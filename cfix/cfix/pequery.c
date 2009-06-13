@@ -98,7 +98,8 @@ static HRESULT CfixsQueryPeImage(
 	__in PIMAGE_DOS_HEADER DosHeader,
 	__in PIMAGE_NT_HEADERS NtHeader,
 	__out PWORD Subsystem,
-	__out PBOOL CfixExportsFound
+	__out PBOOL CfixExportsFound,
+	__out CFIX_MODULE_TYPE *ModuleType
 	)
 {
 	PIMAGE_DATA_DIRECTORY ExportDataDir;
@@ -114,6 +115,19 @@ static HRESULT CfixsQueryPeImage(
 	if ( ExportDataDir == NULL )
 	{
 		return HRESULT_FROM_WIN32( ERROR_BAD_EXE_FORMAT );
+	}
+
+	if ( NtHeader->FileHeader.Characteristics & IMAGE_FILE_DLL )
+	{
+		*ModuleType = CfixModuleDll;
+	}
+	else if ( *Subsystem == IMAGE_SUBSYSTEM_NATIVE )
+	{
+		*ModuleType = CfixModuleDriver;
+	}
+	else
+	{
+		*ModuleType = CfixModuleExe;
 	}
 
 	ExportDir = ( PIMAGE_EXPORT_DIRECTORY ) CfixPtrFromVaNonRelocated( 
@@ -256,7 +270,8 @@ HRESULT CfixQueryPeImage(
 		DosHeader, 
 		NtHeader, 
 		&Info->Subsystem,
-		&Info->FixtureExportsPresent );
+		&Info->FixtureExportsPresent,
+		&Info->ModuleType );
 
 Cleanup:
 	if ( DosHeader != NULL )

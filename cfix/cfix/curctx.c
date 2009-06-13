@@ -25,19 +25,12 @@
 
 #include "cfixp.h"
 #include <stdlib.h>
-#include <windows.h>
 
 //
-// Slot for holding a CFIXS_CONTEXT_INFO during
+// Slot for holding a CFIXP_CONTEXT_INFO during
 // testcase execution.
 //
 static DWORD CfixsTlsSlotForContext = TLS_OUT_OF_INDEXES;
-
-typedef struct _CFIXS_CONTEXT_INFO
-{
-	PCFIX_EXECUTION_CONTEXT ExecutionContext;
-	ULONG MainThreadId;
-} CFIXS_CONTEXT_INFO, *PCFIXS_CONTEXT_INFO;
 
 /*----------------------------------------------------------------------
  * 
@@ -66,7 +59,7 @@ HRESULT CfixpSetCurrentExecutionContext(
 	__out_opt PCFIX_EXECUTION_CONTEXT *PrevContext
 	)
 {
-	PCFIXS_CONTEXT_INFO Info = ( PCFIXS_CONTEXT_INFO )
+	PCFIXP_CONTEXT_INFO Info = ( PCFIXP_CONTEXT_INFO )
 		TlsGetValue( CfixsTlsSlotForContext );
 
 	ASSERT( MainThreadId != 0 );
@@ -87,7 +80,7 @@ HRESULT CfixpSetCurrentExecutionContext(
 	{
 		if ( Info == NULL )
 		{
-			Info = malloc( sizeof( CFIXS_CONTEXT_INFO ) );
+			Info = malloc( sizeof( CFIXP_CONTEXT_INFO ) );
 			if ( ! Info )
 			{
 				return E_OUTOFMEMORY;
@@ -123,14 +116,14 @@ HRESULT CfixpGetCurrentExecutionContext(
 	__out PULONG MainThreadId
 	)
 {
-	PCFIXS_CONTEXT_INFO Info;
+	PCFIXP_CONTEXT_INFO Info;
 
 	if ( ! Context )
 	{
 		return E_INVALIDARG;
 	}
 
-	Info = ( PCFIXS_CONTEXT_INFO ) TlsGetValue( CfixsTlsSlotForContext );
+	Info = ( PCFIXP_CONTEXT_INFO ) TlsGetValue( CfixsTlsSlotForContext );
 
 	if ( Info )
 	{

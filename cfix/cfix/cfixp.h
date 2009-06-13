@@ -137,6 +137,20 @@ HRESULT CFIXCALLTYPE CfixpGetInformationStackframe(
  *
  */
 
+typedef struct _CFIXP_CONTEXT_INFO
+{
+	PCFIX_EXECUTION_CONTEXT ExecutionContext;
+	ULONG MainThreadId;
+
+	//
+	// Fields for Exe-embedded tests.
+	struct
+	{
+		HANDLE YieldEvent;
+	} ExeEmbedded;
+} CFIXP_CONTEXT_INFO, *PCFIXP_CONTEXT_INFO;
+
+
 /*++
 	Routine Description:
 		Obtain the execution context for the current thread.
