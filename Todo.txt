@@ -1,0 +1,60 @@
+TODO
+----
+Log Severities?
+Job object
+-u default if debugger attached
+
+Doc
+---
+ * Using in the debugger
+   * use -u
+   * set working dir 
+ * Supported platforms
+ * Building
+ * API stability
+ * mem leak detection 
+   --> different CRTS
+   --> UMDH: -y
+
+ * Avrf
+ * DEP
+ 
+ * C++
+ * Logging
+ 
+ * Architecture
+ 
+ * Kernel mode
+ 
+ * Hotwos -> Blog?
+ 
+   
+Future Features
+---------------
+ * AssertEqualsDword -> optionally resolve values as error messages
+ * pass additional message DLLs on cmdline
+ * (optionally) run each fixture in separate process -> robustness
+ * Dbg: choose ignore bp/abort TC
+ 
+ * filter top frames of stack traces 
+ 
+ preferred load address?
+ 
+ redistribute dbghelp
+ 
+Bugs
+----
+ Inconclusives not listed on console
+
+Todo
+----
+ * Stacktrace Symbol Resolving KM
+
+WOW64
+-----
+ - cfix32 to load 64 bit driver?
+	--> _EXCEPTION_RECORD 32 vs 64
+ 
+Known Issues
+------------
+ - No stacktrace in KM for unhandled exceptions
