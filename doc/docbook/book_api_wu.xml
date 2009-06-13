@@ -1,0 +1,727 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="TestWinUnitAPI">
+	<title>API for use in test cases (C++ only)</title>
+	<para>
+	Test-, setup- and teardown routines may use the following API.
+	</para>
+
+	<section id="WIN_TRACE">
+		<title>WIN_TRACE</title>
+		<indexterm><primary>WIN_TRACE</primary></indexterm>
+		
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			WIN_TRACE allows arbitrary messages to be printed. The macro allows printf-style formatting and variable argument lists.  
+			Consult the documentation for printf for a list of format specifiers.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+void WIN_TRACE( 
+	__in PCSTR Format, 
+	...
+	);
+
+void WIN_TRACE( 
+	__in PCWSTR Format, 
+	...
+	);
+		</programlisting>
+			<para>
+				WIN_TRACE is overloaded to support both ANSI and UNICODE strings.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Format</emphasis>: Format string. Consult the documentation for printf for a list of format specifiers.
+			</para>
+			<para>
+			[in] <emphasis>...</emphasis>: Arguments. Note that if you use the %s specifier in the format string, 
+			be sure that the wideness (i.e. ANSI vs. Unicode) of argument strings matches the wideness of the format
+			string itself.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+		
+			<programlisting>
+WIN_TRACE( "Some message" );
+WIN_TRACE( L"Foo=%s, Bar=%d", L"test", Bar );
+			</programlisting>
+		</simplesect>
+		
+		&TestApiWuDefaultRequirements13;
+		&RequiresCl14;
+	</section>
+	<section id="WIN_ASSERT_EQUAL">
+		<title>WIN_ASSERT_EQUAL</title>
+		<indexterm><primary>WIN_ASSERT_EQUAL</primary></indexterm>
+		
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			WIN_ASSERT_EQUAL allows typesafe comparison of values. Failed comparisons are treated as a failure, i.e.
+			in the same manner as a failed <link linkend="WIN_ASSERT_TRUE">WIN_ASSERT_TRUE</link>. The benefit over using 
+			<link linkend="WIN_ASSERT_TRUE">WIN_ASSERT_TRUE</link>( Expected == Actual ) is that the expected and actual value
+			will be visible in the failure report.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+void WIN_ASSERT_EQUAL( 
+	__in T Expected, 
+	__in U Actual,
+	...
+	);
+			</programlisting>
+			<para>
+				<emphasis>T</emphasis> and <emphasis>U</emphasis> may either be the same type or compatible types. That is,
+				an appropriate operator== must have been implemented that allows objects of type T and U to be checked for
+				equality.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Expected</emphasis>: The expected value.
+			</para>
+			<para>
+			[in] <emphasis>Actual</emphasis>: The actual value that is to be checked.
+			</para>
+			<para>
+			[in] <emphasis>...</emphasis>: &WinunitMessageArgument;
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Remarks</title>
+			<para>
+			Please refer to the remarks section of <link linkend="CFIXCC_ASSERT_EQUALS">CFIXCC_ASSERT_EQUALS</link> for
+			a discussion on how comparisons are conducted.
+			</para>
+			<note>
+			To compare strings, please use <link linkend="WIN_ASSERT_STRING_EQUAL">WIN_ASSERT_STRING_EQUAL</link>.
+			</note>
+			<para>
+			When comparing non-primitive objects, consider providing an appropriate <link linkend='WinUnit_ToString'>
+			WinUnit::ToString</link> implementation.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+		
+			<programlisting>
+WIN_ASSERT_EQUAL( 42, Answer, "Answer should be 42" );
+WIN_ASSERT_EQUAL( 42, Answer, L"Answer should be %d", 42 );
+WIN_ASSERT_EQUAL( 2.0, 2, "Double/int - exact equality check" );
+
+//
+// Float/double comparisons with relaxed precision.
+// (All of the following assertions succeed).
+//
+WIN_ASSERT_EQUAL( 1.9999999f, 2.0f, "Two floats - relaxed check" );
+WIN_ASSERT_EQUAL( 2.0f, 1.9999999f );
+WIN_ASSERT_EQUAL( 1.99999999999999f, 2.0, "Float/double - relaxed check" );
+WIN_ASSERT_EQUAL( 2.0, 1.99999999999999f, "Double/float - relaxed check" );
+			</programlisting>
+		</simplesect>
+		
+		&TestApiWuDefaultRequirements13;
+		&RequiresCl14;
+	</section>
+	<section id="WIN_ASSERT_NOT_EQUAL">
+		<title>WIN_ASSERT_NOT_EQUAL</title>
+		<indexterm><primary>WIN_ASSERT_NOT_EQUAL</primary></indexterm>
+		
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			WIN_ASSERT_NOT_EQUAL allows typesafe inequality comparisons of values. WIN_ASSERT_NOT_EQUAL works
+			analogously to <link linkend="WIN_ASSERT_EQUAL">WIN_ASSERT_EQUAL</link>.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+void WIN_ASSERT_NOT_EQUAL( 
+	__in T Expected, 
+	__in U Actual,
+	...
+	);
+			</programlisting>
+			<para>
+				<emphasis>T</emphasis> and <emphasis>U</emphasis> may either be the same type or compatible types. That is,
+				an appropriate operator!= must have been implemented that allows objects of type T and U to be checked for
+				inequality.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Expected</emphasis>: The expected value.
+			</para>
+			<para>
+			[in] <emphasis>Actual</emphasis>: The actual value that is to be checked.
+			</para>
+			<para>
+			[in] <emphasis>...</emphasis>: &WinunitMessageArgument;
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Remarks</title>
+			<para>
+			Please refer to the remarks section of <link linkend="CFIXCC_ASSERT_EQUALS">CFIXCC_ASSERT_EQUALS</link> for
+			a discussion on how comparisons are conducted.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+		
+			<programlisting>
+int Foo = 2;
+...
+WIN_ASSERT_NOT_EQUAL( 0, Foo );
+WIN_ASSERT_NOT_EQUAL( 0, Foo, "Foo should never be %s, "zero" );
+			</programlisting>
+		</simplesect>
+		
+		&TestApiWuDefaultRequirements13;
+		&RequiresCl14;
+	</section>	
+	<section id="WIN_ASSERT_STRING_EQUAL">
+		<title>WIN_ASSERT_STRING_EQUAL</title>
+		<indexterm><primary>WIN_ASSERT_STRING_EQUAL</primary></indexterm>
+		
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			WIN_ASSERT_STRING_EQUAL allows value comparison of strings.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+void WIN_ASSERT_STRING_EQUAL( 
+	__in PCSTR Expected, 
+	__in PCSTR Actual,
+	...
+	);
+	
+void WIN_ASSERT_STRING_EQUAL( 
+	__in PCWSTR Expected, 
+	__in PCWSTR Actual,
+	...
+	);
+			</programlisting>
+			<para>
+				WIN_ASSERT_STRING_EQUAL is overloaded to support both ANSI and UNICODE string comparisons.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Expected</emphasis>: The expected value.
+			</para>
+			<para>
+			[in] <emphasis>Actual</emphasis>: The actual value that is to be checked.
+			</para>
+			<para>
+			[in] <emphasis>...</emphasis>: &WinunitMessageArgument;
+			</para>
+		</simplesect>
+		
+		&TestApiWuDefaultRequirements13;
+		&RequiresCl14;
+	</section>
+	<section id="WIN_ASSERT_ZERO">
+		<title>WIN_ASSERT_ZERO</title>
+		<indexterm><primary>WIN_ASSERT_ZERO</primary></indexterm>
+		
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			WIN_ASSERT_ZERO checks whether a given value equals zero. 
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+void WIN_ASSERT_ZERO( 
+	__in T Expression, 
+	...
+	);
+			</programlisting>
+			<para>
+				<emphasis>T</emphasis> may be any signed or unsigned integer type.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Expression</emphasis>: The expression whose value is to be checked.
+			</para>
+			<para>
+			[in] <emphasis>...</emphasis>: &WinunitMessageArgument;
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+		
+			<programlisting>
+int Foo = 0;
+...
+WIN_ASSERT_ZERO( 0, Foo );
+WIN_ASSERT_ZERO( 0, Foo, "Foo should be %s, "zero" );
+			</programlisting>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+		&RequiresCl14;
+	</section>	
+	<section id="WIN_ASSERT_NOT_ZERO">
+		<title>WIN_ASSERT_NOT_ZERO</title>
+		<indexterm><primary>WIN_ASSERT_NOT_ZERO</primary></indexterm>
+		
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			WIN_ASSERT_NOT_ZERO checks whether a given value is not equal to zero. 
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+void WIN_ASSERT_NOT_ZERO( 
+	__in T Expression, 
+	...
+	);
+			</programlisting>
+			<para>
+				<emphasis>T</emphasis> may be any signed or unsigned integer type.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Expression</emphasis>: The expression whose value is to be checked.
+			</para>
+			<para>
+			[in] <emphasis>...</emphasis>: &WinunitMessageArgument;
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+		
+			<programlisting>
+int Foo = -1;
+...
+WIN_ASSERT_NOT_ZERO( 0, Foo );
+WIN_ASSERT_NOT_ZERO( 0, Foo, "Foo should never be %s, "zero" );
+			</programlisting>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+		&RequiresCl14;
+	</section>	
+	<section id="WIN_ASSERT_NULL">
+		<title>WIN_ASSERT_NULL</title>
+		<indexterm><primary>WIN_ASSERT_NULL</primary></indexterm>
+		
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			WIN_ASSERT_NULL checks whether a given value is NULL.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+void WIN_ASSERT_NULL( 
+	__in PVOID Expression, 
+	...
+	);
+			</programlisting>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Expression</emphasis>: The expression whose value is to be checked.
+			</para>
+			<para>
+			[in] <emphasis>...</emphasis>: &WinunitMessageArgument;
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+		
+			<programlisting>
+PWSTR p = NULL;
+WIN_ASSERT_NULL( p );
+			</programlisting>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+		&RequiresCl14;
+	</section>	
+	<section id="WIN_ASSERT_NOT_NULL">
+		<title>WIN_ASSERT_NOT_NULL</title>
+		<indexterm><primary>WIN_ASSERT_NOT_NULL</primary></indexterm>
+		
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			WIN_ASSERT_NOT_NULL checks whether a given value is not equal to NULL. 
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+void WIN_ASSERT_NOT_NULL( 
+	__in PVOID Expression, 
+	...
+	);
+			</programlisting>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Expression</emphasis>: The expression whose value is to be checked.
+			</para>
+			<para>
+			[in] <emphasis>...</emphasis>: &WinunitMessageArgument;
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+		
+			<programlisting>
+PWSTR p = L"";
+WIN_ASSERT_NOT_NULL( p, "p must be NULL" );
+WIN_ASSERT_NOT_NULL( L"test" );
+			</programlisting>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+		&RequiresCl14;
+	</section>	
+	<section id="WIN_ASSERT_FAIL">
+		<title>WIN_ASSERT_FAIL</title>
+		<indexterm><primary>WIN_ASSERT_FAIL</primary></indexterm>
+		
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			WIN_ASSERT_FAIL unconditionally leads to a test case failure.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+void WIN_ASSERT_FAIL( 
+	__in PCSTR Message, 
+	...
+	);
+	
+void WIN_ASSERT_FAIL( 
+	__in PCWSTR Message, 
+	...
+	);		
+			</programlisting>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Message</emphasis>: Message to be included in a failure report. This parameter allows
+			printf-style formatters to be used, with the corresponding parameters being specified as subsequent arguments. 
+			The routine is overloaded and allows <emphasis>Message</emphasis> to be either a unicode or an ANSI string.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+		
+			<programlisting>
+if ( ! CheckIfFileExists( FileName ) )
+{
+  WIN_ASSERT_FAIL( "File %s does not exist aborting test", FileName );
+}
+			</programlisting>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+		&RequiresCl14;
+	</section>	
+	<section id="WIN_ASSERT_TRUE">
+		<title>WIN_ASSERT_TRUE</title>
+		<indexterm><primary>WIN_ASSERT_TRUE</primary></indexterm>
+		
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			WIN_ASSERT_TRUE checks whether a given expression evaluates to TRUE. It is analagous to 
+			<link linkend="CFIX_ASSERT">CFIX_ASSERT</link>.
+			</para>
+			<para>
+			WIN_ASSERT_WINAPI_SUCCESS is an alias for WIN_ASSERT_TRUE.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+void WIN_ASSERT_TRUE( 
+	__in BOOL Expression, 
+	...
+	);
+	
+void WIN_ASSERT_WINAPI_SUCCESS( 
+	__in BOOL Expression, 
+	...
+	);
+			</programlisting>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Expression</emphasis>: The expression whose value is to be checked.
+			</para>
+			<para>
+			[in] <emphasis>...</emphasis>: &WinunitMessageArgument;
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+		
+			<programlisting>
+int a = 0;
+WIN_ASSERT_TRUE( TRUE, "Test a Win32 BOOL" );
+WIN_ASSERT_TRUE( true, L"Test a C++ bool" );
+WIN_ASSERT_TRUE( a == 0 );
+			</programlisting>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+		&RequiresCl14;
+	</section>	
+	<section id="WIN_ASSERT_FALSE">
+		<title>WIN_ASSERT_FALSE</title>
+		<indexterm><primary>WIN_ASSERT_FALSE</primary></indexterm>
+		
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			WIN_ASSERT_FALSE checks whether a given expression evaluates to FALSE.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+void WIN_ASSERT_FALSE( 
+	__in BOOL Expression, 
+	...
+	);
+			</programlisting>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Expression</emphasis>: The expression whose value is to be checked.
+			</para>
+			<para>
+			[in] <emphasis>...</emphasis>: &WinunitMessageArgument;
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+		
+			<programlisting>
+int a = 0;
+WIN_ASSERT_FALSE( FALSE, "Test a Win32 BOOL" );
+WIN_ASSERT_FALSE( false, L"Test a C++ bool" );
+WIN_ASSERT_FALSE( a != 0 );
+			</programlisting>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+		&RequiresCl14;
+	</section>	
+	<section id="WIN_ASSERT_THROWS">
+		<title>WIN_ASSERT_THROWS</title>
+		<indexterm><primary>WIN_ASSERT_THROWS</primary></indexterm>
+		
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			WIN_ASSERT_THROWS can be used to check that a given expression raises a specific 
+			exception. If the expected exvception is not raised, the condition is
+			treated as a failure. If an exception of a different type is raised, this exception 
+			will be treated as an unhandled exception, which, depending on your
+			settings, will either lead to a debugger breakin or to the test case being aborted.
+			</para>
+			<para>
+			Note that WIN_ASSERT_THROWS can only be used to check for exceptions that can
+			be caught <emphasis>by reference</emphasis>.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+void WIN_ASSERT_FALSE( 
+	Expression, 
+	ExceptionType
+	);
+			</programlisting>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Expression</emphasis>: The expression that is expected to raise an exception. If Expression
+			returns a value, this value will be ignored.
+			</para>
+			<para>
+			[in] <emphasis>ExceptionType</emphasis>: The class name of the expected exception.
+			</para>
+			<para>
+			[in] <emphasis>...</emphasis>: &WinunitMessageArgument;
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+		
+			<programlisting>
+class TestException {};
+static void RaiseTestException()
+{
+  throw TestException();
+}
+
+BEGIN_TEST( TestForRaisedException )
+{
+  WIN_ASSERT_THROWS( RaiseTestException(), TestException );
+}
+END_TEST
+			</programlisting>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+		&RequiresCl14;
+	</section>	
+	<section id="WinUnit_ToString">
+		<title>WinUnit::ToString</title>
+		<indexterm><primary>WinUnit::ToString</primary></indexterm>
+		
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			Template for which an explicit specialization may be provided in order to enable
+			cfix to obtain a string representation of an object for use in assertion
+			messages.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+namespace WinUnit
+{
+  template&lt; typename T &gt;
+  inline const TCHAR* ToString(
+    __in const T&amp; Object,
+    __inout_ecount( BufferCch ) PTSTR Buffer,
+    __in size_t BufferCch
+    )
+}
+			</programlisting>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Object</emphasis>: The object for which the string representation is to be created.
+			</para>
+			<para>
+			[in] <emphasis>Buffer</emphasis>: Buffer that may be used as storage for the string representation.
+			</para>
+			<para>
+			[in] <emphasis>BufferCch</emphasis>: Size of the buffer, in TCHARs.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Return Value</title>
+			<para>
+			The string representation. The pointer returned must either point to static storage or to the
+			buffer passed as second parameter.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Remarks</title>
+			<para>
+			When <link linkend="WIN_ASSERT_EQUAL">WIN_ASSERT_EQUAL</link> is used to compare two 
+			non-prmitive objects and the check fails, cfix generates an appropriate error message. 
+			To have this error message include a proper string representation of the objects being
+			compared, you can -- optionally -- provide an appropriate explicit template specialization of 
+			WinUnit::ToString.
+			</para>
+			<para>
+			Note that this differs from the cfic C++ API, which invokes operator&lt;&lt; on an object
+			to obtain its string representation.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+		
+			<programlisting>
+class Foo
+{
+  ...
+};
+
+template&lt;&gt;
+const TCHAR* WinUnit::ToString(
+  __in const Foo&amp; Object,
+  __inout_ecount( BufferCch ) PTSTR Buffer,
+  __in size_t BufferCch
+  )
+{
+  StringCchPrintf( Buffer, BufferCch, ... );
+  return Buffer;
+}
+			</programlisting>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+	</section>	
+</section>
+	

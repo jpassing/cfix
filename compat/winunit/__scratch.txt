@@ -1,0 +1,173 @@
+
+//namespace cfixwu
+//{
+//	class Assert
+//	{
+//	public:
+//		template< typename ValueT, typename ValueU >
+//		static CFIX_REPORT_DISPOSITION AreEqual(
+//			__in PCWSTR ExpectedExpressionString, 
+//			__in const ValueT ExpectedExpressionValue,
+//			__in PCWSTR ActualExpressionString, 
+//			__in const ValueU ActualExpressionValue,
+//			__in PCWSTR FileName, 
+//			__in ULONG LineNumber,
+//			__in PCWSTR Message = NULL, 
+//			... 
+//			)
+//		{
+//			cfixcc::Assertion< cfixcc::Equal >::Relate(
+//				ExpectedExpressionValue,
+//				ActualExpressionString,
+//				ExpectedExpressionString,
+//				ActualExpressionString,
+//				FileName,
+//				LineNumber,
+//				Message == NULL 
+//				? cfixcc::Message()
+//				: cfixcc::FormattedMessage( Message, );
+//		}
+//
+//		static CFIX_REPORT_DISPOSITION AreEqual(
+//			__in PCSTR ExpectedExpressionString, 
+//			__in const ValueT ExpectedExpressionValue,
+//			__in PCSTR ActualExpressionString, 
+//			__in const ValueU ActualExpressionValue,
+//			__in PCSTR FileName, 
+//			__in ULONG LineNumber,
+//			__in PCSTR Message = NULL, 
+//			... 
+//			)
+//		{
+//			cfixcc::Assertion< cfixcc::Equal >::Relate(
+//				ExpectedExpressionValue,
+//				ActualExpressionString,
+//				ExpectedExpressionString,
+//				ActualExpressionString,
+//				FileName,
+//				LineNumber,
+//				Message );
+//		}
+//
+//		template< typename ValueT, typename ValueU >
+//		static void AreNotEqual(
+//			__in PCTSTR NotExpectedExpressionString, 
+//			__in const ValueT NotExpectedExpressionValue,
+//			__in PCTSTR ActualExpressionString, 
+//			__in const ValueU ActualExpressionValue,
+//			__in PCTSTR FileName, 
+//			__in ULONG LineNumber, 
+//			__in PCTSTR Message = NULL, 
+//			...
+//			);
+//
+//		static void StringEqual(
+//			__in PCWSTR Expected, 
+//			__in PCWSTR Actual,
+//			__in PCTSTR FileName, 
+//			__in ULONG LineNumber,
+//			__in PCTSTR Message = NULL, ...
+//			);
+//
+//		static void StringEqual(
+//			__in PCSTR Expected, 
+//			__in PCSTR Actual,
+//			__in PCTSTR FileName, 
+//			__in ULONG LineNumber,
+//			__in PCTSTR Message = NULL, ...
+//			);
+//
+//		template< typename ValueT >
+//		static void IsZero(
+//			__in PCTSTR ZeroExpressionString, 
+//			__in const ValueT ZeroExpression,
+//			__in PCTSTR FileName, 
+//			__in ULONG LineNumber,
+//			__in PCTSTR Message = NULL, 
+//			...
+//			);
+//
+//        template< typename ValueT >
+//		static void IsNotZero(
+//			__in PCTSTR NonzeroExpressionString, 
+//			__in const ValueT NonzeroExpression,
+//            __in PCTSTR FileName, 
+//			__in ULONG LineNumber,
+//			__in PCTSTR Message = NULL, 
+//			...
+//			);
+//
+//        template< typename ValueT >
+//		static void IsNull(
+//			__in PCTSTR ExpressionString, 
+//			__in ValueT* NullExpression,
+//            __in PCTSTR FileName, 
+//			__in ULONG LineNumber,
+//			__in PCTSTR Message = NULL, 
+//			...
+//			);
+//
+//        template< typename ValueT >
+//		static void IsNotNull(
+//			__in PCTSTR NotNullExpressionString, 
+//			__in ValueT* NotNullExpression,
+//            __in PCTSTR FileName, 
+//			__in ULONG LineNumber,
+//			__in PCTSTR Message = NULL, 
+//			...
+//			);
+//
+//        static void Fail(
+//			__in PCTSTR FileName, 
+//			__in ULONG LineNumber,
+//			__in PCTSTR Message = NULL, 
+//			...
+//			);
+//
+//        static void IsTrue(
+//			__in PCTSTR ExpressionString, 
+//			__in bool trueExpression,
+//            __in PCTSTR FileName, 
+//			__in ULONG LineNumber,
+//			__in PCTSTR Message = NULL, 
+//			...
+//			);
+//
+//        static void IsFalse(
+//			__in PCTSTR ExpressionString, 
+//			__in bool FalseExpression,
+//            __in PCTSTR FileName, 
+//			__in ULONG LineNumber,
+//			__in PCTSTR Message = NULL, 
+//			...
+//			);
+//
+//        static void WinapiSucceeded(
+//			__in PCTSTR ExpressionString, 
+//            __in bool Success, 
+//            __in PCTSTR FileName, 
+//			__in ULONG LineNumber,
+//			__in PCTSTR Message = NULL, 
+//			...
+//			);
+//
+//        static void ThrowsException(
+//            __in PCTSTR ExpressionString, 
+//            __in PCTSTR ExceptionType, 
+//            __in bool ExceptionWasThrown, 
+//            __in PCTSTR FileName, 
+//			__in ULONG LineNumber,
+//			__in PCTSTR Message = NULL, 
+//			...
+//			);
+//
+//    private:
+//        ~Assert();
+//
+//		//
+//		// Objects should never be copied.
+//		//
+//		Assert( const Assert& );
+//		const Assert& operator = ( const Assert& );
+//    };
+//}

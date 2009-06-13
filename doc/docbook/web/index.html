@@ -1,0 +1,182 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<title>cfix - Unit testing for C and C++ on Win32</title>
+		<link rel="stylesheet" type="text/css" href="styleweb.css" />
+		<meta name="description" content="cfix is an xUnit testing framework for C/C++, specialized for Win32 (32/64 bit), written by Johannes Passing." />
+	    <meta name="keywords" content="cfix, unit testing, c, c++, win32, windows, native code" />
+		<link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="http://sourceforge.net/export/rss2_projnews.php?group_id=218233&rss_fulltext=1" />
+	</head>
+	<body>
+	<div id='head'>
+			<img src='header.jpg' id='logo' alt='Cfix - Unit testing for Win32' />
+		</div>
+		<div id='subhead'></div>
+		<div id='main'>
+			<div id='content'>
+				<br />
+				<span class='heading'>CFIX AT A GLANCE</span>
+				<hr />
+				
+				<h2>cfix &#151; unit testing for C and C++</h2>
+				<p>
+				<img src='cfix-tick.png' align='left' alt='xUnit testing framework for C/C++'/>
+				cfix is an xUnit testing framework for C/C++, specialized for unmanaged Windows development (32/64 bit). cfix supports 
+				development of <b>both user and kernel mode</b> unit tests.
+				</p>
+				<p>
+				cifx unit tests are compiled and linked into a DLL. The testrunner application provided by cfix allows selectively running tests of one or more of 
+				such test-DLLs. Execution and behaviour in case of failing testcases can be highly customized. Moreover, cfix has been designed 
+				to work well in conjunction with the Windows Debuggers (Visual Studio, WinDBG). 
+				</p>
+				<p>
+				As of cfix 1.3, the framework is <b>source-compatible to WinUnit</b>, i.e. a WinUnit test suite can be recompiled
+				into a full-fledged cfix test suite.
+				</p>
+				<p>
+				Have a look at the <a href='doc/Strategy.html'>Tool strategy chapter in the documentation</a> to learn about the architecture of cfix.
+				</p>
+				
+				<br /><br />
+				
+				<span class='heading'>FIRST STEPS</span>
+				<hr />
+				
+				<table width='100%'>
+				<tr><td width='49%' valign='top'>
+					<img src='download.png' align='left' vspace='5' hspace='5'/><a href='http://sourceforge.net/project/showfiles.php?group_id=218233&package_id=263204'><b>Download</b> the current release of cfix.</a>
+					The release contains both 32 bit (i386) and 64 bit (amd64) binaries. 
+					cfix runs on Windows 2000, XP, Server 2003, Vista, Server 2008, and Windows 7 beta. <br /><br />
+					The installation does <i>not</i> require administrative privileges.
+					
+				</td>
+				<td width='2%'>
+				</td>
+				<td width='49%' valign='top'>
+					<img src='help.png' align='left' vspace='5' hspace='5'/><a href='doc/TutorialUserVsCc.html'/>Read the <b>tutorial</b></a> to see how to properly configure Visual Studio and
+					how to create and run a test suite. All documentation is also contained in the download package as a Html Help (CHM) file.
+				</td></tr>
+				</table>
+				
+				
+				<br /><br />
+				
+				<table width='100%'>
+				<tr>
+				<tr><td width='49%' valign='top'>
+					<a href='http://sourceforge.net/export/rss2_projnews.php?group_id=218233&rss_fulltext=1'><img src='feed.png' align='right' border='0' /></a>
+					<span class='heading'>NEWS</span>
+					<hr />
+					
+					<h3 class='rss'>cfix 1.2.0 released</h3>
+					<p>
+						Version 1.2 introduces a number of improvements, the most important being improved support for C++: In addition to the existing C API, cfix 1.2 introduces a new, easier to use, C++ specific API.
+					</p><p>		
+						For a quick overview of the new features, please refer to the respective post on <a href='http://jpassing.wordpress.com/?p=163'>JP's blog</a>.
+					</p><p>		 
+						Updated binaries and source code are now available for download.
+					</p>
+					<p class='rssfooter'>2008-11-10 11:00</p>
+					
+					<h3 class='rss'>cfix 1.1.1 released</h3>
+					<p>
+						As <a href='http://jpassing.wordpress.com/?p=97'>discussed last week</a>, cfix 1.1.0 has suffered from a potential deadlocking issue when run in the VisualStudio 2008 debugger. cfix 1.1.1 mitigates this problem and should now work equally well with Visual Studio 2005 and 2008. 
+					</p><p>		
+						When run in a debugger, cfix now will not try to capture a stack trace for a failed assertion any more. These stack traces usually have been redundant to what the debugger provides, yet the logic to implement this has been the reason for the interference with the VS 2008 debugger. When run outside the debugger, cfix will capture and display a stack trace as before.  
+					</p><p>		 
+						Updated binaries and source code are now available for download.
+					</p>
+					<p class='rssfooter'>2008-08-26 11:13</p>
+					
+					
+					
+					<h3 class='rss'> cfix 1.1 introduces NT kernel mode unit tests</h3>
+					<p>
+						cfix 1.1, the latest version of the cfix unit testing framework has been released. cfix 1.1 introduces a variety of new features, the most important clearly being the ability to write kernel mode unit tests. That is, cfix now allows developers to author testcases that are run in kernel mode. 
+					</p><p>						 
+						Read more about kernel mode unit testing and other new features of cfix 1.1 on <a href='http://jpassing.wordpress.com/2008/07/14/cfix-11-introduces-nt-kernel-mode-unit-tests/'>JP's blog</a>.
+					</p>
+					<p class='rssfooter'>2008-07-14 14:49</p>
+				
+				
+
+					<h3 class='rss'>cfix 1.0.1 adds support for Windows 2000</h3>
+					<p>
+						Despite the fact that mainstream support for Windows 2000 has ended in 2005 and the system is well on its way to retirement, Windows 2000 is still in wide use today. As such, it remains being an important target platform for many software packages. 
+					</p><p>						 
+						The fact that cfix has not provided support for Windows 2000 was thus unfortunate -- after all, if Windows 2000 is among the target platforms of your software, you should be able to run your tests on this platform. 
+					</p><p>	 
+						cfix 1.0.1 remedies this shortcoming and adds Windows 2000 i386 SP4 as an supported platform.  
+					</p>
+					<p class='rssfooter'>2008-06-03 18:42</p>
+	
+				</td></tr>
+				</table>
+				
+				<div id='cfixfooter'>
+					(C) 2008 Johannes Passing
+				</div>
+				
+				<div class='footer'>
+					<a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=218233&amp;type=2" width="125" height="37" border="0" alt="SourceForge.net Logo" /></a>
+					<br />Feedback? Send to passing at users.sourceforge.net.
+				</div>
+			</div>
+			<div id='menu'>
+				<div id='submenu'>
+					<div id='submenuheader'>
+						Main
+					</div>
+					<div id='submenusep'></div>
+					<ul>
+						<li><a href='#'>Front Page</a></li>
+						<li><a href='http://sourceforge.net/projects/cfix/'>Project Page</a></li>
+					</ul>
+				</div>
+				<div id='submenu'>
+					<div id='submenuheader'>
+						Download cfix
+					</div>
+					<div id='submenusep'></div>
+					<ul>
+						<li><a href='http://sourceforge.net/project/showfiles.php?group_id=218233&package_id=263204'>Download</a></li>
+					</ul>
+				</div>
+				<div id='submenu'>
+					<div id='submenuheader'>
+						Documentation				
+					</div>
+					<div id='submenusep'></div>
+					<ul>
+						<li><a href='doc/index.html'>Table of Contents</a></li>
+						<li><a href='doc/Background.html'>Background</a></li>
+						<li><a href='doc/Usage.html'>Usage</a></li>
+						<li><a href='doc/TutorialUserVsCc.html'>Tutorial (User Mode, C++)</a></li>
+						<li><a href='doc/TutorialUserVs.html'>Tutorial (User Mode, C)</a></li>
+						<li><a href='doc/TutorialKernelWdk.html'>Tutorial (Kernel Mode, C)</a></li>
+						<li><a href='doc/API.html'>API Reference</a></li>
+						<li><a href='doc/WinUnitAPI.html'>WinUnit Compatibility</a></li>
+					</ul>   
+				</div>
+				<div id='submenu'>
+					<div id='submenuheader'>
+						Support					
+					</div>
+					<div id='submenusep'></div>
+					<ul>
+						<li><a href='https://sourceforge.net/tracker/?func=browse&amp;group_id=218233&amp;atid=1043037'>Bug Database</a></li>
+						<li><a href='http://jpassing.wordpress.com/'>Blog</a></li>
+					</ul>   
+				</div>
+				
+				<div id='submenu'>
+					<div id='submenusep'></div>
+					<div style='text-align: center'>
+						<a href='http://www.gnu.org/licenses/lgpl.html'><img src='lgpl.png' hspace='7' vspace='7' border='0' /></a>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+    </body>
+</html>

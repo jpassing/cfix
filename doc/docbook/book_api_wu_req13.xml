@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simplesect>
+	<title>Requirements</title>
+	
+	<table frame="all" tocentry="0">
+		<tgroup cols="3" align="left" colsep="1" rowsep="1">
+			<thead>
+				<row>
+				  <entry></entry>
+				  <entry>User Mode</entry>
+				  <entry>Kernel Mode</entry>
+				</row>
+			</thead>
+			<tbody>
+				<row>
+				  <entry>Available since</entry>
+				  <entry>1.3</entry>
+				  <entry>N/A</entry>
+				</row>
+				<row>
+				  <entry>Header</entry>
+				  <entry>Declared in winunit.h</entry>
+				  <entry>N/A</entry>
+				</row>
+				<row>
+				  <entry>IRQL</entry>
+				  <entry>N/A</entry>
+				  <entry>N/A</entry>
+				</row>
+			</tbody>
+		</tgroup>
+	</table>
+</simplesect>

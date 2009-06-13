@@ -1,0 +1,69 @@
+#
+# Copyright:
+#		2007-2009 Johannes Passing (passing at users.sourceforge.net)
+#
+# This file is part of cfix.
+#
+# cfix is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# cfix is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public License
+# along with cfix.  If not, see <http://www.gnu.org/licenses/>.
+#
+BSCMAKE_FLAGS=$(BSCMAKE_FLAGS) /n
+
+MSC_WARNING_LEVEL=/W4 /Wp64
+
+INCLUDES=..\..\include;..\..\..\Jpht\Include;$(SDK_INC_PATH)\..\mfc42
+
+!if "$(TARGET_DIRECTORY)"=="i386"
+USER_C_FLAGS=/D_UNICODE /DUNICODE /analyze
+LINKER_FLAGS=/nxcompat /dynamicbase /SafeSEH
+!else
+USER_C_FLAGS=/D_UNICODE /DUNICODE
+LINKER_FLAGS=/nxcompat /dynamicbase
+!endif
+
+!if "$(DDKBUILDENV)"=="chk"
+DEBUG_CRTS=1
+!endif
+
+USE_LIBCMT=1
+
+TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
+		   $(SDK_LIB_PATH)\user32.lib \
+		   $(SDK_LIB_PATH)\advapi32.lib \
+		   $(SDK_LIB_PATH)\shlwapi.lib \
+		   $(SDK_LIB_PATH)\version.lib \
+		   $(MAKEDIR)\..\..\..\Jpht\bin\$(DDKBUILDENV)\$(TARGET_DIRECTORY)\jpht.lib
+
+TARGETNAME=cdiag
+TARGETPATH=..\..\bin\$(DDKBUILDENV)
+TARGETTYPE=DYNLINK
+
+PASS0_HEADERDIR=..\..\include
+PASS0_SOURCEDIR=obj$(BUILD_ALT_DIR)\$(TARGET_DIRECTORY)
+
+SOURCES=\
+	formatstr.c \
+	formatter.c \
+	helper.c \
+	main.c \
+	memalloc.c \
+	msgresolver.c \
+	outputhandler.c \
+	regconfigstore.c \
+	session.c \
+	version.c \
+	textfilehandler.c \
+	cdiag.rc \
+	cdiagmsg.mc
+	
+DLLBASE=0x63f00000
