@@ -1,0 +1,135 @@
+BUILD: Examining d:\dev\wdev\cfix\cfixkern\testkmsc directory for files to compile.
+before AssemblyIdentity_AfterReadAllSources
+after AssemblyIdentity_AfterReadAllSources
+skipping post pass 0 command
+Compiling and Linking d:\dev\wdev\cfix\cfixkern\testkmsc *************
+'nmake.exe /nologo BUILDMSG=Stop. -i /nologo /f c:\winddk\6000\bin\makefile.def BUILD_PASS=PASS2 LINKONLY=1 NOPASS0=1 MAKEDIR_RELATIVE_TO_BASEDIR= MAKEDIR_LOWERCASE=d:\dev\wdev\cfix\cfixkern\testkmsc'
+d:\dev\wdev\cfix\cfixkern\testkmsc: TARGETPATH is ..\..\bin\chk
+	cl.exe @d:\dev\wdev\cfix\cfixkern\testkmsc\objchk_wlh_x86\i386\cl.rsp
+Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 14.00.50727.220 for 80x86
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+cl /Fo"d:\dev\wdev\cfix\cfixkern\testkmsc\objchk_wlh_x86\i386/"
+   /FC
+   
+   
+   /Ii386
+   /I.
+   /I..\..\include
+   /IC:\WinDDK\6000\inc\ddk
+   /Id:\dev\wdev\cfix\cfixkern\testkmsc\objchk_wlh_x86\i386
+   /IC:\WinDDK\6000\inc\api
+   /IC:\WinDDK\6000\inc\api
+   /IC:\WinDDK\6000\inc\ddk
+   /IC:\WinDDK\6000\inc\ddk
+   /IC:\WinDDK\6000\inc\crt
+   /D_X86_=1
+   /Di386=1
+   
+   /DSTD_CALL
+   /DCONDITION_HANDLING=1
+   
+   
+   /DNT_INST=0
+   /DWIN32=100
+   /D_NT1X_=100
+   /DWINNT=1
+   /D_WIN32_WINNT=0x0600
+   /DWINVER=0x0600
+   /D_WIN32_IE=0x0700
+   
+   
+   
+   /DWIN32_LEAN_AND_MEAN=1
+   /DDEVL=1
+   /DDBG=1
+   /D__BUILDMACHINE__=WinDDK
+   /DFPO=0
+   
+   
+   /D_DLL=1
+   /DNDEBUG
+   
+   /DDEPRECATE_DDK_FUNCTIONS=1
+   /DMSC_NOOPT
+   /DNTDDI_VERSION=0x06000000
+   
+   
+   
+   
+   /c
+   /Zc:wchar_t-
+   /Zl
+   /Zp8
+   /Gy
+   /Gm-
+   -cbstring
+   /W4
+   /WX
+   /Wp64
+   
+   /Gz
+   
+   
+   /hotpatch
+   /EHs-c-
+   
+   /GR-
+   /GF
+   /GS
+   /Z7
+   /Od
+   /Oi
+   
+   
+   /Oy-
+   /Z7
+   
+   /analyze
+   /DCFIX_KERNELMODE
+   -DKMDF_MAJOR_VERSION=01
+   -DKMDF_MINOR_VERSION=005
+   /FIC:\WinDDK\6000\inc\api\warning.h
+   
+   
+   .\suite.c 
+
+suite.c
+	link.exe /out:..\..\bin\chk\i386\testkmsc.sys /machine:ix86 @C:\Users\jp\AppData\Local\Temp\nm2731.tmp
+Microsoft (R) Incremental Linker Version 8.00.50727.220
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/MERGE:_PAGE=PAGE 
+/MERGE:_TEXT=.text 
+/SECTION:INIT,d 
+/OPT:REF 
+/OPT:ICF 
+/IGNORE:4198,4010,4037,4039,4065,4070,4078,4087,4089,4221 
+/INCREMENTAL:NO 
+/FULLBUILD 
+/release 
+/NODEFAULTLIB 
+/WX 
+/debug 
+/debugtype:cv 
+/version:6.0 
+/osversion:6.0 
+/functionpadmin:5 
+/safeseh 
+/debug 
+/debugtype:cv,fixup 
+/pdbcompress 
+/STACK:0x40000,0x1000 
+/driver 
+/base:0x10000 
+/subsystem:native,6.00 
+/entry:GsDriverEntry@8 
+/out:..\..\bin\chk\i386\testkmsc.sys 
+objchk_wlh_x86\i386\suite.obj 
+C:\WinDDK\6000\lib\wlh\i386\BufferOverflowK.lib 
+C:\WinDDK\6000\lib\wlh\i386\ntoskrnl.lib 
+C:\WinDDK\6000\lib\wlh\i386\hal.lib 
+C:\WinDDK\6000\lib\wlh\i386\wmilib.lib 
+C:\WinDDK\6000\lib\wlh\i386\aux_klib.lib 
+..\..\bin\chk\i386\cfixkdrv.lib 
+   Creating library ..\..\bin\chk\i386\testkmsc.lib and object ..\..\bin\chk\i386\testkmsc.exp

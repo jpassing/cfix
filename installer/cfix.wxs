@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+	optionally register directories in VS
+	 -> x64 may not be installed
+	
+	Feedback-Link
+	
+-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2003/01/wi">
+	<Product 
+			Id="$(var.ProductCode)" 
+			Name="cfix" 
+			Language="1033" 
+			Version="$(var.ProductVersion)" 
+			UpgradeCode="3b3b866d-128c-4aa0-ba7d-5f5e1e9b8542"
+			Manufacturer="Johannes Passing">
+		<Package 
+			Id="$(var.PackageCode)" 
+			Description="Unit testing framework for Win32 and NT kernel mode" 
+			InstallerVersion="200" 
+			Compressed="yes" 
+			Platforms="Intel"
+			InstallPrivileges="limited"/>
+			
+		<Upgrade Id="3b3b866d-128c-4aa0-ba7d-5f5e1e9b8542">
+			<!-- Prevent over-installing newer versions -->
+			<UpgradeVersion MigrateFeatures='yes' Minimum="$(var.ProductVersion)" Property="NEWERPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" />
+			<Property Id="NEWERPRODUCTFOUND" Secure="yes" />
+			
+			<!-- Upgrade older versions -->
+			<UpgradeVersion MigrateFeatures='yes' Minimum="1.0.0.0" Maximum="$(var.ProductVersion)" Property="PREVIOUSVERSIONSINSTALLED" IncludeMaximum="yes" />
+			<Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
+		</Upgrade>
+
+		<CustomAction Id="ERRCA_CANCELNEWERVERSION" Return="check" Error="$(loc.NewerVersionInstalled)" />
+		<InstallExecuteSequence>
+			<RemoveExistingProducts After="InstallInitialize" />
+			<Custom Action="ERRCA_CANCELNEWERVERSION" After="FindRelatedProducts"><![CDATA[NEWERPRODUCTFOUND AND NOT Installed]]></Custom>
+		</InstallExecuteSequence>
+		
+		<Media Id="1" Cabinet="cfix.cab" EmbedCab="yes" />
+
+		<!-- Retain install location on upgrade -->
+		<Property Id="INSTALLLOCATION" Secure="yes">
+			<RegistrySearch Id="SearchInstallLocation" Root="HKCU" Key="Software\cfix" Name="InstallLocation" Type="directory" />
+		</Property>
+
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramMenuFolder">
+				<Directory Id="DirProgMenu" Name="cfix">
+				</Directory>
+			</Directory>
+			<Directory Id="AppDataFolder">
+				<Directory Id="INSTALLLOCATION" Name="cfix">
+					<Component Id="CompInstallLocation" Guid="17f698aa-e3dc-4875-861e-1b519fb52733">
+						<Registry Id="KeyInstallLocation" Root="HKCU" Key="Software\cfix" Name="InstallLocation" Type="string" KeyPath="yes" Value="[INSTALLLOCATION]" />
+					</Component>
+					
+					<Component Id="CompCfixHome" Guid="52c94872-5b2a-450b-9675-d6cdf2cab194">
+						<Environment 
+							Id="EnvCfixHome"
+							Action="set"
+							Name="CFIX_HOME"
+							Part="all"
+							Permanent="no"
+							Value="[INSTALLLOCATION]"/>
+					</Component>
+					
+					<Component Id="CompCfixPathI386" Guid="7f6397fd-6abb-4a72-8d4d-e8a94b1419bf">
+						<Environment 
+							Id="EnvCfixPathI386"
+							Action="set"
+							Name="PATH"
+							Part="last"
+							Permanent="no"
+							Value="[INSTALLLOCATION]bin\i386"/>
+					</Component>
+					
+					<Component Id="CompCfixPathAmd64" Guid="7cfe854b-368c-4ad0-a9d3-fcf826af4b7f">
+						<Environment 
+							Id="EnvCfixPathAmd64"
+							Action="set"
+							Name="PATH"
+							Part="last"
+							Permanent="no"
+							Value="[INSTALLLOCATION]bin\amd64"/>
+					</Component>
+					
+					<Component Id="CompCOPYING" Guid="d245b200-ea36-4ebb-9697-3fc258b0f7d2">
+						<File
+							Id="FileCOPYING"
+							Name="COPYING"
+							DiskId="1"
+							Source="COPYING"
+							Vital="yes"
+							KeyPath="yes"/>
+					</Component>
+					
+					<Directory Id="DirBin" Name="bin">
+						<Directory Id="DirBinI386" Name="i386">
+							<Component Id="CompI386Cdiag" Guid="f6bf7f75-ba0d-43c2-8e97-a77ebcfe7fae">
+								<File
+									Id="FileI386CdiagDll"
+									Name="cdiag.dll"
+									DiskId="1"
+									Source="bin\fre\i386\cdiag.dll"
+									Vital="yes"
+									KeyPath="yes"/>
+								<File
+									Id="FileI386CdiagPdb"
+									Name="cdiag.pdb"
+									DiskId="1"
+									Source="bin\fre\i386\cdiag.pdb"
+									Vital="yes"
+									KeyPath="no"/>
+							</Component>
+							<Component Id="CompI386Cfix" Guid="de857a6e-19c9-40f0-8446-cf6afd1a8d8b">
+								<File
+									Id="FileI386CfixDll"
+									Name="cfix.dll"
+									DiskId="1"
+									Source="bin\fre\i386\cfix.dll"
+									Vital="yes"
+									KeyPath="yes"/>
+								<File
+									Id="FileI386CfixPdb"
+									Name="cfix.pdb"
+									DiskId="1"
+									Source="bin\fre\i386\cfix.pdb"
+									Vital="yes"
+									KeyPath="no"/>
+							</Component>
+							<Component Id="CompI386Cfix32" Guid="138f1b09-c445-4763-a09b-fe704d00933f">
+								<File
+									Id="FileI386Cfix32Exe"
+									Name="cfix32.exe"
+									DiskId="1"
+									Source="bin\fre\i386\cfix32.exe"
+									Vital="yes"
+									KeyPath="yes"/>
+								<File
+									Id="FileI386Cfix32Pdb"
+									Name="cfix32.pdb"
+									DiskId="1"
+									Source="bin\fre\i386\cfix32.pdb"
+									Vital="yes"
+									KeyPath="no"/>
+							</Component>
+							<Component Id="CompI386Cfixkl" Guid="937dc3c6-8665-4dd7-b116-df34eb65e649">
+								<File
+									Id="FileI386CfixklDll"
+									Name="cfixkl.dll"
+									DiskId="1"
+									Source="bin\fre\i386\cfixkl.dll"
+									Vital="yes"
+									KeyPath="yes"/>
+								<File
+									Id="FileI386CfixklPdb"
+									Name="cfixkl.pdb"
+									DiskId="1"
+									Source="bin\fre\i386\cfixkl.pdb"
+									Vital="yes"
+									KeyPath="no"/>
+							</Component>
+							<Component Id="CompI386Cfixkr32" Guid="73bf8647-71b4-4882-95b6-6229d25cfd46">
+								<File
+									Id="FileI386Cfixkr32Sys"
+									Name="cfixkr32.sys"
+									DiskId="1"
+									Source="bin\fre\i386\cfixkr32.sys"
+									Vital="yes"
+									KeyPath="yes"/>
+								<File
+									Id="FileI386Cfixkr32Pdb"
+									Name="cfixkr32.pdb"
+									DiskId="1"
+									Source="bin\fre\i386\cfixkr32.pdb"
+									Vital="yes"
+									KeyPath="no"/>
+							</Component>
+							<Component Id="CompI386Dbghelp" Guid="39608daa-ba46-4544-91fb-331351b0458a">
+								<File
+									Id="FileI386DbghelpDll"
+									Name="dbghelp.dll"
+									DiskId="1"
+									Source="redist\i386\dbghelp.dll"
+									Vital="yes"
+									KeyPath="yes"/>
+							</Component>
+							<Component Id="CompI386SymSrv" Guid="0f862728-061f-44c1-a49f-af8b4e15a47a">
+								<File
+									Id="FileI386SymSrvDll"
+									Name="symsrv.dll"
+									DiskId="1"
+									Source="redist\i386\symsrv.dll"
+									Vital="yes"
+									KeyPath="yes"/>
+							</Component>
+						</Directory>
+						<Directory Id="DirBinAmd64" Name="amd64">
+							<Component Id="CompAmd64Cdiag" Guid="1b0da94c-c808-4e63-b14e-3e7bfccd4807">
+								<File
+									Id="FileAmd64CdiagDll"
+									Name="cdiag.dll"
+									DiskId="1"
+									Source="bin\fre\amd64\cdiag.dll"
+									Vital="yes"
+									KeyPath="yes"/>
+								<File
+									Id="FileAmd64CdiagPdb"
+									Name="cdiag.pdb"
+									DiskId="1"
+									Source="bin\fre\amd64\cdiag.pdb"
+									Vital="yes"
+									KeyPath="no"/>
+							</Component>
+							<Component Id="CompAmd64Cfix" Guid="eb06e498-154f-4d8f-afee-a9aceffc3496">
+								<File
+									Id="FileAmd64CfixDll"
+									Name="cfix.dll"
+									DiskId="1"
+									Source="bin\fre\amd64\cfix.dll"
+									Vital="yes"
+									KeyPath="yes"/>
+								<File
+									Id="FileAmd64CfixPdb"
+									Name="cfix.pdb"
+									DiskId="1"
+									Source="bin\fre\amd64\cfix.pdb"
+									Vital="yes"
+									KeyPath="no"/>
+							</Component>
+							<Component Id="CompAmd64Cfix64" Guid="14361a33-f60e-4c80-b379-2db0e734e27d">
+								<File
+									Id="FileAmd64Cfix64Exe"
+									Name="cfix64.exe"
+									DiskId="1"
+									Source="bin\fre\amd64\cfix64.exe"
+									Vital="yes"
+									KeyPath="yes"/>
+								<File
+									Id="FileAmd64Cfix64Pdb"
+									Name="cfix64.pdb"
+									DiskId="1"
+									Source="bin\fre\amd64\cfix64.pdb"
+									Vital="yes"
+									KeyPath="no"/>
+							</Component>
+							<Component Id="CompAmd64Cfixkl" Guid="b99b248a-ba0c-473d-97fe-660fd3df6cec">
+								<File
+									Id="FileAmd64CfixklDll"
+									Name="cfixkl.dll"
+									DiskId="1"
+									Source="bin\fre\amd64\cfixkl.dll"
+									Vital="yes"
+									KeyPath="yes"/>
+								<File
+									Id="FileAmd64CfixklPdb"
+									Name="cfixkl.pdb"
+									DiskId="1"
+									Source="bin\fre\amd64\cfixkl.pdb"
+									Vital="yes"
+									KeyPath="no"/>
+							</Component>
+							<Component Id="CompAmd64Cfixkr64" Guid="35b89b35-6ce4-4623-a338-56710bd26071">
+								<File
+									Id="FileAmd64Cfixkr64Sys"
+									Name="cfixkr64.sys"
+									DiskId="1"
+									Source="bin\fre\amd64\cfixkr64.sys"
+									Vital="yes"
+									KeyPath="yes"/>
+								<File
+									Id="FileAmd64Cfixkr64Pdb"
+									Name="cfixkr64.pdb"
+									DiskId="1"
+									Source="bin\fre\amd64\cfixkr64.pdb"
+									Vital="yes"
+									KeyPath="no"/>
+							</Component>
+							<Component Id="CompAmd64Dbghelp" Guid="28a4b16b-7e92-42dd-ac37-5032b32ac445">
+								<File
+									Id="FileAmd64DbghelpDll"
+									Name="dbghelp.dll"
+									DiskId="1"
+									Source="redist\amd64\dbghelp.dll"
+									Vital="yes"
+									KeyPath="yes"/>
+							</Component>
+							<Component Id="CompAmd64SymSrv" Guid="ba7c58de-156d-46b2-8f39-d5ba5fb23a1c">
+								<File
+									Id="FileAmd64SymSrvDll"
+									Name="symsrv.dll"
+									DiskId="1"
+									Source="redist\amd64\symsrv.dll"
+									Vital="yes"
+									KeyPath="yes"/>
+							</Component>
+						</Directory>
+					</Directory>
+					<Directory Id="DirDoc" Name="doc">
+						<Component Id="CompDoc" DiskId="1" Guid="4124fa31-968e-49dd-bf33-0ea541b2bb34">
+							<File Id="FileCfixChm" Name="cfix.chm" Source="doc\docbook\cfix.chm" Vital="yes">
+								<Shortcut 
+									Id="ShortcutCfixChm"
+									Description="cfix Documentation"
+									Directory="DirProgMenu"
+									Icon="CfixIco"
+									Name="Doc"
+									LongName="Documentation"/>						
+							</File>
+						</Component>
+						
+						<Directory Id="DirSamples" Name="examples">
+							<Directory Id="DirSamplesKernel" Name="KernelMo" LongName="KernelMode">
+								<Component Id="CompSamplesKernel" DiskId="1" Guid="a9dcfd17-b12d-4c51-9b70-4f1bc32fb593">
+									<File Id="FileSamplesKernelKtestDef" Name="ktest.def" Source="doc\samples\Kernel\ktest.def" />
+									<File Id="FileSamplesKernelSources" Name="SOURCES" Source="doc\samples\Kernel\SOURCES" />
+									<File Id="FileSamplesKernelMakefile" Name="makefile" Source="doc\samples\Kernel\makefile" />
+									<File Id="FileSamplesKernelSuiteC" Name="suite.c" Source="doc\samples\Kernel\suite.c" />
+								</Component>
+							</Directory>
+							<Directory Id="DirSamplesUser" Name="UserMode">
+								<Component Id="CompSamplesUser" DiskId="1" Guid="5f1d2afa-c307-4d93-8f1b-38149041611c">
+									<File Id="FileSamplesUserStdafxCpp" Name="stdafx.cpp" Source="doc\samples\VsSample\stdafx.cpp" />
+									<File Id="FileSamplesUserStdafxH" Name="stdafx.h" Source="doc\samples\VsSample\stdafx.h" />
+									<File Id="FileSamplesUserTestsCpp" Name="tests.cpp" Source="doc\samples\VsSample\tests.cpp" />
+									<File Id="FileSamplesUserSln08" Name="VsSam08.sln" LongName="ExampleVs2008.sln" Source="doc\samples\VsSample\ExampleVs2008.sln" />
+									<File Id="FileSamplesUserVcp08" Name="VsSam08.VCP" LongName="ExampleVs2008.vcproj" Source="doc\samples\VsSample\ExampleVs2008.vcproj" />
+									<File Id="FileSamplesUserSln05" Name="VsSam05.sln" LongName="ExampleVs2005.sln" Source="doc\samples\VsSample\ExampleVs2005.sln" />
+									<File Id="FileSamplesUserVcp05" Name="VsSam05.VCP" LongName="ExampleVs2005.vcproj" Source="doc\samples\VsSample\ExampleVs2005.vcproj" />
+									<File Id="FileSamplesUserSln03" Name="VsSam03.sln" LongName="ExampleVs2003.sln" Source="doc\samples\VsSample\ExampleVs2003.sln" />
+									<File Id="FileSamplesUserVcp03" Name="VsSam03.VCP" LongName="ExampleVs2003.vcproj" Source="doc\samples\VsSample\ExampleVs2003.vcproj" />
+								</Component>
+							</Directory>
+							<Directory Id="DirSamplesUserCc" Name="UserCpp" LongName="UserMode C++">
+								<Component Id="CompSamplesUserCc" DiskId="1" Guid="6dc96d0d-f0b0-404c-943c-d83f8c461aae">
+									<File Id="FileSamplesUserCcStdafxCpp" Name="stdafx.cpp" Source="doc\samples\Cc\stdafx.cpp" />
+									<File Id="FileSamplesUserCcStdafxH" Name="stdafx.h" Source="doc\samples\Cc\stdafx.h" />
+									<File Id="FileSamplesUserCcSimpleCpp" Name="simple.cpp" Source="doc\samples\Cc\simple.cpp" />
+									<File Id="FileSamplesUserCcImprovedCpp" Name="improved.cpp" Source="doc\samples\Cc\improved.cpp" />
+									<File Id="FileSamplesUserCcAdderCpp" Name="adder.cpp" Source="doc\samples\Cc\adder.cpp" />
+									<File Id="FileSamplesUserCcAdderH" Name="adder.h" Source="doc\samples\Cc\adder.h" />
+									<File Id="FileSamplesUserCcSln08" Name="VsSaCc08.sln" LongName="ExampleCcVs2008.sln" Source="doc\samples\Cc\ExampleCcVs2008.sln" />
+									<File Id="FileSamplesUserCcVcp08" Name="VsSaCc08.VCP" LongName="ExampleCcVs2008.vcproj" Source="doc\samples\Cc\ExampleCcVs2008.vcproj" />
+									<File Id="FileSamplesUserCcSln05" Name="VsSaCc05.sln" LongName="ExampleCcVs2005.sln" Source="doc\samples\Cc\ExampleCcVs2005.sln" />
+									<File Id="FileSamplesUserCcVcp05" Name="VsSaCc05.VCP" LongName="ExampleCcVs2005.vcproj" Source="doc\samples\Cc\ExampleCcVs2005.vcproj" />
+									<File Id="FileSamplesUserCcSln03" Name="VsSaCc03.sln" LongName="ExampleCcVs2003.sln" Source="doc\samples\Cc\ExampleCcVs2003.sln" />
+									<File Id="FileSamplesUserCcVcp03" Name="VsSaCc03.VCP" LongName="ExampleCcVs2003.vcproj" Source="doc\samples\Cc\ExampleCcVs2003.vcproj" />
+								</Component>                                                        
+							</Directory>
+						</Directory>
+					</Directory>
+					<Directory Id="DirInclude" Name="include">
+						<Component Id="CompIncludes" DiskId="1" Guid="c988cb16-f49a-452e-9901-2c660fecd35e">
+							<File Id="FileCdiagH" Name="cdiag.h" Source="include\cdiag.h" Vital="yes"/>
+							<File Id="FileCdiagMsgH" Name="cdiagmsg.h" Source="include\cdiagmsg.h"  Vital="yes"/>
+							<File Id="FileCfixH" Name="cfix.h" Source="include\cfix.h"  Vital="yes"/>
+							<File Id="FileCfixCcH" Name="cfixcc.h" Source="include\cfixcc.h"  Vital="yes"/>
+							<File Id="FileCfixApiH" Name="cfixapi.h" Source="include\cfixapi.h"  Vital="yes"/>
+							<File Id="FileCfixAuxH" Name="cfixaux.h" Source="include\cfixaux.h"  Vital="yes"/>
+							<File Id="FileCfixKlMsgH" Name="CFIXKL_1.H" LongName="cfixklmsg.h" Source="include\cfixklmsg.h"  Vital="yes"/>
+							<File Id="FileCfixKrH" Name="cfixkr.h" Source="include\cfixkr.h"  Vital="yes"/>
+							<File Id="FileCfixKrioH" Name="cfixkrio.h" Source="include\cfixkrio.h"  Vital="yes"/>
+							<File Id="FileCfixMsgH" Name="cfixmsg.h" Source="include\cfixmsg.h"  Vital="yes"/>
+							<File Id="FileCfixPeH" Name="cfixpe.h" Source="include\cfixpe.h"  Vital="yes"/>
+						</Component>
+					</Directory>
+					<Directory Id="DirLib" Name="lib">
+						<Directory Id="DirLibI386" Name="i386">
+							<Component Id="CompLibI386" DiskId="1" Guid="bf8d7455-7ddc-48c1-a053-3d700965a1b8">
+								<File Id="FileCdiagLibI386" Name="cdiag.lib" Source="bin\fre\i386\cdiag.lib"  Vital="yes"/>
+								<File Id="FileCfixLibI386" Name="cfix.lib" Source="bin\fre\i386\cfix.lib"  Vital="yes"/>
+								<File Id="FileCfixKdrvLibI386" Name="cfixkdrv.lib" Source="bin\fre\i386\cfixkdrv.lib"  Vital="yes"/>
+							</Component>
+						</Directory>
+						<Directory Id="DirLibAmd64" Name="amd64">
+							<Component Id="CompLibAmd64" DiskId="1" Guid="42adc5ff-6022-4301-b66a-0dde85bc2d5d">
+								<File Id="FileCdiagLibAmd64" Name="cdiag.lib" Source="bin\fre\amd64\cdiag.lib"  Vital="yes"/>
+								<File Id="FileCfixLibAmd64" Name="cfix.lib" Source="bin\fre\amd64\cfix.lib"  Vital="yes"/>
+								<File Id="FileCfixKdrvLibAmd64" Name="cfixkdrv.lib" Source="bin\fre\amd64\cfixkdrv.lib"  Vital="yes"/>		
+							</Component>
+						</Directory>
+					</Directory>
+				</Directory>
+			</Directory>
+		</Directory>
+
+		<Feature Id="FeatureMain" Title="cfix" Absent='disallow' Level="1" AllowAdvertise="no" Display="expand">
+			
+			<ComponentRef Id="CompCfixHome"/>
+			<ComponentRef Id="CompCOPYING"/>
+			<ComponentRef Id="CompInstallLocation"/>
+			
+			<Feature Id="FeatureBinI386" Title="i386 (x86) binaries" Level="1" AllowAdvertise="no" Description="Tools for i386 (x86). Required if you intend to write tests for this platform.">
+				<ComponentRef Id="CompI386Cdiag"/>
+				<ComponentRef Id="CompI386Cfix"/>
+				<ComponentRef Id="CompI386Cfix32"/>
+				<ComponentRef Id="CompI386Cfixkl"/>
+				<ComponentRef Id="CompI386Cfixkr32"/>
+				<ComponentRef Id="CompI386Dbghelp"/>
+				<ComponentRef Id="CompI386SymSrv"/>
+			
+				<ComponentRef Id="CompLibI386"/>
+				
+				<Feature Id="FeatureBinI386AddToPath" Title="Register in PATH" Level="1" AllowAdvertise="no" Description="Adds the respective directory to the PATH environment variable.">
+					<ComponentRef Id="CompCfixPathI386"/>
+				</Feature>
+			</Feature>
+			<Feature Id="FeatureBinAmd64" Title="AMD64 (x64) binaries" Level="1" AllowAdvertise="no" Description="Tools for AMD64 (x64). Required if you intend to write tests for this platform.">
+				<Condition Level="2"><![CDATA[NOT VersionNT64]]></Condition>
+				
+				<ComponentRef Id="CompAmd64Cdiag"/>
+				<ComponentRef Id="CompAmd64Cfix"/>
+				<ComponentRef Id="CompAmd64Cfix64"/>
+				<ComponentRef Id="CompAmd64Cfixkl"/>
+				<ComponentRef Id="CompAmd64Cfixkr64"/>
+				<ComponentRef Id="CompAmd64Dbghelp"/>
+				<ComponentRef Id="CompAmd64SymSrv"/>
+				
+				<ComponentRef Id="CompLibAmd64"/>
+				
+				<Feature Id="FeatureBinAmd64AddToPath" Title="Register in PATH" Level="1" AllowAdvertise="no" Description="Adds the respective directory to the PATH environment variable.">
+					<ComponentRef Id="CompCfixPathAmd64"/>
+				</Feature>
+			</Feature>
+			
+			<Feature Id="FeatureSamples" Title="Samples" Level="1" AllowAdvertise="no" Description="Sample projects.">
+				<ComponentRef Id="CompSamplesKernel"/>
+				<ComponentRef Id="CompSamplesUser"/>
+				<ComponentRef Id="CompSamplesUserCc"/>
+			</Feature>
+			
+			<ComponentRef Id="CompDoc"/>
+			<ComponentRef Id="CompIncludes"/>
+		</Feature>
+
+		<Property Id="WIXUI_INSTALLDIR" Value="INSTALLLOCATION" />
+		<UIRef Id="CfixUi" />
+
+		<Property Id='ARPHELPLINK'>http://cfix.sourceforge.net/</Property>
+		<Property Id='ARPURLINFOABOUT'>http://cfix.sourceforge.net/</Property>
+		<Property Id='ARPPRODUCTICON'>CfixIco</Property>
+	
+		<Property Id='OPENTUTORIALAFTERFINISH'>1</Property>
+		
+		<Property Id='HTMLHELP'>hh.exe</Property>
+		<CustomAction Id="LaunchFile" Return="asyncNoWait" Property="HTMLHELP" ExeCommand="mk:@MSITStore:[INSTALLLOCATION]doc\cfix.chm::ch04s01.html" />
+		
+		<Icon Id="CfixIco" SourceFile="icon.ico" />
+	</Product>	
+</Wix>

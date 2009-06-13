@@ -1,0 +1,69 @@
+TODO
+----
+Log Severities?
+Job object
+-u default if debugger attached
+
+
+
+Doc
+---
+ * Using in the debugger
+   * use -u
+   * set working dir 
+ * mem leak detection 
+   --> different CRTS
+   --> UMDH: -y
+ * Feedback
+
+ * Avrf
+ * DEP
+ 
+ * Logging
+ 
+ * PATH-problem --> tocket
+ 
+ * prefast in makefile
+	remove -f
+		- CFIX_E_TESTRUN_ABORTED
+		- CfixAbort
+  
+ * CfixCreateCrtThread 
+ 
+Parallel
+--------
+ TsExecAction:
+  - flag: all/run setup only/run teardown only/run tests only
+  -> called by ParallelAction, make sure setup/teardown called only once, while tests can run in parallel
+ CFIX_FIXTURE_OPTIONS( SUPPORTS_MT )
+   
+Future Features
+---------------
+ * AssertEqualsDword -> optionally resolve values as error messages
+ * pass additional message DLLs on cmdline
+ * (optionally) run each fixture in separate process -> robustness
+ * Dbg: choose ignore bp/abort TC
+ 
+ * filter top frames of stack traces 
+ 
+ * before/after routines --> JUnit semantics
+ 
+ preferred load address?
+ 
+ Show ODS-message when invalid cmdine params passed
+ 
+ Leak detection (Heap*) based on jpfbt-tracing
+ 
+Bugs
+----
+ cdiag: Resolver: try clearing NT-flag
+
+Todo
+----
+ * Stacktrace Symbol Resolving KM
+
+ 
+Known Issues
+------------
+ - No stacktrace in KM for unhandled exceptions
+ 

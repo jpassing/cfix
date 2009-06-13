@@ -1,0 +1,299 @@
+#----------------------------------------------------------------------
+#
+# Purpose:
+# 		Main makefile. Named makefile.cfix in order not to interfere with
+#		building process, which is driven by build.exe
+# 
+# Copyright:
+# 		2007, 2008, Johannes Passing (passing at users.sourceforge.net)
+# 
+# This file is part of cfix.
+# 
+# cfix is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# cfix is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public License
+# along with cfix.  If not, see <http://www.gnu.org/licenses/>.
+#
+#----------------------------------------------------------------------
+
+!IF [cscript /nologo buildnum.vbs > __buildnum.inc]
+!ENDIF
+!INCLUDE __buildnum.inc
+
+VERSION=1.2.0.$(BUILDNUMBER)
+CUSTOMSYMSTORE=D:\XSYMBOLS\Custom
+CFIX_CLAGS=-f -z -kern
+
+!if ( "$(DDKBUILDENV)" != "" ) 
+!ERROR Build environment found. Execute this command in a normal shell, not in a WDK shell.
+!endif
+
+!if ( "$(SDKBASE)" == "" )
+!MESSAGE WARNING: SDKBASE not set. Set to base directory of Windows SDK.
+!MESSAGE WARNING: Note that the path must not contain any spaces - required by build.exe
+!endif
+
+#----------------------------------------------------------------------
+#
+# Binaries. Build process is driven by build.exe.
+#
+#----------------------------------------------------------------------
+
+build: chk fre symadd
+
+symadd:
+	symstore add /r /f bin\chk\i386\c*.pdb  /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
+	symstore add /r /f bin\chk\amd64\c*.pdb  /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
+	symstore add /r /f bin\fre\i386\c*.pdb  /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
+	symstore add /r /f bin\fre\amd64\c*.pdb  /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
+	
+version:
+	rcstamp cfix\Cfix\cfix.rc $(VERSION)
+	rcstamp cfix\cfixcmd\runtest.rc $(VERSION)
+	rcstamp cdiag\cdiag\cdiag.rc $(VERSION)
+	rcstamp cfixkern\Cfixkl\cfixkl.rc $(VERSION)
+	rcstamp cfixkern\Cfixkr\cfixkr.rc $(VERSION)
+	
+i386chk: version
+	cmd /C ddkbuild -WNETW2K checked . -cZ
+
+i386fre:
+	cmd /C ddkbuild -WNETW2K free . -cZ
+	
+amd64chk:
+	cmd /C ddkbuild -WLHNETA64 checked . -cZ
+	
+amd64fre:
+	cmd /C ddkbuild -WLHNETA64 free . -cZ	
+	
+chk: i386chk amd64chk
+
+fre: i386fre amd64fre
+
+i386: i386chk i386fre
+
+amd64: amd64chk amd64fre
+
+cleantemps:
+	-1 for /f "delims=" %%i in ('dir /ad/s/b obj*') do @rd /S /Q  %%i
+	-1 for /f "delims=" %%i in ('dir /s/b *.log') do @del  %%i
+	-1 for /f "delims=" %%i in ('dir /s/b *.err') do @del  %%i
+	-1 for /f "delims=" %%i in ('dir /s/b *.wrn') do @del  %%i
+	if exist doc\samples\Kernel\bin rd /S /Q doc\samples\Kernel\bin
+	if exist doc\samples\VsSample\Debug rd /S /Q doc\samples\VsSample\Debug
+	if exist doc\samples\VsSample\Release rd /S /Q doc\samples\VsSample\Release
+	del doc\samples\VsSample\*.ncb
+	del doc\samples\VsSample\*.suo
+	del doc\samples\VsSample\*.user 
+	
+clean: cleantemps
+	if exist bin\chk rd /S /Q bin\chk
+	if exist bin\fre rd /S /Q bin\fre
+	
+
+#----------------------------------------------------------------------
+#
+# Unit tests on test machines.
+#
+#----------------------------------------------------------------------
+
+copylocal:
+#
+# Copy binaries.
+#
+!if ( "$(ARCH)" == "AMD64" )	
+	xcopy /S /Y /I /EXCLUDE:xcopy-excludes.txt bin\chk\amd64 c:\dev\cfix\bin\chk\amd64
+	xcopy /S /Y /I /EXCLUDE:xcopy-excludes.txt bin\fre\amd64 c:\dev\cfix\bin\fre\amd64
+!endif
+	
+	xcopy /S /Y /I /EXCLUDE:xcopy-excludes.txt bin\chk\i386 c:\dev\cfix\bin\chk\i386
+	xcopy /S /Y /I /EXCLUDE:xcopy-excludes.txt bin\fre\i386 c:\dev\cfix\bin\fre\i386
+	
+#
+# Copy redists once.
+#
+!if ( "$(ARCH)" == "AMD64" )	
+	if not exist c:\dev\cfix\chk\amd64\symsrv.dll copy redist\amd64\*.dll c:\dev\cfix\bin\chk\amd64
+	if not exist c:\dev\cfix\fre\amd64\symsrv.dll copy redist\amd64\*.dll c:\dev\cfix\bin\fre\amd64	
+!endif
+
+	if not exist c:\dev\cfix\chk\i386\symsrv.dll copy redist\i386\*.dll c:\dev\cfix\bin\chk\i386
+	if not exist c:\dev\cfix\fre\i386\symsrv.dll copy redist\i386\*.dll c:\dev\cfix\bin\fre\i386
+	
+	if not exist c:\dev\cfix\cfix md c:\dev\cfix\cfix
+
+	copy /Y makefile.cfix c:\dev\cfix\makefile.cfix
+
+#
+# For use on test machines only.
+#
+testlocal: copylocal
+!if ( "$(UAC)" == "1" )
+	elevate cmd /K "cd /d c:\dev\cfix\ && $(MAKE) -f makefile.cfix ARCH=$(ARCH) test"
+!else
+	$(COMSPEC) /C "cd /d c:\dev\cfix\ && $(MAKE) -f makefile.cfix ARCH=$(ARCH) test"
+!endif
+
+debug:
+	echo procArch: $(PROCESSOR_ARCHITECTURE)
+	echo Arch: $(ARCH)
+	echo UAC: $(UAC)
+
+#----------------------------------------------------------------------
+#
+# Unit tests.
+#
+#----------------------------------------------------------------------
+
+test: testchk testfre
+	
+testi386chk:
+	cd bin\chk\i386
+	echo i386 checked
+
+	-1100 sc delete cfixkr
+	-1100 sc delete cfixkr_cfixkr32
+	-1100 sc delete cfixkr_testklib6
+	-1100 sc delete cfixkr_testkmsc
+	
+	cfix32 $(CFIX_FLAGS) testapi.dll
+	cfix32 $(CFIX_FLAGS) testcpp.dll
+	cfix32 $(CFIX_FLAGS) testtsx.dll
+	cfix32 -kern $(CFIX_FLAGS) ..\$(ARCH)\testkmsc.sys
+	cfix32 $(CFIX_FLAGS) testkr.dll
+	cfix32 $(CFIX_FLAGS) testdiag.dll
+	
+	cd ..\..\..
+	
+testi386fre:
+	cd bin\fre\i386
+	echo i386 free
+	
+	-1100 sc delete cfixkr
+	-1100 sc delete cfixkr_cfixkr32
+	-1100 sc delete cfixkr_testklib6
+	-1100 sc delete cfixkr_testkmsc
+	
+	cfix32 $(CFIX_FLAGS) testapi.dll
+	cfix32 $(CFIX_FLAGS) testcpp.dll
+	cfix32 $(CFIX_FLAGS) testtsx.dll
+	cfix32 -kern $(CFIX_FLAGS) ..\$(ARCH)\testkmsc.sys
+	cfix32 $(CFIX_FLAGS) testkr.dll
+	cfix32 $(CFIX_FLAGS) testdiag.dll
+	
+	cd ..\..\..
+	
+testamd64chk:
+	cd bin\chk\amd64
+	echo amd64 checked
+	
+	-1100 sc delete cfixkr
+	-1100 sc delete cfixkr_cfixkr64
+	-1100 sc delete cfixkr_testklib6
+	-1100 sc delete cfixkr_testkmsc
+	
+	cfix64 $(CFIX_FLAGS) testapi.dll
+	cfix64 $(CFIX_FLAGS) testcpp.dll
+	cfix64 $(CFIX_FLAGS) testtsx.dll
+	cfix64 -kern $(CFIX_FLAGS) ..\$(ARCH)\testkmsc.sys
+	cfix64 $(CFIX_FLAGS) testkr.dll
+	cfix64 $(CFIX_FLAGS) testdiag.dll
+	
+	cd ..\..\..
+	
+testamd64fre:
+	cd bin\fre\amd64
+	echo amd64 free
+	
+	-1100 sc delete cfixkr
+	-1100 sc delete cfixkr_cfixkr64
+	-1100 sc delete cfixkr_testklib6
+	-1100 sc delete cfixkr_testkmsc
+	
+	cfix64 $(CFIX_FLAGS) testapi.dll
+	cfix64 $(CFIX_FLAGS) testcpp.dll
+	cfix64 $(CFIX_FLAGS) testtsx.dll
+	cfix64 -kern $(CFIX_FLAGS) ..\$(ARCH)\testkmsc.sys
+	cfix64 $(CFIX_FLAGS) testkr.dll
+	cfix64 $(CFIX_FLAGS) testdiag.dll
+	
+	cd ..\..\..
+	
+!if ( "$(ARCH)" == "AMD64" )	
+testchk: testi386chk testamd64chk
+testfre: testi386fre testamd64fre
+!else
+testchk: testi386chk
+testfre: testi386fre
+!endif
+
+#----------------------------------------------------------------------
+#
+# Documentation.
+#
+#----------------------------------------------------------------------
+docs:
+	cd doc\docbook
+	$(MAKE) $(MAKEFLAGS)
+	cd ..\..
+	
+#----------------------------------------------------------------------
+#
+# Installer.
+#
+#----------------------------------------------------------------------
+installer: build docs
+	cd installer
+	$(MAKE) clean cfix.msi
+	cd ..
+	
+#----------------------------------------------------------------------
+#
+# File releases.
+#
+#----------------------------------------------------------------------
+
+release: cleantemps installer srcrelease
+
+srcrelease:
+	if exist release\cfix-src rd /S /Q release\cfix-src
+	
+	md release\cfix-src
+	if not exist release\cfix-src-$(VERSION)\cfix md release\cfix-src-$(VERSION)\cfix
+	if not exist release\cfix-src-$(VERSION)\cfix\cfix md release\cfix-src-$(VERSION)\cfix\cfix
+	if not exist release\cfix-src-$(VERSION)\cfix\cdiag md release\cfix-src-$(VERSION)\cfix\cdiag
+	if not exist release\cfix-src-$(VERSION)\doc md release\cfix-src-$(VERSION)\doc
+	if not exist release\cfix-src-$(VERSION)\doc\samples md release\cfix-src-$(VERSION)\doc\samples
+	
+	xcopy /S /Y /I include release\cfix-src-$(VERSION)\cfix\include
+	xcopy /S /Y /I cfix release\cfix-src-$(VERSION)\cfix\cfix
+	xcopy /S /Y /I cdiag release\cfix-src-$(VERSION)\cfix\cdiag
+	xcopy /S /Y /I ..\jpht release\cfix-src-$(VERSION)\jpht
+	
+	copy /Y DIRS release\cfix-src-$(VERSION)\cfix
+	copy /Y makefile.cfix release\cfix-src-$(VERSION)\cfix
+	
+	copy /Y doc\docbook\cfix.chm release\cfix-src-$(VERSION)\doc
+	xcopy /S /Y /I  doc\samples\VsSample release\cfix-src-$(VERSION)\doc\samples\UserMode
+	xcopy /S /Y /I  doc\samples\Kernel release\cfix-src-$(VERSION)\doc\samples\KernelMode
+	
+	copy /Y COPYING release\cfix-src-$(VERSION)
+	
+	cd release\cfix-src-$(VERSION)\jpht
+	cmd.exe /C clean.cmd
+	del /S *.ncb
+	del /S *.user
+	cd ..\..\..
+	
+	cd release\cfix-src-$(VERSION)\cfix
+	del /S *.ncb
+	del /S *.user
+	cd ..\..\..

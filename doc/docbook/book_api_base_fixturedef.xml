@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="FixtureDefCcAPI">
+		<title>Fixture definition (C and C++)</title>
+
+		<para>
+		Fixtures are defined with the CFIX_BEGIN_FIXTURE/CFIX_END_FIXTURE construct, as shown in the following example:
+		</para>
+		
+		<programlisting>
+#include &lt;cfix.h&gt;
+
+void __stdcall Setup() 	  { ... }
+void __stdcall Teardown() { ... }
+void __stdcall Before()   { ... }
+void __stdcall After()    { ... }
+void __stdcall Test1()    { ... }
+void __stdcall Test2()    { ... }
+
+CFIX_BEGIN_FIXTURE( SuiteName )
+	CFIX_FIXTURE_SETUP( Setup )
+	CFIX_FIXTURE_TEARDOWN( Teardown )
+	CFIX_FIXTURE_BEFORE( Before )
+	CFIX_FIXTURE_AFTER( After )
+	CFIX_FIXTURE_ENTRY( Test1 )
+	CFIX_FIXTURE_ENTRY( Test2 )
+CFIX_END_FIXTURE()
+		</programlisting>
+		<para>
+		To avoid having to forward declare the routines, it is usually adisable to put 
+		this fixture definition at the end of a file. Note that all of these entries are optional.
+		</para>
+		
+		<note>
+			The order and positioning of FIX_FIXTURE_SETUP, CFIX_FIXTURE_TEARDOWN, CFIX_FIXTURE_BEFORE, 
+			and CFIX_FIXTURE_AFTER entries is irrelevant. The order of CFIX_FIXTURE_ENTRY entries, however, 
+			defines their execution order.
+		</note>
+		
+		<section id="CFIX_BEGIN_FIXTURE">
+			<title>CFIX_BEGIN_FIXTURE</title>
+			<indexterm><primary>CFIX_BEGIN_FIXTURE</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIX_BEGIN_FIXTURE defines the start of a fixture definition. It is also used to specify the name
+				of the fixture.
+				</para>
+				<para>
+				SuiteName defines the name of the fixture. It must be unique across
+				all fixtures of the same test module (i.e. DLL). The same restrictions as for naming
+				routines apply, i.e. no spaces, no special characters etc.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+CFIX_BEGIN_FIXTURE( SuiteName )
+				</programlisting>
+				<note>Do not put quotes around the suite name.</note>
+			</simplesect>
+			
+			&TestDefDefaultRequirements;
+		</section>
+		
+		<section id="CFIX_END_FIXTURE">
+			<title>CFIX_END_FIXTURE</title>
+			<indexterm><primary>CFIX_END_FIXTURE</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIX_END_FIXTURE defines the end of a fixture definition. 
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+CFIX_BEGIN_FIXTURE()
+				</programlisting>
+			</simplesect>
+			
+			&TestDefDefaultRequirements;
+		</section>
+		
+		<section id="CFIX_FIXTURE_SETUP">
+			<title>CFIX_FIXTURE_SETUP</title>
+			<indexterm><primary>CFIX_FIXTURE_SETUP</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Used to specify a routine that is to be used as <emphasis>setup routine</emphasis>. The setup routine will be called
+				once, before any of the test routnes are executed. 
+				</para>
+				<para>
+				Specifying CFIX_FIXTURE_SETUP is optional. Note, however, that CFIX_FIXTURE_SETUP may be used at most once per fixture definition.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+CFIX_FIXTURE_SETUP( Routine )
+				</programlisting>
+				<para>
+				Setup routines must have the following signature. Specifying __stdcall is only required if /Gz is not 
+				used as compiler switch.
+				</para>
+				<programlisting>
+void __stdcall SetupRoutine()
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				If the setup routine fails, none of the test routines will be executed. The teardown routine will not be invoked either.
+				</para>
+				<note>
+				For certain initialization work, it may be more advantageous to use a <link linkend="CFIX_FIXTURE_BEFORE">before-routine</link>
+				rather than a setup routine.
+				</note>
+			</simplesect>
+			
+			&TestDefDefaultRequirements;
+		</section>
+		
+		<section id="CFIX_FIXTURE_TEARDOWN">
+			<title>CFIX_FIXTURE_TEARDOWN</title>
+			<indexterm><primary>CFIX_FIXTURE_TEARDOWN</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Used to specify a routine that is to be used as <emphasis>teardown routine</emphasis>. The teardown routine will be called
+				once, after all of the test routnes are executed. 
+				</para>
+				<para>
+				Specifying CFIX_FIXTURE_TEARDOWN is optional. Note, however, that CFIX_FIXTURE_TEARDOWN may be used at most once per fixture definition.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				
+				<programlisting>
+CFIX_FIXTURE_TEARDOWN( Routine )
+				</programlisting>
+				
+				<para>
+				Teardown routines must have the following signature. Specifying __stdcall is only required if /Gz is not 
+				used as compiler switch.
+				</para>
+				<programlisting>
+void __stdcall TeardownRoutine()
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				The teardown routine will be called regardless of whether the test routines
+				succeeded or not. The only situation in which the teardown routine is not called is when the setup routine has failed.
+				</para>
+				<note>
+				For certain initialization work, it may be more advantageous to use a <link linkend="CFIX_FIXTURE_AFTER">after-routine</link>
+				rather than a teardown routine.
+				</note>
+			</simplesect>
+			
+			&TestDefDefaultRequirements;
+		</section>
+		
+		<section id="CFIX_FIXTURE_BEFORE">
+			<title>CFIX_FIXTURE_BEFORE</title>
+			<indexterm><primary>CFIX_FIXTURE_BEFORE</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Used to specify a routine that is to be used as <emphasis>before-routine</emphasis>. The before-routine will be called
+				once per test routine, before the test routine is invoked. As such, the before-routine should be used to initialize
+				any state required by the test routines. Use <link linkend="CfixPeSetValue">CfixPeSetValue</link> to store any custom state 
+				information and make it available to <link linkend="CFIX_FIXTURE_ENTRY">test-</link> and 
+				<link linkend="CFIX_FIXTURE_AFTER">after</link> routines.
+				</para>
+				<para>
+				Specifying CFIX_FIXTURE_BEFORE is optional. Note, however, that CFIX_FIXTURE_BEFORE may be used at most once per fixture definition.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+CFIX_FIXTURE_BEFORE( Routine )
+				</programlisting>
+				<para>
+				Setup routines must have the following signature. Specifying __stdcall is only required if /Gz is not 
+				used as compiler switch.
+				</para>
+				<programlisting>
+void __stdcall BeforeRoutine()
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				When the before-routine fails, the current test routine will not be called. The after-routine (if present) will not be called
+				either. 
+				</para>
+				<note>
+				For certain initialization work that should occur only once per fixture (rather than once per test routine), 
+				use a <link linkend="CFIX_FIXTURE_SETUP">setup routine</link> rather than a before-routine.
+				</note>
+			</simplesect>
+			
+			&TestDefDefaultRequirements12;
+		</section>
+		
+		<section id="CFIX_FIXTURE_AFTER">
+			<title>CFIX_FIXTURE_AFTER</title>
+			<indexterm><primary>CFIX_FIXTURE_AFTER</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Used to specify a routine that is to be used as <emphasis>after-routine</emphasis>. The after-routine will be called
+				once per test routine, after the test routine has been invoked. As such, the after-routine should be used to clean up
+				any state set up by a before-routine or a test routine.
+				</para>
+				<para>
+				Specifying CFIX_FIXTURE_AFTER is optional. Note, however, that CFIX_FIXTURE_AFTER may be used at most once per fixture definition.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+CFIX_FIXTURE_AFTER( Routine )
+				</programlisting>
+				<para>
+				Setup routines must have the following signature. Specifying __stdcall is only required if /Gz is not 
+				used as compiler switch.
+				</para>
+				<programlisting>
+void __stdcall AfterRoutine()
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				The after-routine will be called regardless of whether the test routine succeeded or not. The only situation in which 
+				the after-routine is not called is when the before-routine has failed, in which case the test routine also did not run.
+				</para>
+				<note>
+				For certain cleanup work that should occur only once per fixture (rather than once per test routine), 
+				use a <link linkend="CFIX_FIXTURE_TEARDOWN">teardown routine</link> rather than an after-routine.
+				</note>
+			</simplesect>
+			
+			&TestDefDefaultRequirements12;
+		</section>
+		
+		<section id="CFIX_FIXTURE_ENTRY">
+			<title>CFIX_FIXTURE_ENTRY</title>
+			<indexterm><primary>CFIX_FIXTURE_ENTRY</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Used to add a test case to the fixture. CFIX_FIXTURE_ENTRY may be used any number of times per fixture.
+				</para>
+				<para>
+				Use <link linkend="CfixPeGetValue">CfixPeGetValue</link> to access any custom state 
+				information initialized by a <link linkend="CFIX_FIXTURE_BEFORE">before</link>-routine.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				
+				<programlisting>
+CFIX_FIXTURE_ENTRY( Routine )
+				</programlisting>
+				
+				<para>
+				Test routines must have the following signature. Specifying __stdcall is only required if /Gz is not 
+				used as compiler switch.
+				</para>
+				<programlisting>
+void __stdcall TestRoutine()
+				</programlisting>
+			</simplesect>
+			
+			&TestDefDefaultRequirements;
+		</section>
+	</section>
+	

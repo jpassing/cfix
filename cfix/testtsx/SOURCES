@@ -1,0 +1,38 @@
+#
+# setup VisualC++ source browsing
+#
+#BROWSER_INFO=1
+BSCMAKE_FLAGS=$(BSCMAKE_FLAGS) /n
+
+MSC_WARNING_LEVEL=/W4 /Wp64
+
+INCLUDES=..\..\include
+
+!if "$(TARGET_DIRECTORY)"=="i386"
+USER_C_FLAGS=/D_UNICODE /DUNICODE /analyze /EHa
+LINKER_FLAGS=/nxcompat /dynamicbase /SafeSEH
+!else
+USER_C_FLAGS=/D_UNICODE /DUNICODE /EHa
+LINKER_FLAGS=/nxcompat /dynamicbase
+!endif
+
+C_DEFINES = /DCFIX_NO_CPP_EXTENSIONS
+
+!if "$(DDKBUILDENV)"=="chk"
+DEBUG_CRTS=1
+!endif
+
+USE_LIBCMT=1
+
+TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
+		   $(SDK_LIB_PATH)\shlwapi.lib \
+		   $(MAKEDIR)\..\..\bin\$(DDKBUILDENV)\$(TARGET_DIRECTORY)\cfix.lib
+
+TARGETNAME=testtsx
+TARGETPATH=..\..\bin\$(DDKBUILDENV)
+TARGETTYPE=DYNLINK
+
+SOURCES=\
+	suites.cpp \
+	drive.c
+	

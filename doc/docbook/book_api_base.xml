@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="TestBaseAPI">
+		<title>API for use in test cases (C and C++)</title>
+		<para>
+		Test-, before-, after-, setup- and teardown routines may use the following API.
+		</para>
+
+		<section id="CFIX_ASSERT">
+			<title>CFIX_ASSERT</title>
+			<indexterm><primary>CFIX_ASSERT</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Use CFIX_ASSERT to assert any expression. If the expression evaluates to be false, the test case is considered
+				to have failed. The report for a failed assertions includes the expression itself, file and line number as well
+				as the function name. 
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+void CFIX_ASSERT( __in BOOL Expression );
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+			
+				<programlisting>
+CFIX_ASSERT( a == 1 );
+CFIX_ASSERT( !"This will always fail" );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiDefaultRequirements10;
+		</section>
+		
+		<section id="CFIX_ASSERT_MESSAGE">
+			<title>CFIX_ASSERT_MESSAGE</title>
+			<indexterm><primary>CFIX_ASSERT_MESSAGE</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Use CFIX_ASSERT_MESSAGE to assert any expression. If the expression evaluates to be false, the test case is considered
+				to have failed. The report for a failed assertions includes the message, file and line number as well
+				as the function name. 
+				</para>
+				<para>
+				The macro allows printf-style formatting to construct the message. Consult the documentation for printf for
+				a list of format specifiers.
+				</para>
+				<para>
+				In contrast to CFIX_ASSERT, not the expression itself but the message provided as a parameter will be displayed in the 
+				failure log.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+void CFIX_ASSERT_MESSAGE( 
+	__in BOOL Expression, 
+	__in PCTSTR Format, 
+	... 
+	);
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<para>
+				If UNICODE has been defined, string parameters are expected to by of type PCWSTR. Otherwise,
+				ANSI is assumed and string parameters are expected to by of type PCSTR. 
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				In kernel mode, ANSI strings are not supported. Strings are always assumed to by of type PCWSTR.
+				Moreover, formatting can only take place at IRQL &lt;= APC_LEVEL. At higher IRQL, formatting is
+				skipped and the Format string is used as-is.
+				</para>
+				<para>
+				As variadic macro arguments have not been supported until cl 14.00, this macro is not available 
+				if downlevel compilers are used.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+			
+				<programlisting>
+CFIX_ASSERT_MESSAGE( a == 1, L"a should be one, but it is %d", a );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiDefaultRequirements12;
+		</section>
+		
+		<section id="CFIX_ASSERT_EQUALS_DWORD">
+			<title>CFIX_ASSERT_EQUALS_DWORD, CFIX_ASSERT_EQUALS_ULONG</title>
+			<indexterm><primary>CFIX_ASSERT_EQUALS_DWORD</primary></indexterm>
+			<indexterm><primary>CFIX_ASSERT_EQUALS_ULONG</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIX_ASSERT_EQUALS_DWORD is similar to CFIX_ASSERT, but has the additional feature of reporting expected and actual
+				value of the expressions compared. CFIX_ASSERT_EQUALS_ULONG is a synonym for CFIX_ASSERT_EQUALS_DWORD.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				
+				<programlisting>
+void CFIX_ASSERT_EQUALS_DWORD( __in DWORD Expected, __in DWORD Actual );
+void CFIX_ASSERT_EQUALS_ULONG( __in ULONG Expected, __in ULONG Actual );
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+				<programlisting>
+CFIX_ASSERT_EQUALS_DWORD( ERROR_FILE_NOT_FOUND, GetLastError() );
+CFIX_ASSERT_EQUALS_ULONG( 42, foo );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiDefaultRequirements10;
+		</section>
+
+		<section id="CFIX_INCONCLUSIVE">
+			<title>CFIX_INCONCLUSIVE</title>
+			<indexterm><primary>CFIX_INCONCLUSIVE</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Whenever a test case cannot be executed properly and is thus inconclusive, use CFIX_INCONCLUSIVE to report
+				the reason of inconclusiveness. The test case will be immediately aborted. 
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				
+				<programlisting>
+void CFIX_INCONCLUSIVE( __in PCTSTR Message );
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<para>
+				If UNICODE has been defined, string parameters are expected to by of type PCWSTR. Otherwise,
+				ANSI is assumed and string parameters are expected to by of type PCSTR. 
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				In kernel mode, ANSI strings are not supported. Strings are always assumed to by of type PCWSTR.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+				
+				<programlisting>
+CFIX_INCONCLUSIVE( L"This test case cannot be run on WOW64" );
+CFIX_INCONCLUSIVE( L"This test case requires admin privileges" );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiDefaultRequirements10;
+		</section>
+		
+		<section id="CFIX_LOG">
+			<title>CFIX_LOG</title>
+			<indexterm><primary>CFIX_LOG</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Use CFIX_LOG to log arbitrary information. The macro allows printf-style formatting and variable argument lists.  
+				Consult the documentation for printf for a list of format specifiers.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				
+				<programlisting>
+void CFIX_LOG( __in PCTSTR Format, ... );
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<para>
+				If UNICODE has been defined, string parameters are expected to by of type PCWSTR. Otherwise,
+				ANSI is assumed and string parameters are expected to by of type PCSTR. 
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				In kernel mode, ANSI strings are not supported. Strings are always assumed to by of type PCWSTR.
+				Moreover, formatting can only take place at IRQL &lt;= APC_LEVEL. At higher IRQL, formatting 
+				is skipped and the Format string is used as-is.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+				
+				<programlisting>
+CFIX_LOG( L"A simple log message" );
+CFIX_LOG( L"Value is %x, Last error was: %d", foo, GetLastError() );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiDefaultRequirements10;
+		</section>
+		
+		<section id="CfixPeGetValue">
+			<title>CfixPeGetValue</title>
+			<indexterm><primary>CfixPeGetValue</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CfixPeGetValue retrieves the user-defined value associated with the currently executing fixture on the
+				current thread. 
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				
+				<programlisting>
+PVOID CfixPeGetValue(
+	__in ULONG Reserved
+	);
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+				[in] <emphasis>Reserved</emphasis>: must be 0.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Return Value</title>
+				<para>
+				The user-specified value. If no value has been specified yet, NULL is returned.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				With CfixPeGetValue and <link linkend='CfixPeSetValue'>CfixPeSetValue</link>, access is provided
+				to a TLS slot that is maintained for the duration of the execution of a fixture. In order to limit the
+				usage of global or static variables, authors of test suites are encouraged to store fixture-specific
+				data using these functions.
+				</para>
+				<para>
+				Note, however, that such fixture-specific data should be maintained and accessed by <link linkend="CFIX_FIXTURE_BEFORE">before-</link>,
+				<link linkend="CFIX_FIXTURE_AFTER">after</link> and <link linkend="CFIX_FIXTURE_ENTRY">test</link>-routines only.
+				<link linkend="CFIX_FIXTURE_SETUP">Setup</link>- and <link linkend="CFIX_FIXTURE_TEARDOWN">teardown</link>-routines, 
+				in contrast, should only be used to maintain global and static variables. 
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+				
+				<programlisting>
+//
+// Structure containing all fixture-specific data.
+//
+typedef struct _FIXTURE_DATA
+{
+  HANDLE File;
+  ...
+} FIXTURE_DATA, *PFIXTURE_DATA;
+
+static void Before()
+{
+  PFIXTURE_DATA FixtureData = 
+    ( PFIXTURE_DATA ) malloc( sizeof( FIXTURE_DATA ) );
+  CFIX_ASSERT( FixtureData != NULL );
+  
+  FixtureData->File = CreateFile( ... );
+  
+  CfixPeSetValue( 0, FixtureData );
+}
+
+static void Test()
+{
+  PFIXTURE_DATA FixtureData = ( PFIXTURE_DATA ) CfixPeGetValue( 0 );
+  ...
+  
+  //
+  // Use members of FixtureData.
+  //
+}
+
+static void After()
+{
+  PFIXTURE_DATA FixtureData = ( PFIXTURE_DATA ) CfixPeGetValue( 0 );
+  
+  CloseHandle( FixtureData->File );
+  free( FixtureData );
+  
+  //
+  // This is optional:
+  //
+  CfixPeSetValue( 0, NULL );
+}
+
+
+CFIX_BEGIN_FIXTURE( Example )
+  CFIX_FIXTURE_BEFORE( Before )
+  CFIX_FIXTURE_AFTER( After )
+  CFIX_FIXTURE_ENTRY( Teardown )
+CFIX_END_FIXTURE()
+				</programlisting>
+			</simplesect>
+			
+			&TestApiDefaultRequirements12;
+		</section>
+		
+		<section id="CfixPeSetValue">
+			<title>CfixPeSetValue</title>
+			<indexterm><primary>CfixPeSetValue</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CfixPeSetValue sets the user-defined value associated with the currently executing fixture on the
+				current thread. 
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				
+				<programlisting>
+VOID CfixPeSetValue(
+	__in ULONG Reserved,
+	__in PVOID Value
+	);
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+				[in] <emphasis>Reserved</emphasis>: must be 0.
+				</para>
+				<para>
+				[in] <emphasis>Value</emphasis>: the value to be set.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				See <link linkend='CfixPeGetValue'>CfixPeGetValue</link> for a discussion and example code.
+				</para>
+			</simplesect>
+			
+			&TestApiDefaultRequirements12;
+		</section>
+		
+		<section id="CfixCreateThread">
+			<title>CfixCreateThread</title>
+			<indexterm><primary>CfixCreateThread</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Use CfixCreateThread whenever you need to create a thread from within a test case and this
+				thread may use any of the APIs in this section. CfixCreateThread is a wrapper for
+				CreateThread with the added functionality that the thread is registered so that
+				cfix can properly relate any asserions etc. to the current test case.
+				</para>
+				<para>
+				See MSDN for discussion of parameters and usage description.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread(
+	__in PSECURITY_ATTRIBUTES ThreadAttributes,
+	__in SIZE_T StackSize,
+	__in PTHREAD_START_ROUTINE StartAddress,
+	__in_opt PVOID Parameter,
+	__in DWORD CreationFlags,
+	__out_opt PDWORD ThreadId
+	);
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Requirements</title>
+		
+				<table frame="all" tocentry="0">
+					<tgroup cols="3" align="left" colsep="1" rowsep="1">
+						<thead>
+							<row>
+							  <entry></entry>
+							  <entry>User Mode</entry>
+							  <entry>Kernel Mode</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row>
+							  <entry>Available since</entry>
+							  <entry>1.0</entry>
+							  <entry>Not supported</entry>
+							</row>
+							<row>
+							  <entry>Header</entry>
+							  <entry>Declared in cfix.h</entry>
+							  <entry>Not supported</entry>
+							</row>
+							<row>
+							  <entry>Library</entry>
+							  <entry>Link to cfix.lib</entry>
+							  <entry>Not supported</entry>
+							</row>
+							<row>
+							  <entry>DLL</entry>
+							  <entry>cfix.dll</entry>
+							  <entry>N/A</entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</table>
+			</simplesect>
+		</section>
+</section>
+	

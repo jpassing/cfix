@@ -1,0 +1,36 @@
+#
+# setup VisualC++ source browsing
+#
+#BROWSER_INFO=1
+BSCMAKE_FLAGS=$(BSCMAKE_FLAGS) /n
+
+MSC_WARNING_LEVEL=/W4 /Wp64
+
+INCLUDES=..\..\include
+
+!if "$(TARGET_DIRECTORY)"=="i386"
+USER_C_FLAGS=/D_UNICODE /DUNICODE /analyze /EHa
+LINKER_FLAGS=/nxcompat /dynamicbase /SafeSEH
+!else
+USER_C_FLAGS=/D_UNICODE /DUNICODE /EHa
+LINKER_FLAGS=/nxcompat /dynamicbase
+!endif
+
+!if "$(DDKBUILDENV)"=="chk"
+DEBUG_CRTS=1
+C_DEFINES = $(C_DEFINES) /D_DEBUG
+!endif
+
+USE_LIBCMT=1
+USE_STL=1
+
+TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
+		   $(MAKEDIR)\..\..\bin\$(DDKBUILDENV)\$(TARGET_DIRECTORY)\cfix.lib
+
+TARGETNAME=testmanu
+TARGETPATH=..\..\bin\$(DDKBUILDENV)
+TARGETTYPE=DYNLINK
+
+SOURCES=\
+	manual.c
+	
