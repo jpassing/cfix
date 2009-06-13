@@ -170,6 +170,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\cfix\thread.c"
+						>
+					</File>
+					<File
 						RelativePath=".\cfix\tls.c"
 						>
 					</File>
