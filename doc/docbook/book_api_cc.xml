@@ -1,0 +1,705 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="TestCcAPI">
+		<title>API for use in test cases (C++ only)</title>
+		<para>
+		Test-, before-, after-, setup- and teardown routines may use the following API.
+		</para>
+
+		<section id="CFIXCC_ASSERT_EQUALS">
+			<title>CFIXCC_ASSERT_EQUALS</title>
+			<indexterm><primary>CFIXCC_ASSERT_EQUALS</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIXCC_ASSERT_EQUALS allows typesafe comparison of values. Failed comparisons are treated as a failure, i.e.
+				in the same manner as a failed <link linkend="CFIX_ASSERT">CFIX_ASSERT</link>. The benefit over using 
+				<link linkend="CFIX_ASSERT">CFIX_ASSERT</link>( Expected == Actual ) is that the expected and actual value
+				will be visible in the failure report.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+void CFIXCC_ASSERT_EQUALS( 
+	__in T Expected, 
+	__in T Actual 
+	);
+				</programlisting>
+				<para>
+					<emphasis>T</emphasis> can be any type, but the types of both values must be compatible. See
+					discussion below.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+				[in] <emphasis>Expected</emphasis>: The expected value.
+				</para>
+				<para>
+				[in] <emphasis>Actual</emphasis>: The actual value that is to be checked.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				The way the comparison is conducted depends on the type of the two values.
+				<itemizedlist>
+					<listitem>Primitive integer objects are compared using the builtin == operator.</listitem>
+					<listitem>Comparisons of float and double values do not check for exact equality but allow a deviation of
+						10 units in the last place (ULP). The default value of 10 ULP may be overridden by defining 
+						CFIXCC_FLOAT_COMPARE_MAX_ULPS with a custom ULP-value.
+					</listitem>
+					<listitem>Pointers are checked for address equality.
+						An exception to this are C strings (char*, const char*, wchar_t*, const wchar_t*). Such strings will be
+						wrapped by std::string and std::wstring objects respectively, and operator== of std::string or
+						std::wstring will be invoked. That is, a value-comparison is conducted.
+					</listitem>
+					<listitem>
+						For non-primitive, non-pointer types, i.e. objects of a custom class, operator== of the respective
+						class is invoked. 
+					</listitem>
+				</itemizedlist>
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+			
+				<programlisting>
+class SomeClass
+{
+private:
+	int value;
+public:
+	bool operator == ( const SomeClass&amp; other ) const
+	{
+		return this->value == other.value;
+	}
+
+	...
+};
+...
+
+//
+// These tests will succeed:
+//
+CFIXCC_ASSERT_EQUALS( SomeClass( 1 ), SomeClass( 1 ) );
+CFIXCC_ASSERT_EQUALS( L"test", L"test" );
+CFIXCC_ASSERT_EQUALS( 1.9999999f, 2.0f );	// See remarks on ULPs.
+
+//
+// These will fail:
+//
+SomeClass* a = new SomeClass( 1 );
+SomeClass* b = new SomeClass( 1 );
+
+CFIXCC_ASSERT_EQUALS( a, b );	// Values equal, but pointers are not.
+CFIXCC_ASSERT_EQUALS( L"test", L"" );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiCcDefaultRequirements12;
+		</section>
+		
+		<section id="CFIXCC_ASSERT_EQUALS_MESSAGE">
+			<title>CFIXCC_ASSERT_EQUALS_MESSAGE</title>
+			<indexterm><primary>CFIXCC_ASSERT_EQUALS_MESSAGE</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIXCC_ASSERT_EQUALS_MESSAGE allows typesafe comparison of values. Failed comparisons are treated as a failure, i.e.
+				in the same manner as a failed <link linkend="CFIX_ASSERT">CFIX_ASSERT</link>. The benefit over using 
+				<link linkend="CFIX_ASSERT">CFIX_ASSERT</link>( Expected == Actual ) is that the expected and actual value
+				will be visible in the failure report.
+				</para>
+				<para>
+				Unlike <link linkend="CFIXCC_ASSERT_EQUALS">CFIXCC_ASSERT_EQUALS</link>, CFIXCC_ASSERT_EQUALS_MESSAGE additionally
+				allows a user defined message to be specified. This message will be contained in the failure report.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+void CFIXCC_ASSERT_EQUALS_MESSAGE( 
+	__in T Expected, 
+	__in T Actual, 
+	__in PCWSTR Message, 
+	... 
+	);
+	
+void CFIXCC_ASSERT_EQUALS_MESSAGE( 
+	__in T Expected, 
+	__in T Actual, 
+	__in PCSTR Message, 
+	... 
+	);
+				</programlisting>
+				<para>
+					<emphasis>T</emphasis> can be any type, but the types of both values must be compatible. See
+					discussion below.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+				[in] <emphasis>Expected</emphasis>: The expected value.
+				</para>
+				<para>
+				[in] <emphasis>Actual</emphasis>: The actual value that is to be checked.
+				</para>
+				<para>
+				[in] <emphasis>Message</emphasis>: Message to be included in a failure report. This parameter allows
+				printf-style formatters to be used. The routine is overloaded and allows <emphasis>Message</emphasis> to
+				be either a unicode or an ANSI string.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				For a discussion on how the comparisons is conducted, see <link linkend="CFIXCC_ASSERT_EQUALS">CFIXCC_ASSERT_EQUALS</link>.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+			
+				<programlisting>
+CFIXCC_ASSERT_EQUALS_MESSAGE( 
+	2.0f, 
+	FloatValue, 
+	"Comparing %f against 2.0", FloatValue );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiCcDefaultRequirements12;
+			
+			<para>
+			&VariadicMacroRemark;
+			
+			</para>
+		</section>
+		
+		
+		
+		
+		
+		
+		
+		
+		<section id="CFIXCC_ASSERT_NOT_EQUALS">
+			<title>CFIXCC_ASSERT_NOT_EQUALS</title>
+			<indexterm><primary>CFIXCC_ASSERT_NOT_EQUALS</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIXCC_ASSERT_NOT_EQUALS allows typesafe comparison of values. Failed comparisons are treated as a failure, i.e.
+				in the same manner as a failed <link linkend="CFIX_ASSERT">CFIX_ASSERT</link>. The benefit over using 
+				<link linkend="CFIX_ASSERT">CFIX_ASSERT</link>( Expected != Actual ) is that the expected and actual value
+				will be visible in the failure report.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+void CFIXCC_ASSERT_NOT_EQUALS( 
+	__in T Expected, 
+	__in T Actual 
+	);
+				</programlisting>
+				<para>
+					<emphasis>T</emphasis> can be any type, but the types of both values must be compatible. See
+					discussion below.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+				[in] <emphasis>Expected</emphasis>: The expected value.
+				</para>
+				<para>
+				[in] <emphasis>Actual</emphasis>: The actual value that is to be checked.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				The way the comparison is conducted depends on the type of the two values.
+				<itemizedlist>
+					<listitem>Primitive integer objects are compared using the builtin != operator.</listitem>
+					<listitem>Pointers are checked for address inequality.
+						An exception to this are C strings (char*, const char*, wchar_t*, const wchar_t*). Such strings will be
+						wrapped by std::string and std::wstring objects respectively, and operator!= of std::string or
+						std::wstring will be invoked. That is, a value-comparison is conducted.
+					</listitem>
+					<listitem>
+						For non-primitive, non-pointer types, i.e. objects of a custom class, operator!= of the respective
+						class is invoked. 
+					</listitem>
+				</itemizedlist>
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+			
+				<programlisting>
+CFIXCC_ASSERT_NOT_EQUALS( 1, 2 );
+CFIXCC_ASSERT_NOT_EQUALS( L"test", L"" );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiCcDefaultRequirements12;
+		</section>
+		
+		<section id="CFIXCC_ASSERT_NOT_EQUALS_MESSAGE">
+			<title>CFIXCC_ASSERT_NOT_EQUALS_MESSAGE</title>
+			<indexterm><primary>CFIXCC_ASSERT_NOT_EQUALS_MESSAGE</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIXCC_ASSERT_NOT_EQUALS_MESSAGE allows typesafe comparison of values. Failed comparisons are treated as a failure, i.e.
+				in the same manner as a failed <link linkend="CFIX_ASSERT">CFIX_ASSERT</link>. The benefit over using 
+				<link linkend="CFIX_ASSERT">CFIX_ASSERT</link>( Expected != Actual ) is that the expected and actual value
+				will be visible in the failure report.
+				</para>
+				<para>
+				Unlike <link linkend="CFIXCC_ASSERT_NOT_EQUALS">CFIXCC_ASSERT_NOT_EQUALS</link>, CFIXCC_ASSERT_NOT_EQUALS_MESSAGE additionally
+				allows a user defined message to be specified. This message will be contained in the failure report.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+void CFIXCC_ASSERT_NOT_EQUALS_MESSAGE( 
+	__in T Expected, 
+	__in T Actual, 
+	__in PCWSTR Message, 
+	... 
+	);
+	
+void CFIXCC_ASSERT_NOT_EQUALS_MESSAGE( 
+	__in T Expected, 
+	__in T Actual, 
+	__in PCSTR Message, 
+	... 
+	);
+				</programlisting>
+				<para>
+					<emphasis>T</emphasis> can be any type, but the types of both values must be compatible. See
+					discussion below.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+				[in] <emphasis>Expected</emphasis>: The expected value.
+				</para>
+				<para>
+				[in] <emphasis>Actual</emphasis>: The actual value that is to be checked.
+				</para>
+				<para>
+				[in] <emphasis>Message</emphasis>: Message to be included in a failure report. This parameter allows
+				printf-style formatters to be used. The routine is overloaded and allows <emphasis>Message</emphasis> to
+				be either a unicode or an ANSI string.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				For a discussion on how the comparisons is conducted, see <link linkend="CFIXCC_ASSERT_NOT_EQUALS">CFIXCC_ASSERT_NOT_EQUALS</link>.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+			
+				<programlisting>
+CFIXCC_ASSERT_NOT_EQUALS_MESSAGE( 
+	2.0f, 
+	FloatValue, 
+	"Checking that %f is not equal to 2.0", FloatValue );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiCcDefaultRequirements12;
+			
+			<para>
+			&VariadicMacroRemark;
+			
+			</para>
+		</section>
+		
+		
+		
+		
+		
+		
+		
+		<section id="CFIXCC_ASSERT_LESS">
+			<title>CFIXCC_ASSERT_LESS[_OR_EQUAL]</title>
+			<indexterm><primary>CFIXCC_ASSERT_LESS[_OR_EQUAL]</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIXCC_ASSERT_LESS and CFIXCC_ASSERT_LESS_OR_EQUAL allow typesafe comparison of values. Failed comparisons are treated as a failure, i.e.
+				in the same manner as a failed <link linkend="CFIX_ASSERT">CFIX_ASSERT</link>. The benefit over using 
+				<link linkend="CFIX_ASSERT">CFIX_ASSERT</link>( Expected &lt; Actual )/<link linkend="CFIX_ASSERT">CFIX_ASSERT</link>( Expected &lt;= Actual ) 
+				is that the expected and actual value will be visible in the failure report.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+void CFIXCC_ASSERT_LESS( 
+	__in T Expected, 
+	__in T Actual 
+	);
+	
+void CFIXCC_ASSERT_LESS_OR_EQUAL( 
+	__in T Expected, 
+	__in T Actual 
+	);
+				</programlisting>
+				<para>
+					<emphasis>T</emphasis> can be any type, but the types of both values must be compatible. See
+					discussion below.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+				[in] <emphasis>Expected</emphasis>: The expected value.
+				</para>
+				<para>
+				[in] <emphasis>Actual</emphasis>: The actual value that is to be checked.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				The way the comparison is conducted depends on the type of the two values.
+				<itemizedlist>
+					<listitem>Primitive integer objects are compared using the builtin &lt; [&lt;=] operator.</listitem>
+					<listitem>Pointers are checked for address inequality.
+						An exception to this are C strings (char*, const char*, wchar_t*, const wchar_t*). Such strings will be
+						wrapped by std::string and std::wstring objects respectively, and operator&lt; [operator&lt;=] of std::string or
+						std::wstring will be invoked. That is, a value-comparison is conducted.
+					</listitem>
+					<listitem>
+						For non-primitive, non-pointer types, i.e. objects of a custom class, operator&lt; [operator&lt;=]  of the respective
+						class is invoked. 
+					</listitem>
+				</itemizedlist>
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+			
+				<programlisting>
+CFIXCC_ASSERT_LESS( 1, 2 );
+CFIXCC_ASSERT_LESS( L"a", L"b" );
+CFIXCC_ASSERT_LESS_OR_EQUAL( -1, 0 );
+CFIXCC_ASSERT_LESS_OR_EQUAL( -1, -1 );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiCcDefaultRequirements12;
+		</section>
+		
+		<section id="CFIXCC_ASSERT_LESS_MESSAGE">
+			<title>CFIXCC_ASSERT_LESS[_OR_EQUAL]_MESSAGE</title>
+			<indexterm><primary>CFIXCC_ASSERT_LESS[_OR_EQUAL]_MESSAGE</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIXCC_ASSERT_LESS_MESSAGE and CFIXCC_ASSERT_LESS_OR_EQUAL_MESSAGE allow typesafe comparison of values. Failed comparisons are treated as a failure, i.e.
+				in the same manner as a failed <link linkend="CFIX_ASSERT">CFIX_ASSERT</link>. The benefit over using 
+				<link linkend="CFIX_ASSERT">CFIX_ASSERT</link>( Expected &lt; Actual )/<link linkend="CFIX_ASSERT">CFIX_ASSERT</link>( Expected &lt;= Actual ) 
+				is that the expected and actual value will be visible in the failure report.
+				</para>
+				<para>
+				Unlike <link linkend="CFIXCC_ASSERT_LESS">CFIXCC_ASSERT_LESS</link>, CFIXCC_ASSERT_LESS_MESSAGE and CFIXCC_ASSERT_LESS_OR_EQUAL_MESSAGE additionally
+				allows a user defined message to be specified. This message will be contained in the failure report.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+void CFIXCC_ASSERT_LESS_MESSAGE( 
+	__in T Expected, 
+	__in T Actual, 
+	__in PCWSTR Message, 
+	... 
+	);
+	
+void CFIXCC_ASSERT_LESS_MESSAGE( 
+	__in T Expected, 
+	__in T Actual, 
+	__in PCSTR Message, 
+	... 
+	);
+	
+void CFIXCC_ASSERT_LESS_OR_EQUAL_MESSAGE( 
+	__in T Expected, 
+	__in T Actual, 
+	__in PCWSTR Message, 
+	... 
+	);
+	
+void CFIXCC_ASSERT_LESS_OR_EQUAL_MESSAGE( 
+	__in T Expected, 
+	__in T Actual, 
+	__in PCSTR Message, 
+	... 
+	);
+				</programlisting>
+				<para>
+					<emphasis>T</emphasis> can be any type, but the types of both values must be compatible. See
+					discussion below.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+				[in] <emphasis>Expected</emphasis>: The expected value.
+				</para>
+				<para>
+				[in] <emphasis>Actual</emphasis>: The actual value that is to be checked.
+				</para>
+				<para>
+				[in] <emphasis>Message</emphasis>: Message to be included in a failure report. This parameter allows
+				printf-style formatters to be used. The routine is overloaded and allows <emphasis>Message</emphasis> to
+				be either a unicode or an ANSI string.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				For a discussion on how the comparisons is conducted, see <link linkend="CFIXCC_ASSERT_LESS">CFIXCC_ASSERT_LESS</link>.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+			
+				<programlisting>
+CFIXCC_ASSERT_LESS_OR_EQUAL_MESSAGE( 
+	2.0f, 
+	FloatValue, 
+	"Checking that %f is smaller than or equal to 2.0", FloatValue );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiCcDefaultRequirements12;
+			
+			<para>
+			&VariadicMacroRemark;
+			
+			</para>
+		</section>
+		
+		
+		
+		
+		
+		
+		
+		
+		<section id="CFIXCC_ASSERT_GREATER">
+			<title>CFIXCC_ASSERT_GREATER[_OR_EQUAL]</title>
+			<indexterm><primary>CFIXCC_ASSERT_GREATER[_OR_EQUAL]</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIXCC_ASSERT_GREATER and CFIXCC_ASSERT_GREATER_OR_EQUAL allow typesafe comparison of values. Failed comparisons are treated as a failure, i.e.
+				in the same manner as a failed <link linkend="CFIX_ASSERT">CFIX_ASSERT</link>. The benefit over using 
+				<link linkend="CFIX_ASSERT">CFIX_ASSERT</link>( Expected &gt; Actual )/<link linkend="CFIX_ASSERT">CFIX_ASSERT</link>( Expected &gt;= Actual ) 
+				is that the expected and actual value will be visible in the failure report.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+void CFIXCC_ASSERT_GREATER( 
+	__in T Expected, 
+	__in T Actual 
+	);
+	
+void CFIXCC_ASSERT_GREATER_OR_EQUAL( 
+	__in T Expected, 
+	__in T Actual 
+	);
+				</programlisting>
+				<para>
+					<emphasis>T</emphasis> can be any type, but the types of both values must be compatible. See
+					discussion below.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+				[in] <emphasis>Expected</emphasis>: The expected value.
+				</para>
+				<para>
+				[in] <emphasis>Actual</emphasis>: The actual value that is to be checked.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				The way the comparison is conducted depends on the type of the two values.
+				<itemizedlist>
+					<listitem>Primitive integer objects are compared using the builtin &gt; [&gt;=] operator.</listitem>
+					<listitem>Pointers are checked for address inequality.
+						An exception to this are C strings (char*, const char*, wchar_t*, const wchar_t*). Such strings will be
+						wrapped by std::string and std::wstring objects respectively, and operator&gt; [operator&gt;=] of std::string or
+						std::wstring will be invoked. That is, a value-comparison is conducted.
+					</listitem>
+					<listitem>
+						For non-primitive, non-pointer types, i.e. objects of a custom class, operator&gt; [operator&gt;=]  of the respective
+						class is invoked. 
+					</listitem>
+				</itemizedlist>
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+			
+				<programlisting>
+CFIXCC_ASSERT_GREATER( 3, 2 );
+CFIXCC_ASSERT_GREATER( L"c", L"b" );
+CFIXCC_ASSERT_GREATER_OR_EQUAL( 1, -1 );
+CFIXCC_ASSERT_GREATER_OR_EQUAL( -1, -1 );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiCcDefaultRequirements12;
+		</section>
+		
+		<section id="CFIXCC_ASSERT_GREATER_MESSAGE">
+			<title>CFIXCC_ASSERT_GREATER[_OR_EQUAL]_MESSAGE</title>
+			<indexterm><primary>CFIXCC_ASSERT_GREATER[_OR_EQUAL]_MESSAGE</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIXCC_ASSERT_GREATER_MESSAGE and CFIXCC_ASSERT_GREATER_OR_EQUAL_MESSAGE allow typesafe comparison of values. Failed comparisons are treated as a failure, i.e.
+				in the same manner as a failed <link linkend="CFIX_ASSERT">CFIX_ASSERT</link>. The benefit over using 
+				<link linkend="CFIX_ASSERT">CFIX_ASSERT</link>( Expected &gt; Actual )/<link linkend="CFIX_ASSERT">CFIX_ASSERT</link>( Expected &gt;= Actual ) 
+				is that the expected and actual value will be visible in the failure report.
+				</para>
+				<para>
+				Unlike <link linkend="CFIXCC_ASSERT_GREATER">CFIXCC_ASSERT_GREATER</link>, CFIXCC_ASSERT_GREATER_MESSAGE and CFIXCC_ASSERT_GREATER_OR_EQUAL_MESSAGE additionally
+				allows a user defined message to be specified. This message will be contained in the failure report.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+void CFIXCC_ASSERT_GREATER_MESSAGE( 
+	__in T Expected, 
+	__in T Actual, 
+	__in PCWSTR Message, 
+	... 
+	);
+	
+void CFIXCC_ASSERT_GREATER_MESSAGE( 
+	__in T Expected, 
+	__in T Actual, 
+	__in PCSTR Message, 
+	... 
+	);
+	
+void CFIXCC_ASSERT_GREATER_OR_EQUAL_MESSAGE( 
+	__in T Expected, 
+	__in T Actual, 
+	__in PCWSTR Message, 
+	... 
+	);
+	
+void CFIXCC_ASSERT_GREATER_OR_EQUAL_MESSAGE( 
+	__in T Expected, 
+	__in T Actual, 
+	__in PCSTR Message, 
+	... 
+	);
+				</programlisting>
+				<para>
+					<emphasis>T</emphasis> can be any type, but the types of both values must be compatible. See
+					discussion below.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+				[in] <emphasis>Expected</emphasis>: The expected value.
+				</para>
+				<para>
+				[in] <emphasis>Actual</emphasis>: The actual value that is to be checked.
+				</para>
+				<para>
+				[in] <emphasis>Message</emphasis>: Message to be included in a failure report. This parameter allows
+				printf-style formatters to be used. The routine is overloaded and allows <emphasis>Message</emphasis> to
+				be either a unicode or an ANSI string.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				For a discussion on how the comparisons is conducted, see <link linkend="CFIXCC_ASSERT_GREATER">CFIXCC_ASSERT_GREATER</link>.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+			
+				<programlisting>
+CFIXCC_ASSERT_GREATER_OR_EQUAL_MESSAGE( 
+	2.0f, 
+	FloatValue, 
+	"Checking that %f is greater than or equal to 2.0", FloatValue );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiCcDefaultRequirements12;
+			
+			<para>
+			&VariadicMacroRemark;
+			
+			</para>
+		</section>
+</section>
+	

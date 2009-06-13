@@ -1,0 +1,227 @@
+#head	
+{ 
+	background-color: #0C8E3E;
+	width: 800px;
+	height: 130px;
+	margin: 0 auto;
+}
+#subhead	
+{ 
+	background-image: url(headsep.png);
+	width: 800px;
+	height: 10px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 0px;
+	margin-bottom: 10px;
+}
+#main {
+	position: relative;
+	width: 800px;
+	margin: 0 auto;
+	text-align: left;
+}
+#main br {
+	clear: both;
+}
+#content	
+{ 
+	background-color: white;
+	position:relative;
+	margin: 0 auto;
+	width: 580px;
+	padding: 10px;
+	float: left;
+}			
+#menu
+{ 
+	width: 190px;
+	float: left;
+	margin-left: 10px;
+}			
+#logo
+{
+	position:relative;
+}
+#submenu
+{
+	background-color: #FFFFFF;
+	margin-bottom: 10px;
+}
+
+#submenuheader
+{
+	background-color: #3B5400;
+	color: white;
+	font-family: 'Trebuchet MS', Verdana, Helvetica;
+	font-weight: bold;
+	padding-left: 10px;
+	height: 24px;
+	line-height: 24px;
+}
+#submenu ul
+{
+	list-style: none;
+	margin: 0;
+	padding: 5px 0px 5px 10px;
+}
+#submenu a
+{
+	font-family: 'Trebuchet MS', Verdana, Helvetica;
+	font-size:10pt;
+	line-height: 18pt;
+	color: #2D5D79;
+}
+		
+
+
+html, body
+{ 
+	background-color: Gainsboro;
+	margin: 20px;
+	
+	font-family: 'Trebuchet MS', verdana, helvetica;
+	font-size: 10pt;
+	
+	text-align: center;
+}
+
+h1, h2, h3, h4 {
+	font-family: 'Trebuchet MS', Verdana, Helvetica;
+	font-weight: bold;
+}
+h1 
+{ 
+	font-size: 16pt;
+}
+h2 
+{ 
+	font-size: 14pt;
+}
+h3 
+{ 
+	font-size: 12pt;
+}
+h4 
+{ 
+	font-size: 10pt;
+}
+a
+{
+	color: #2D5D79;
+	text-decoration: none;
+}
+a:hover
+{
+	color: #2D5D79;
+	text-decoration: underline;
+}
+
+p
+{
+	font-family: 'Trebuchet MS', Verdana, Helvetica;
+	font-size: 10pt;
+	line-height: 16pt;
+	margin-left: 20px;
+}
+.toc b	/* Table of Contents */
+{
+	margin-left: -20px;
+}
+.toc 
+{
+	margin-left: 20px;
+}
+
+#cfixheader
+{
+	background-color: #2D5D78;
+	color: white;
+	font-size: 10pt;
+	text-align: center;
+}
+#cfixfooter
+{
+	color: gray;
+	font-size: 8pt;
+	text-align: center;
+}
+
+.heading
+{
+	font-size: 10pt;
+	color: gray;
+	line-height: 7px;
+}
+hr {
+	border: none 0; 
+	border-top: 1px dashed #2D5D78;
+	height: 1px;
+}
+.figure
+{
+	text-align: center;
+}
+td 
+{
+	font-size: 10pt;
+}
+dd 
+{
+	margin-left: 20px;
+}
+.programlisting
+{
+	font-size: 9pt;
+	margin-left: 30px;
+	margin-right: 30px;
+	background-color: #f5f5f5;
+	padding: 5px;
+	border: 1px coral solid;
+	border-color: #2D5D78;
+	border-width: thin;
+}
+
+.footer
+{
+	margin-top: 50px;
+	font-family: 'Trebuchet MS', Verdana, Helvetica;
+	font-size: 8pt;
+	text-align: center;
+}
+
+
+.rss
+{
+	font-family: 'Trebuchet MS', Verdana, Helvetica;
+	font-weight: bold;
+	font-size: 10pt;
+}
+
+.rssfooter
+{
+	font-family: 'Trebuchet MS', Verdana, Helvetica;
+	text-align: center;
+	font-style: italic;
+	font-size: 8pt;
+	text-align: right;
+}
+
+.table table 
+{
+	border-collapse: collapse;
+	margin-left: 20px;
+}
+
+.table th 
+{
+	padding: 0 0.5em;
+	text-align: left;
+	font-size: 10pt;
+}
+
+.table td 
+{
+	border-bottom: 1px solid #CCC;
+	padding: 4 0.5em;
+}

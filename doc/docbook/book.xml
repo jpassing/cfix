@@ -1,0 +1,1645 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+	<!ENTITY TestApiDefaultRequirements10 SYSTEM "book_api_req.xml">
+	<!ENTITY TestApiDefaultRequirements12 SYSTEM "book_api_req12.xml">
+	<!ENTITY TestApiCcDefaultRequirements12 SYSTEM "book_api_cc_req12.xml">
+	<!ENTITY TestDefDefaultRequirements SYSTEM "book_testdef_req.xml">
+	<!ENTITY TestDefDefaultRequirements12 SYSTEM "book_testdef_req12.xml">
+
+	<!ENTITY ApiBase SYSTEM "book_api_base.xml">
+	<!ENTITY ApiBaseFixtureDef SYSTEM "book_api_base_fixturedef.xml">
+	<!ENTITY ApiCc SYSTEM "book_api_cc.xml">
+	<!ENTITY ApiCcFixtureDef SYSTEM "book_api_cc_fixturedef.xml">
+	<!ENTITY VariadicMacroRemark "
+		Note that due to the use of variadic macro arguments, at least cl 14.00 (Visual Studio 2005) is required to 
+		use the formatting capabilities of this routine. For downlevel compilers, <emphasis>Message</emphasis> is 
+		treated as-is (i.e. without formatting) and the variadic argument list has to be empty.">
+			
+
+	
+]>
+<!--
+	TODO
+		- W2K as platform
+		- driver unsigned
+-->
+<book >
+  <title>cfix</title>
+
+  <bookinfo>
+    <releaseinfo>Release 1.1</releaseinfo>
+    <author>Johannes Passing</author>
+  </bookinfo>
+
+  <toc/>
+
+  <chapter id="Preface">
+	<title>Preface</title>
+	<section id="Legal">
+		<title>Legal notice</title>
+		<para>
+		Copyright of this document 2007-2008 Johannes Passing. All rights reserved.
+		</para>
+		<para>
+		Microsoft, Active Directory, ActiveMovie, ActiveX, BackOffice, ClearType, Developer Studio, Direct3D, Direct Animation, 
+		DirectDraw, DirectInput, DirectMusic, DirectPlay, DirectShow, DirectSound, DirectX, IntelliMouse, JScript, Microsoft Press, 
+		MSDN, MSN, MS-DOS, Natural, NetMeeting, NetShow, Sidewalk, Visual Basic, Visual C++, Visual C#, Visual FoxPro, Visual J++, 
+		Visual Studio, WebTV, Win32, Win32s, Windows, Windows NT, and Windows Server are either registered trademarks or trademarks 
+		of Microsoft Corporation in the United States and/or other countries.
+		</para>
+		<para>
+		Java is a trademark of Sun Microsystems.
+		</para>
+		<para>
+		Usage of this documentation is subject to the licensing terms of the GNU Lesser General Public License, version 3.0.
+		</para>
+	</section>
+   </chapter>
+   <chapter id="Background">
+	<title>Background</title>
+	<section id="BackgroundIntroduction">
+		<title>Introduction</title>
+		<para>
+		cfix is a framework for authoring and running xUnit-like testcases written in C or C++. The aim of the tool
+		is to provide a development experience very similar to frameworks such as JUnit or NUnit. Due to the nature of
+		C and C++, current unit testing	frameworks for C and C++ hardly reach the ease of use of JUnit or NUnit. In 
+		particular, it is noticable that significantly more code has to be written to implement a test suite. 
+		</para>
+		<para>
+		Languages like Java and the various .Net languages, as well as scripting languages, all provide reflection facilities.
+		Unit testing frameworks for these languages can therefore rely on reflective features in order to minimize the amount
+		of code required to define a test suite. Provided a library, the framework can find and identify test cases and is able to selectively run them.
+		</para>
+		<para>
+		Lacking similar reflective facilities, the route most unit testing frameworks for C and C++ have 
+		chosen is to oblige the developer to explicitly define test cases and fixtures. Taking CUnit as an example,
+		the developer has to make explictit function calls to define a test suite, add test cases to the suite and to 
+		finally run this suite. CppUnit simplifies this a bit, but still requires the developer to implement quite
+		some amount of initialization code. Another important drawback of this approach is the fact that no real
+		separation between test code and test runner is done. Often, even the choice whether to use a graphical or a console frontend for 
+		running test is tied to this initialization code.
+		</para>
+		<para>
+		Based on this observation, it is clearly desirable to minimize the amount of boilerplate code the developer 
+		has to write. Furthermore, a separation (in terms of artifacts, i.e. binaries) between the code to be tested
+		and the test runner application is crucial.
+		</para>
+	</section>
+	<section id="Portability">
+		<title>Portability</title>
+		<para>
+		Most current unit testing frameworks for C and C++ are portable. The same tools can be used to test code on a multitude of
+		platforms. Although a sound feature, several compromises have to be made to allow portability of both tools and test suites.
+		As such, forgoing non-portable operating system features contributes to the fact that these frameworks are significantly
+		less convenient to use than their managed counterparts NUnit or JUnit.
+		</para>
+		<para>
+		For a vast amount of projects, portability is not actually required - a significant amount of software developed 
+		today is targeted at a single platform only. Striving to provide a powerful, yet easy to use testing framework, the approach
+		chosen by cfix is thus to sacrifice portability in order to gain the option to fully exploit the services provided
+		by the Windows platform. These services at hand, cfix is thus able to provide the features expressed in the previous section -
+		minimizing the amount of code a developer has to write and providing a strict separation in terms of artifacts 
+		between test code and test runner.
+		</para>
+	</section>
+	<section id="Terms">
+		<title>Terms used</title>
+		<para>
+		The following terms are used throughout this documentation.
+		</para>
+		<section id="TermTestCase">
+			<title>Test Case</title>
+			<para>
+				A Test Case<indexterm><primary>Test Case</primary></indexterm> contains the actual testing code. It utilizes assertions etc. to report
+				success or failure of certain operations. A test case is implemented as a single routine.
+			</para>
+			<para>
+				This understanding corresponds to test methods (i.e. methods decorated with [Test]) in NUnit.
+			</para>
+		</section>
+		<section id="TermTestFixture">
+			<title>Test Fixture</title>
+			<para>
+				A Test Fixture<indexterm><primary>Test Fixture</primary></indexterm> is a collection of test cases, accompanied by a setup and teardown routine.
+			</para>
+			<para>
+				This understanding corresponds to test classes (i.e. classes decorated with [TestFixture]) in NUnit.
+			</para>
+		</section>
+		<section id="TermTestModule">
+			<title>Test Module</title>
+			<para>
+				All fixtures are compiled and linked into a single binary, which is a DLL file. This DLL file
+				is referred to as Test Module<indexterm><primary>Test Module</primary></indexterm>.
+			</para>
+		</section>
+		<section id="TermTestSuite">
+			<title>Test Suite</title>
+			<para>
+				A collection of one or more test modules is referred to as test suite.
+			</para>
+		</section>
+	</section>
+	<section id="Strategy">
+		<title>Tool strategy</title>
+		<para>
+		As indicated in the <link linkend="BackgroundIntroduction">Introduction</link>, cfix implements a separation between
+		test code, which is provided in form of a test module, and the test runner, which is provided by cfix. This
+		separation is similar to NUnit and JUnit, but differs significantly from the approach chosen by CUnit and CppUnit.
+		</para>
+		
+		<para>
+		All test cases and fixtures are compiled and linked into a single DLL, the test module. The test runner, named
+		cfix32.exe (or cfix64.exe for AMD64 platforms), can now be used to run all or a selection of test fixtures.
+		The way cfix implements this introspection of a test module is to rely on the features of the PE file format
+		used by Windows. By inspecting the export directory of the PE file, all fixtures defined in a test module can
+		be identified. Depending on user input, cfix can then selectively run these fixtures. This approach is similar to WinUnit,
+		although the exact implementation differs.
+		</para>
+		<figure>
+			<title>User mode testing: basic architecture</title>
+			<graphic fileref="cfix-arch-user.png">
+			</graphic>
+		</figure>
+		
+		<para>
+		For kernel mode code, the architecture looks slightly different. The tests are compiled into a driver rather than into a DLL. 
+		The driver is verly lightweight and, besides the tests, contains only very little cfix-provided code 
+		(basically, just a DriverEntry implementation).
+		</para>
+		
+		<para>
+		When cfix32 or cfix64 is requested to run a kernel mode tests, it will load the Reflector, a driver that contains the 
+		kernel mode fraction of the testing framework. Relaying control operation and output through the reflector, 
+		the kernel mode unit tests can be run.
+		</para>
+		
+		<figure>
+			<title>Kernel mode testing: basic architecture</title>
+			<graphic fileref="cfix-arch-kernel.png">
+			</graphic>
+		</figure>
+		
+		<para>
+		All these additional steps are performed without additional user intervention -- the drivers are installed, loaded and 
+		stopped automatically. From a user perspective, running a kernel mode tests feels just like running a user mode test.
+		</para>
+
+
+	</section>
+  </chapter>
+  
+  <chapter id="Usage">
+	<title>Usage</title>
+	<section id="Platforms">
+		<title>Supported Platforms<indexterm><primary>Platforms</primary></indexterm></title>
+		<para>
+			<table frame="all"><title>Supported Platforms</title>
+				<tgroup cols="4" align="left" colsep="1" rowsep="1">
+					<thead>
+						<row>
+						  <entry></entry>
+						  <entry>i386</entry>
+						  <entry>AMD64</entry>
+						  <entry>IA-64</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						  <entry>Windows Server 2008</entry>
+						  <entry>Supported</entry>
+						  <entry>Supported</entry>
+						  <entry>See remark [1]</entry>
+						</row>
+						<row>
+						  <entry>Windows Vista</entry>
+						  <entry>Supported</entry>
+						  <entry>Supported</entry>
+						  <entry>See remark [1]</entry>
+						</row>
+						<row>
+						  <entry>Windows Server 2003</entry>
+						  <entry>Supported</entry>
+						  <entry>Supported</entry>
+						  <entry>See remark [1]</entry>
+						</row>
+						<row>
+						  <entry>Windows XP</entry>
+						  <entry>Supported</entry>
+						  <entry>Supported</entry>
+						  <entry>See remark [1]</entry>
+						</row>
+						<row>
+						  <entry>Windows 2000</entry>
+						  <entry>Supported</entry>
+						  <entry>N/A</entry>
+						  <entry>See remark [1]</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+		</para>
+		
+		<itemizedlist>
+			<listitem>
+				[1] Itanium: cfix <emphasis>should</emphasis> run on IA64. However, short of an Itanium machine, no tests have been performed on this platform and therefore, no binaries are provided. 
+			</listitem>
+		</itemizedlist>	
+		
+		<para>
+			Older NT platforms (3.x, 4.0) as well as all consumer Windows releases (95, 98, ME) are not supported.
+		</para>
+	</section>
+	<section id="Compilers">
+		<title>Supported Compilers and Linkers<indexterm><primary>Compiler</primary></indexterm><indexterm><primary>Linker</primary></indexterm></title>
+		<para>
+			cfix only supports the Microsoft compiler and linker, cl.exe and link.exe. Other compilers may work,
+			but have not been tested. 
+		</para>
+		<simplesect>
+			<title>Visual Studio</title>
+			<para>
+				cfix supports and has been tested with Visual Studio 2003 (i.e. cl version 13.10) onward. Note, however,
+				that a small amount of features is not supported for cl 13.00/Visual Studio 2003 and is only available
+				for cl 14.00/Visual Studio 2005 and later releases.
+			</para>
+		</simplesect>
+		<simplesect>
+			<title>WDK</title>
+			<para>
+				For development with the WDK, use at least WDK 6000. Although older DDKs (3790, 3790.1830) work, they
+				are outdated and may require certain build settings to be adjusted.
+			</para>
+		</simplesect>
+	</section>
+	<section id="TestRun">
+		<title>Test Run<indexterm><primary>Test Run</primary></indexterm></title>
+		<para>
+		Provided one or more test modules, cfix can be requested to run certain fixtures<indexterm><primary>Fixture</primary></indexterm>. Fixtures
+		are exeuted in the following sequence:
+		
+		<itemizedlist>
+		<listitem>
+			<para>
+			First, the setup routine<indexterm><primary>Setup Routine</primary></indexterm> (if one has been provided) is run. In case
+			an assertion fails or an unhandled exception is thrown from within the setup routine, the routine is aborted. As the 
+			setup routine is considered to play a vital role for successful execution of a fixture, the entire fixture
+			is aborted as well.
+			</para>
+		</listitem>
+		<listitem>
+			<para>
+			Next, the test cases of the fixture are run one after another. In case of failed assertions or unhandled exceptions, the
+			test case is immediately aborted and execution is resumed at the next test case.
+			</para>
+		</listitem>
+		<listitem>
+			<para>
+			Finally, after all test cases have completed, the teardown routine is run. Teardown routines, like setup routines,
+			are optional, so this step does not apply to all fixtures. Again, failed assertions and unhandled exceptions
+			lead to the abortion of the routine.
+			</para>
+		</listitem>
+		</itemizedlist>
+		
+		<note>
+		Fixtures are always run	in their entirety -- it is not possible to run a single test case only.
+		</note>
+		
+		What exactly does abortion of a routine mean? All failures are first reported so that the user is informed about the
+		situation. By using Windows Structured Exception Handling, cfix then causes the affected routine to be aborted, i.e.
+		no further statements of the routine are executed. 
+		</para>
+		<para>
+		It is notable that the exact behaviour in the event of a failure differs on the context. As such, cfix is aware
+		of the presence of a debugger and adapts its behaviour appropriately. As an example, if a debugger is present and an
+		assertion fails, the test case is not aborted -- instead a brealpoint is issued so that the debugger breaks in
+		on the affected line of code.
+		</para>
+		<para>
+		Moreover, by specifying appropriate command line options, the behaviour can be further adjusted. This includes changing the way
+		cfix deals with unhandled exceptions or specifying that the test run should be aborted as soon as the first failure
+		occurs.
+		</para>
+		<para>
+		As indicated before, all events -- be it the successful completion of a test case, failed assertions, log messages or 
+		unhandled exceptions are reported. Depending on the options chosen by the user, the information
+		is displayed on the console or logged to a text file.
+		</para>
+	</section>
+	<section id="Multithreading">
+		<title>Multithreading<indexterm><primary>Multithreading</primary></indexterm></title>
+		<para>
+		cfix has been implemented in a threadsafe manner. Furthermore, test cases are explicily allowed to make use
+		of multithreading as long as they use the wrapper function CfixCreateThread rather than CreateThread.
+		</para>
+		<para>
+		The motivation behind this is as follows. Although the current release supports execution of one fixture
+		at a time only, future releases are planned to allow parallel test execution. While the details are not of
+		importance at this stage, it already raises the question of how to deal with unknown threads, i.e. threads that
+		have been created by test cases and are thus outside of cfix' control. In order to relate such threads
+		to the test case they belong to, cfix needs some help -- and this help comes in the form of using
+		the CfixCreateThread wrapper function. cfix will relate a thread created by CfixCreateThread with the 
+		existing test case and is now also able to handle any events (assertions etc) by this thread properly.
+		
+		<note>
+			When creating threads from within a test case and these threads use the cfix API (CFIX_ASSERT, CFIX_LOG etc), always
+			make sure to use CfixCreateThread rather than CreateThread. Threads not using the cfix API (worker threads etc)
+			are not affected by this requirement.
+		</note>
+		</para>
+	</section>
+	<section id="Building">
+		<title>Building cfix<indexterm><primary>Building</primary></indexterm></title>
+		<para>
+			Under normal circumstances, it is advisable to use the binaries provided on the download page. 
+			On the one hand, building cfix by yourself requires certain prerequisites to be met. On the other hand, 
+			using the prebuilt binaries makes sure that in case of a problem with cfix, it is ensured that proper symbols exist 
+			for debugging a crash dump.
+		</para>
+		<para>
+			Building cfix requires the following software to be installed:
+			<itemizedlist>
+				<listitem>
+					WDK 6000.
+				</listitem>
+				<listitem>
+					Windows SDK 6.0. Note that due to the fact that build.exe is unable to handle include paths containing spaces, 
+					the default installation directory (C:\Program Files\Microsoft SDKs\Windows\v6.0) cannot be used by build.exe. 
+					Either install the SDK to a directory not containing spaces or create an appropriate link. 
+					The environment variable SDKBASE should be set up to point to the SDK installation directory.
+				</listitem>
+				<listitem>
+					DdkBuild. DdkBuild can be obtained from http://www.hollistech.com/Resources/ddkbuild/ddkbuild.htm.
+				</listitem>
+				<listitem>
+					rcstamp. cfix currently uses rcstamp for versioning resources. rcstamp can be ontained at http://www.codeproject.com/KB/applications/rcstamp.aspx.
+				</listitem>
+			</itemizedlist>
+			
+			When these prereqisites have been met, you should be able to build cfix using nmake -f makefile.cfix.
+		</para>
+	</section>
+  </chapter>
+  
+  <chapter id="TutorialUserVsCc">
+    <title>Tutorial (User Mode, Language: C++)</title>
+	<section id="TutorialUserVsCcInstallingCfix">
+		<title>Post-installation steps</title>
+		<para>
+		After having installed cfix, you will see the following folder structure:
+		<figure><title>Folder Structure<indexterm><primary>Folder Structure</primary></indexterm></title>
+			<graphic fileref="tut_foldstruct.gif">
+			</graphic>
+		</figure>
+		The bin folder contains the binaries, the ones of interest are cfix32<indexterm><primary>cfix32</primary></indexterm> 
+		and cfix64<indexterm><primary>cfix64</primary></indexterm>. The binaries contain their
+		bit-ness in their name so that you can put both the i386 and the amd64 folder in your 
+		PATH<indexterm><primary>PATH</primary></indexterm> without getting
+		conflicts. The remaining folders should be self-explanatory.
+		</para>
+		<para>
+		The tutorial assumes that you plan to write tests with Visual Studio<indexterm><primary>Visual Studio</primary></indexterm>. 
+		In this case, it is advisable to first configure Visual Studio so that it automatically finds the required cfix files. The following paragraphs explain how.
+		</para>
+		<note>
+		Another option than configuring the VC++ directories is to make use of the %CFIX_HOME% environment variable:
+		In your project, add <emphasis>$(CFIX_HOME)\include</emphasis> to as an <emphasis>Additional Include Directory</emphasis>
+		and <emphasis>$(CFIX_HOME)\lib\i386</emphasis> (or amd64, respectively) to the <emphasis>Additional Library Directories</emphasis>.
+		</note>
+		<para>
+		Start Visual Studio and open the Options dialog<indexterm><primary>Options Dialog</primary></indexterm> (Tools | Options). 
+		In the tree view on the left, navigate to
+		'Projects and Solutions' and finally 'C++ Directories'<indexterm><primary>C++ Directories</primary></indexterm>. There, 
+		add the appropriate cfix binary directories (bin\i386 for platform 'Win32', bin\amd64 for platform 'x64').
+		<figure><title>Configuring Exe Directories</title>
+			<graphic fileref="tut_vs_opt_exe.gif">
+			</graphic>
+		</figure>
+		
+		<note>
+		Rather than using absolute paths, you can use the $(CFIX_HOME) environment variable the installer sets by default.
+		That is, use $(CFIX_HOME)\include, $(CFIX_HOME)\lib\i386 and $(CFIX_HOME)\bin\i386 to refer to the cfix include, library,
+		and  binary directory,respectively.
+		</note>
+		
+		Now, select 'Include files'<indexterm><primary>Include files</primary></indexterm> in the dropdown menu on the 
+		top right and add the cfix include directory to the list.
+		<figure><title>Configuring Include Directories</title>
+			<graphic fileref="tut_vs_opt_inc.gif">
+			</graphic>
+		</figure>
+		
+		And finally, select 'Library files'<indexterm><primary>Library files</primary></indexterm> in the dropdown menu on the top right 
+		and add add the appropriate 
+		cfix library directories (lib\i386 for platform 'Win32', lib\amd64 for platform 'x64').
+		<figure><title>Configuring Library Directories</title>
+			<graphic fileref="tut_vs_opt_lib.gif">
+			</graphic>
+		</figure>
+		
+		That is all, we are ready to write our first test project.
+		</para>
+	</section>
+	<section id="TutorialUserVsCcAuthoringATestSuite">
+		<title>Authoring a first test suite</title>
+		<para>
+			Writing a unit test for cfix comprises the following steps:
+			<itemizedlist>
+				<listitem>include cfixcc.h</listitem>
+				<listitem>Create a fixture by writing class that publicly derives from <link linkend='TestFixture'>cfixcc::TestFixture</link></listitem>
+				<listitem>Add one or more methods to this class that implement the actual tests</listitem>
+				<listitem>Optionally, implement before/after or setup/teardown methods</listitem>
+				<listitem>Make the class known to cfix by writing a test definition</listitem>
+			</itemizedlist>
+		</para>
+		<para>
+			The following listing shows the scaffold of a unit test. cfix does not require the class to be declared in 
+			a separate header file first, so the entire code can be placed in a single C++ source file.
+			<programlisting>
+#include &lt;cfixcc.h&gt;
+
+class ExampleTest : public <link linkend='TestFixture'>cfixcc::TestFixture</link>
+{
+public:
+  void TestOne() 
+  {}
+  
+  void TestTwo() 
+  {}
+};
+
+<link linkend='CFIXCC_BEGIN_CLASS'>CFIXCC_BEGIN_CLASS</link>( ExampleTest )
+  <link linkend='CFIXCC_METHOD'>CFIXCC_METHOD</link>( TestOne )
+  <link linkend='CFIXCC_METHOD'>CFIXCC_METHOD</link>( TestTwo )
+<link linkend='CFIXCC_END_CLASS'>CFIXCC_END_CLASS</link>()
+			</programlisting>
+			<emphasis>ExampleTest</emphasis> derives from  <link linkend='TestFixture'>cfixcc::TestFixture</link>, which makes it a fixture. 
+			<emphasis>TestOne</emphasis> and <emphasis>TestTwo</emphasis> are two arbitrarily named methods that implement tests. 
+			To tell cfix that these methhods indeed implements a test cases, we have to add the <link linkend='CFIXCC_BEGIN_CLASS'>CFIXCC_BEGIN_CLASS</link>/
+			<link linkend='CFIXCC_METHOD'>CFIXCC_METHOD</link>/<link linkend='CFIXCC_END_CLASS'>CFIXCC_END_CLASS</link> construct at the end of 
+			the file.
+		</para>
+		<para>
+			Note that this is in fact all there is to do to write a simple test case -- there is no need to write any additional
+			registration code, implement a main routine or anything else. Although the test does not do anything meaningful yet,
+			we could already compile and run it.
+		</para>
+		<para>
+			But before we do so, we first implement our two methods. Inside such a test method, we can use
+			the <link linkend='TestCcAPI'>entire set of CFIX_ASSERT* assertions:</link>
+			<programlisting>
+void TestOne() 
+{
+  const wchar_t* testString = L"test";
+  
+  //
+  // Use typesafe assertions...
+  //
+  <link linkend='CFIXCC_ASSERT_EQUALS'>CFIXCC_ASSERT_EQUALS</link>( 1, 1 );
+  <link linkend='CFIXCC_ASSERT_EQUALS'>CFIXCC_ASSERT_EQUALS</link>( L"test", testString );
+  <link linkend='CFIXCC_ASSERT_EQUALS'>CFIXCC_ASSERT_EQUALS</link>( wcslen( testString ), ( size_t ) 4 );
+  
+  //
+  // ...log messages...
+  //
+  <link linkend='CFIX_LOG'>CFIX_LOG</link>( L"Test string is %s", testString );
+  
+  //
+  // ...or plain assertions.
+  //
+  <link linkend='CFIX_ASSERT'>CFIX_ASSERT</link>( wcslen( testString ) == 4 );
+  <link linkend='CFIX_ASSERT_MESSAGE'>CFIX_ASSERT_MESSAGE</link>( testString[ 0 ] == 't', 
+    L"Test string should start with a 't'" );
+}
+			</programlisting>
+			Clearly, TestOne should succeed. To see what happens when an assertion fails, let us write 
+			TestTwo so that it fails:
+			<programlisting>
+void TestTwo() 
+{
+  wchar_t* testString = L"test";
+  
+  <link linkend='CFIXCC_ASSERT_LESS_MESSAGE'>CFIXCC_ASSERT_LESS_MESSAGE</link>( wcslen( testString ), ( size_t ) 4, 
+	L"String should be no longer than 3 chars -- but is it?" );
+
+  <link linkend='CFIX_LOG'>CFIX_LOG</link>( L"Will this line be executed at all?" );
+}
+			</programlisting>
+			<note>
+				As you may have noticed, some assertions begin with CFIXCC_ and some begin with CFIX_. All CFIXCC_
+				assertions are for use with C++ only, while CFIX_ assertions are available to both C and C++. To add
+				a bit of convenience, all CFIX_ assertions are also available with CFIXCC_ prefix. For instance, 
+				CFIXCC_ASSERT and CFIX_ASSERT are the same thing.
+			</note>
+		</para>
+	</section>
+
+	<section id="TutorialUserVsCcRunningTheTest">
+		<title>Running the test</title>
+		<para>
+			Before we can run the test in the debugger for the first time, we have to make some adaptions to the project configuration
+			<indexterm><primary>Project Configuration</primary></indexterm>.
+			Open the project's property page and navigate to the 'Debugging'<indexterm><primary>Debugging</primary></indexterm> node. There, add
+			'cfix32.exe' (or 'cfix64.exe' for the x64 configuration) as Command<indexterm><primary>Command</primary></indexterm>. Note: do not 
+			omit the .exe suffix -- otherwise running without debugger will not work.
+			<figure><title>Adjusting Debugging Settings</title>
+				<graphic fileref="tut_vs_projsettings.png"></graphic>
+			</figure>
+		</para>
+		<para>
+			As Command Arguments<indexterm><primary>Command Arguments</primary></indexterm>, type "$(OutDir)\$(ProjectName).dll".
+			<note>
+			Do not forget the quotes around the path.
+			</note>
+			
+			<note>When using C++<indexterm><primary>C++</primary></indexterm>, you shoud use the compiler switch
+			/EHa<indexterm><primary>/EHa</primary></indexterm> rather than /EHs<indexterm><primary>/EHs</primary></indexterm>. 
+			cfix internally uses SEH<indexterm><primary>SEH</primary></indexterm> and using
+			/EHa ensures that your destructors are called properly in case a test case is aborted.
+			</note>
+			
+			<warning>
+			<para>
+			It is strongly recommended to set the Working Directory to <emphasis>$(OutDir)</emphasis> and
+			to use this directory as a conmmon output directory for both your test DLL (i.e. the DLL containing your test cases)
+			and for any (non-system) DLLs referenced by this test DLL. This will make sure that all DLLs will be able to be loaded properly.
+			</para>
+			<!--
+			<para>
+			Background: As an example, consider a DLL named <emphasis>widgets.dll</emphasis> that contains code you intent to write tests for. 
+			<emphasis>widgets_test.dll</emphasis> is a cfix test DLL that contains a number of appropriate fixtures. If 
+			both, <emphasis>widgets.dll</emphasis> and <emphasis>widgets_test.dll</emphasis>, reside in the same directory, 
+			the Windows Loader (and thus, cfix) will be able to properly load both DLLs. If, in contrast, these DLLs reside in different
+			directories and the directory of <emphasis>widgets.dll</emphasis> does not happen to be listed in the PATH
+			environment variable, cfix will report an error message indicating that the DLL failed to be loaded. The reason
+			for this simply is that the Windows Loader is unable to find <emphasis>widgets.dll</emphasis>.
+			</para>
+			--> 
+			<para>
+			Please consult the MSDN documentation for details and background information on the 
+			<emphasis>Dynamic-Link Library Search Order</emphasis>.
+			</para>
+			</warning>
+		</para>
+		<para>
+			These adjustments having been done, we can run the test by hitting F5. After a few moments,
+			the following assertion box should appear, notifying us that TestTwo, as anticipated, has
+			triggered a failed assertion:
+			<figure><title>Output Window</title>
+				<graphic fileref="tut_run_cc_dbg.png"></graphic>
+			</figure>
+			
+			If you choose 'Break' the debugger will break in and point to the line containing the
+			affected assertion. Meanwhile, the output window will have shown the following output:
+			<programlisting>
+[Log]     VsSample.ExampleTest.TestOne 
+            Test string is test
+
+[Success] VsSample.ExampleTest.TestOne
+[Failure] VsSample.ExampleTest.TestTwo 
+            test.cpp(35): ExampleTest::TestTwo
+
+            Expression: 
+              String should be no longer than 3 chars -- but is it?: 
+              [4] &lt; [4] (Expression: wcslen( testString ) &lt; ( size_t ) 4)
+            Last Error: 0 (The operation completed successfully. )
+			</programlisting>
+			
+			Aha, the comparison has failed because 4 &lt; 4 does not hold.
+		</para>
+		<para>
+			If you now continue execution by pressing F5 again, note that the routine will be left
+			prematurely -- the CFIX_LOG statement will not be executed! With the last assertion
+			having failed, cfix assumes that it is futile to resume the test -- and therefore aborts it.
+		</para>
+		<para>
+			But what happens when we instead choose 'Continue' in the assertion message box? The failure
+			will be printed to the output window, yet execution will be resumed as normal. That is, the log 
+			statement will be executed this time.
+		</para>
+		<para>
+			Now that we know how cfix behaves when run in the debugger, let us run it without debugger attached.
+			Press Ctrl+F5 and let it run. Again, after a few moments, the assertion will fail -- but rather
+			than issuing a breakpoint, cfix will print the following output to the console:
+			<programlisting>
+[Log]     VsSample.ExampleTest.TestOne
+            Test string is test
+
+[Success] VsSample.ExampleTest.TestOne
+[Failure] VsSample.ExampleTest.TestTwo
+            test.cpp(35): ExampleTest::TestTwo
+
+            Expression: 
+              String should be no longer than 3 chars -- but is it?: 
+              [4] &lt; [4] (Expression: wcslen( testString ) &lt; ( size_t ) 4)
+            Last Error: 0 (The operation completed successfully. )
+
+            cfix!CfixpCaptureStackTrace +0x40
+            cfix!CfixPeReportFailedAssertion +0xd2 
+            VsSample!cfixcc::Assertion&lt;cfixcc::Less&gt;::Fail&lt;unsigned int&gt; +0x215 
+            VsSample!cfixcc::Assertion&lt;cfixcc::Less&gt;::Relate&lt;unsigned int&gt; +0x60 
+            VsSample!ExampleTest::TestTwo +0xdb (test.cpp:34)
+            VsSample!cfixcc::InvokeTestMethod&lt;ExampleTest,&amp;ExampleTest::TestTwo&gt; +0x3a 
+            cfix!CfixsRunTestRoutine +0x33
+            cfix!CfixsRunTestCaseMethod +0x27 
+            cfix!CfixsRunTestCase +0x25 
+            cfix!CfixsRunTsexecActionMethod +0xfb 
+            cfix!CfixsRunSequenceAction +0x122 
+            cfix32!CfixrunpRunFixtures +0x90 
+            cfix32!CfixrunsMainWorker +0x3f
+            cfix32!CfixrunMain +0x1b9
+            cfix32!wmain +0x80 
+			</programlisting>
+		</para>
+	</section>
+
+	<section id="TutorialUserVsCcExceptions">
+		<title>Exceptions</title>
+		<para>
+			C++ code frequently makes use of exceptions, so it makes sense to write tests
+			that check whether the right exceptions are thrown. For this purpose, cfix
+			provides <link linkend='CFIXCC_METHOD_EXPECT_EXCEPTION'>CFIXCC_METHOD_EXPECT_EXCEPTION</link>.
+		</para>
+		<para>
+			To illustrate how <link linkend='CFIXCC_METHOD_EXPECT_EXCEPTION'>CFIXCC_METHOD_EXPECT_EXCEPTION</link>
+			is used, we add another method to our fixture, <emphasis>TestThatThrows</emphasis>:
+						<programlisting>
+#include &lt;cfixcc.h&gt;
+#include &lt;bitset&gt;
+
+class ExampleTest : public <link linkend='TestFixture'>cfixcc::TestFixture</link>
+{
+public:
+  void TestOne() 
+  {
+    // As before.
+  }
+  
+  void TestTwo() 
+  {
+    // As before.
+  }
+  
+  void TestThatThrows()
+  {
+    std::bitset&lt; 33 &gt; bitset;
+    bitset[ 32 ] = 1;
+    bitset.to_ulong();	// Will throw an std::overflow_error.
+  }
+};
+
+<link linkend='CFIXCC_BEGIN_CLASS'>CFIXCC_BEGIN_CLASS</link>( ExampleTest )
+  <link linkend='CFIXCC_METHOD'>CFIXCC_METHOD</link>( TestOne )
+  <link linkend='CFIXCC_METHOD'>CFIXCC_METHOD</link>( TestTwo )
+  <link linkend='CFIXCC_METHOD_EXPECT_EXCEPTION'>CFIXCC_METHOD_EXPECT_EXCEPTION</link>( TestThatThrows, std::overflow_error )
+<link linkend='CFIXCC_END_CLASS'>CFIXCC_END_CLASS</link>()
+			</programlisting>
+		</para>
+		<para>
+			<emphasis>TestThatThrows</emphasis> should lead to an std::overflow_error being raised and by using
+			<link linkend='CFIXCC_METHOD_EXPECT_EXCEPTION'>CFIXCC_METHOD_EXPECT_EXCEPTION</link>, we check that
+			this is indeed the case.
+		</para>
+		<para>
+			Running the suite again should now yield the following output, indicating that all tests succeeded:
+			<programlisting>
+[Success]      VsSample.ExampleTest.TestOne
+[Success]      VsSample.ExampleTest.TestTwo
+[Success]      VsSample.ExampleTest.TestThatThrows
+			</programlisting>
+		</para>
+		<para>
+			Back to <emphasis>TestThatThrows</emphasis>, we now modify the code so that the exception is not
+			raised any more:
+			<programlisting>
+  void TestThatThrows()
+  {
+    std::bitset&lt; 33 &gt; bitset;
+    bitset[ 32 ] = 0;	
+    bitset.to_ulong();	// No overflow here.
+  }
+			</programlisting>
+		</para>
+		<para>
+			Indeed, if we now run the test again, we get the following output:
+			<programlisting>
+[Success]      VsSample.ExampleTest.TestOne
+[Success]      VsSample.ExampleTest.TestTwo
+[Failure]      VsSample.ExampleTest.TestThatThrows
+                 Expression: Expected exception, but none has been raised
+                 
+                 [...]
+			</programlisting>
+		</para>
+	</section>
+
+	<section id="TutorialUserVsCcBeforeAfter">
+		<title>Before and after methods</title>
+		<para>
+			If several tests in a single fixture share common initialization and cleanup code, this code can
+			be moved into dedicated methods, <emphasis>before</emphasis>- and <emphasis>after</emphasis> methods.
+			Like JUnit's @Before and @After methods, these methods are run before and after each test method, respectively.
+		</para>
+		<para>
+			<link linkend='TestFixture'>cfixcc::TestFixture</link>, from which each test class inherits, provides empty
+			implementations for the methods <link linkend='TestFixture_Before'>Before</link> and <link linkend='TestFixture_After'>After</link>.
+			As such, implementing a <emphasis>before</emphasis>- or <emphasis>after</emphasis> method is merely a matter of overriding
+			these virtual methods.
+		</para>
+		<para>
+			To illustrate the order in which methods will now be invoked, consider the following code:
+			<programlisting>
+#include &lt;cfixcc.h&gt;
+
+class ExampleTest : public <link linkend='TestFixture'>cfixcc::TestFixture</link>
+{
+public:
+  //
+  // Overridden methods.
+  //
+  virtual void Before()
+  {
+	  <link linkend='CFIX_LOG'>CFIX_LOG</link>( L"In Before()" );
+  }
+
+  virtual void After()
+  {
+	  <link linkend='CFIX_LOG'>CFIX_LOG</link>( L"In After()" );
+  }
+
+  //
+  // Test methods.
+  //
+  void TestOne() 
+  {
+	  <link linkend='CFIX_LOG'>CFIX_LOG</link>( L"In TestOne()" );
+  }
+
+  void TestTwo() 
+  {
+	  <link linkend='CFIX_LOG'>CFIX_LOG</link>( L"In TestTwo()" );
+  }
+};
+
+<link linkend='CFIXCC_BEGIN_CLASS'>CFIXCC_BEGIN_CLASS</link>( ExampleTest )
+  <link linkend='CFIXCC_METHOD'>CFIXCC_METHOD</link>( TestOne )
+  <link linkend='CFIXCC_METHOD'>CFIXCC_METHOD</link>( TestTwo )
+<link linkend='CFIXCC_END_CLASS'>CFIXCC_END_CLASS</link>()
+			</programlisting>
+			Running this test will yield:
+			<programlisting>
+[Log]          VsSample.ExampleTest.TestOne
+                 In Before()
+
+[Log]          VsSample.ExampleTest.TestOne
+                 In TestOne()
+
+[Log]          VsSample.ExampleTest.TestOne
+                 In After()
+
+[Success]      VsSample.ExampleTest.TestOne
+[Log]          VsSample.ExampleTest.TestTwo
+                 In Before()
+
+[Log]          VsSample.ExampleTest.TestTwo
+                 In TestTwo()
+
+[Log]          VsSample.ExampleTest.TestTwo
+                 In After()
+[Success]      VsSample.ExampleTest.TestTwo
+			</programlisting>
+		</para>
+		<para>
+			In practice, before and after methods are usually used to initialize any member variables of the
+			test class. In a way, implementing before and after methods is similar to implementing a default
+			constructor and a destructor for the fixture class. In fact, a new object of the fixture class will 
+			be created for each test, so using constructors and a destructors would actually work. 
+			There is, however, an important reason why before and after-methods should
+			be preferred: You may use the various kinds of assertions cfix offers in these methods. 
+		</para>
+		<para>
+			Although you could use assertions in constructors and destructors as well, in particular the 
+			latter case is problematic: If such an assertion fails, an assertion will be raised internally. Having a
+			destructor raise an exception, however, is something C++ does not like at all. 
+		</para>
+		<para>
+			So to keep yourself out of trouble, do not implement a constructor and destructor for your fixture
+			class but use before and after methods instead.
+		</para>
+	</section>
+
+	<section id="TutorialUserVsCcSetupTeardown">
+		<title>SetUp and TearDown methods</title>
+		<para>
+			Although it is might be possible to perform any necessary initialization and teardown work
+			in before and after-methods, it may be inefficient to do so. In particular when expensive resources
+			such as database connections or global resources have to be initialized, it is beneficial to
+			perform such actions once <emphasis>per fixture</emphasis> rather than once 
+			<emphasis>per test</emphasis>.
+		</para>
+		<para>
+			For such situations, cfix provides SetUp and TearDown methods. These are analogous to JUnit's 
+			@BeforeClass and @AfterClass methods. As SetUp and TearDown run only once per fixture and should
+			initialize global resources only, they are implemented as static methods.
+		</para>
+		<para>
+			Like Before and After methods, SetUp and TearDown do not need any further registration -- as
+			soon as you add static methods named <emphasis>SetUp</emphasis> and <emphasis>TearDown</emphasis>
+			to your fixture class, cfix will treat those appropriately. Needless to say, if you only need one
+			of these routines, you do not need to implement the other, too.
+		</para>
+		<para>
+			The following code illustrates the usage of  SetUp and TearDown methods:
+			<programlisting>
+#include &lt;cfixcc.h&gt;
+
+class ExampleTest : public <link linkend='TestFixture'>cfixcc::TestFixture</link>
+{
+public:
+  static void <link linkend='TestFixture_SetUp'>SetUp</link>()
+  {
+    CFIX_LOG( L"In SetUp()" );
+  }
+
+  static void <link linkend='TestFixture_TearDown'>TearDown</link>()
+  {    
+    CFIX_LOG( L"In TearDown()" );
+  }
+  
+
+  void TestOne() 
+  {
+	CFIX_LOG( L"In TestOne()" );
+  }
+};
+
+<link linkend='CFIXCC_BEGIN_CLASS'>CFIXCC_BEGIN_CLASS</link>( ExampleTest )
+  <link linkend='CFIXCC_METHOD'>CFIXCC_METHOD</link>( TestOne )
+<link linkend='CFIXCC_END_CLASS'>CFIXCC_END_CLASS</link>()
+			</programlisting>
+		</para>
+		<para>
+			Again, like in Before and After methods, you are free to use assertions within SetUp and TearDown methods.
+		</para>
+	</section>
+	<section id="TutorialUserVsCcConclusion">
+		<title>Conclusion</title>
+		<para>
+			This concludes the quick tutorial about writing cfix unit tests in C++. In %CFIX_HOME%\doc\examples, you
+			will find additional example projects for Visual Studio 2003, 2005, and 2008.
+		</para>
+		<para>
+			For additional details on any of the methods and constructs used throughout the tutorial, please consult
+			the <link linkend='API'>API Reference</link>.
+		</para>
+		<para>
+			Finally, for help, feature suggestions and critique, do not hesitate to send feedback to the email address shown 
+			at the very bottom of the page.
+		</para>
+	</section>
+</chapter>
+  
+		
+  <chapter id="TutorialUserVs">
+    <title>Tutorial (User Mode, Language: C)</title>
+	<section id="TutorialUserVsInstallingCfix">
+		<title>Post-installation steps</title>
+		<para>
+		After having installed cfix, you will see the following folder structure:
+		<figure><title>Folder Structure<indexterm><primary>Folder Structure</primary></indexterm></title>
+			<graphic fileref="tut_foldstruct.gif">
+			</graphic>
+		</figure>
+		The bin folder contains the binaries, the ones of interest are cfix32<indexterm><primary>cfix32</primary></indexterm> 
+		and cfix64<indexterm><primary>cfix64</primary></indexterm>. The binaries contain their
+		bit-ness in their name so that you can put both the i386 and the amd64 folder in your 
+		PATH<indexterm><primary>PATH</primary></indexterm> without getting
+		conflicts. The remaining folders should be self-explanatory.
+		</para>
+		<para>
+		The tutorial assumes that you plan to write tests with Visual Studio<indexterm><primary>Visual Studio</primary></indexterm>. 
+		In this case, it is advisable to first configure Visual Studio so that it automatically finds the required cfix files. The following paragraphs explain how.
+		</para>
+		<note>
+		Another option than configuring the VC++ directories is to make use of the %CFIX_HOME% environment variable:
+		In your project, add <emphasis>$(CFIX_HOME)\include</emphasis> to as an <emphasis>Additional Include Directory</emphasis>
+		and <emphasis>$(CFIX_HOME)\lib\i386</emphasis> (or amd64, respectively) to the <emphasis>Additional Library Directories</emphasis>.
+		</note>
+		<para>
+		Start Visual Studio and open the Options dialog<indexterm><primary>Options Dialog</primary></indexterm> (Tools | Options). 
+		In the tree view on the left, navigate to
+		'Projects and Solutions' and finally 'C++ Directories'<indexterm><primary>C++ Directories</primary></indexterm>. There, 
+		add the appropriate cfix binary directories (bin\i386 for platform 'Win32', bin\amd64 for platform 'x64').
+		<figure><title>Configuring Exe Directories</title>
+			<graphic fileref="tut_vs_opt_exe.gif">
+			</graphic>
+		</figure>
+		
+		<note>
+		Rather than using absolute paths, you can use the $(CFIX_HOME) environment variable the installer sets by default.
+		That is, use $(CFIX_HOME)\include, $(CFIX_HOME)\lib\i386 and $(CFIX_HOME)\bin\i386 to refer to the cfix include, library,
+		and  binary directory,respectively.
+		</note>
+		
+		Now, select 'Include files'<indexterm><primary>Include files</primary></indexterm> in the dropdown menu on the 
+		top right and add the cfix include directory to the list.
+		<figure><title>Configuring Include Directories</title>
+			<graphic fileref="tut_vs_opt_inc.gif">
+			</graphic>
+		</figure>
+		
+		And finally, select 'Library files'<indexterm><primary>Library files</primary></indexterm> in the dropdown menu on the top right 
+		and add add the appropriate 
+		cfix library directories (lib\i386 for platform 'Win32', lib\amd64 for platform 'x64').
+		<figure><title>Configuring Library Directories</title>
+			<graphic fileref="tut_vs_opt_lib.gif">
+			</graphic>
+		</figure>
+		
+		That is all, we are ready to write our first test project.
+		</para>
+	</section>
+	<section id="TutorialUserVsAuthoringATestSuite">
+		<title>Authoring a test suite</title>
+		<para>
+		Test Modules are DLLs, so we need to create a new DLL project. In the 'New Project' Wizard, select 
+		'Win32 Project'. On the following page, choose 'DLL' as application type.
+		<figure><title>Creating a new Project</title>
+			<graphic fileref="tut_vs_newproj.png">
+			</graphic>
+		</figure>
+		</para>
+		<para>
+		A minimalistic test project could consist of the following code:
+		<programlisting language="C">
+#include "stdafx.h"
+#include &lt;cfix.h&gt;
+
+/*++
+	Routine Description:
+		Test routine -- do the actual testing.
+--*/
+static void __stdcall Test1()
+{
+	int a = 1;
+	int b = 1;
+	CFIX_ASSERT( a + b == 2 );
+}
+
+CFIX_BEGIN_FIXTURE( MyMinimalisticFixture )
+	CFIX_FIXTURE_ENTRY( Test1 )
+CFIX_END_FIXTURE()
+			</programlisting>
+		</para>
+		<para>
+		But let us look at a more interesting example. Open a source file and copy the following code:
+			<programlisting>
+//
+// Always include cfix.h!
+//
+#include "stdafx.h"
+#include &lt;cfix.h&gt;
+
+/*++
+  Routine Description:
+    Setup Routine -- will be called at the very beginning of the
+    testrun. If the setup routine fails, no testcase of this 
+    fixture will be executed.
+
+    If your default calling convention is cdecl (this is the 
+    case for Visual Studio projects), be sure to add __stdcall 
+    to all routine decarations -- otheriwse you will get the 
+    following warning:
+       cannot convert from 'void (__cdecl *)(void)' 
+       to 'CFIX_PE_TESTCASE_ROUTINE'
+
+    As the routine is referenced only by the fixture definition 
+    (see below), you may declare this routine as static.
+--*/
+static void __stdcall FixtureSetup()
+{
+  CFIX_ASSERT( 0 != 1 );
+}
+
+/*++
+  Routine Description:
+    Teardown Routine -- will be called at the end of the
+    testrun. 
+--*/
+static void __stdcall FixtureTeardown()
+{
+  CFIX_LOG( L"Tearing down..." );
+}
+
+/*++
+  Routine Description:
+    Test routine -- do the actual testing.
+--*/
+static void __stdcall Test1()
+{
+  DWORD a = 1;
+  DWORD b = 1;
+  CFIX_ASSERT_EQUALS_DWORD( a, b );
+  CFIX_ASSERT( a + b == 2 );
+
+  //
+  // Log a message -- printf-style formatting may be used.
+  //
+  CFIX_LOG( L"a=%d, b=%d", a, b );
+}
+
+/*++
+  Routine Description:
+    Another test routine -- one that will trigger a failed 
+    assertion.
+--*/
+static void __stdcall Test2()
+{
+  DWORD a = 17;
+
+  //
+  // This one will fail. If run in the debugger, it will break here.
+  // if run outside the debugger, the failure will be logged and the
+  // testcase is aborted.
+  //
+  CFIX_ASSERT( a == 42 );
+}
+
+/*++
+  Description:
+    These lines define a test fixture. It is best to put this at the
+    end of the file.
+
+    'MyFixture' is the name of the fixture. It must be unique across
+    all fixtures of this DLL. The same restrictions as for naming
+    routines apply, i.e. no spaces, no special characters etc.
+
+    The order of CFIX_FIXTURE_ENTRY, CFIX_FIXTURE_SETUP and 
+    CFIX_FIXTURE_TEARDOWN is irrelevant. For the current release, 
+    however, (1.0), the order of FIXTURE_ENTRYs defines the 
+    execution order.
+--*/
+CFIX_BEGIN_FIXTURE( MyFixture )
+  //
+  // Define Test1 and Test2 to be test routines. You can define any 
+  // number of test routines.
+  //
+  CFIX_FIXTURE_ENTRY( Test1 )
+  CFIX_FIXTURE_ENTRY( Test2 )
+
+  //
+  // Define FixtureSetup to be a setup routine. At most one
+  // CFIX_FIXTURE_SETUP line may be declared per fixture.  If the
+  // fixture does not require setup, omit this line.
+  //
+  CFIX_FIXTURE_SETUP( FixtureSetup )
+
+  //
+  // Define FixtureTeardown to be a teardown routine. As with
+  // setup routines, you can declare at most one such routine
+  // per fixture. If the fixture does not require teardown, 
+  // omit this line.
+  //
+  CFIX_FIXTURE_TEARDOWN( FixtureTeardown )
+CFIX_END_FIXTURE()
+
+CFIX_BEGIN_FIXTURE( MyOtherFixture )
+  //
+  // You are free to reuse certain routines in another fixture if
+  // it makes sense.
+  //
+  CFIX_FIXTURE_ENTRY( Test1 )
+CFIX_END_FIXTURE()
+			</programlisting>
+			In order to run the code in the debugger, we have to make some adaptions to the project configuration
+			<indexterm><primary>Project Configuration</primary></indexterm>.
+			Open the project's property page and navigate to the 'Debugging'<indexterm><primary>Debugging</primary></indexterm> node. There, add
+			'cfix32.exe' (or 'cfix64.exe' for the x64 configuration) as Command<indexterm><primary>Command</primary></indexterm>. Note: do not 
+			omit the .exe suffix -- otherwise running without debugger will not work.
+			<figure><title>Adjusting Debugging Settings</title>
+				<graphic fileref="tut_vs_projsettings.png"></graphic>
+			</figure>
+			
+		</para>
+		<para>
+			As Command Arguments<indexterm><primary>Command Arguments</primary></indexterm>, type -u "$(OutDir)\$(ProjectName).dll".
+			I have used the -u switch in order to break on exceptions. This makes debugging easier, so
+			it is advisable to always use this switch for debugging.
+			
+			<note>
+			Do not forget the quotes around the path.
+			</note>
+			
+			<note>When using C++<indexterm><primary>C++</primary></indexterm>, you shoud use the compiler switch
+			/EHa<indexterm><primary>/EHa</primary></indexterm> rather than /EHs<indexterm><primary>/EHs</primary></indexterm>. 
+			cfix internally uses SEH<indexterm><primary>SEH</primary></indexterm> and using
+			/EHa ensures that your destructors are called properly in case a test case is aborted.
+			</note>
+			
+			<warning>
+			<para>
+			It is strongly recommended to set the Working Directory to <emphasis>$(OutDir)</emphasis> and
+			to use this directory as a conmmon output directory for both your test DLL (i.e. the DLL containing your test cases)
+			and for any (non-system) DLLs referenced by this test DLL. This will make sure that all DLLs will be able to be loaded properly.
+			</para>
+			<para>
+			Please consult the MSDN documentation for details and background information on the 
+			<emphasis>Dynamic-Link Library Search Order</emphasis>.
+			</para>
+			</warning>
+		</para>
+	</section>
+	<section id="TutorialUserVsRunningTheTest">
+		<title>Running the test</title>
+		<para>
+			Hit F5 to compile the project and launch the test. Soon after the tesrun has started, you should see the following
+			dialog indicating that a breakpoint<indexterm><primary>Breakpoint</primary></indexterm> has been hit:
+			<figure><title>Failed Assertion</title>
+				<graphic fileref="tut_vs_break.gif"></graphic>
+			</figure>
+			Click 'break' and you will see that the current the statement CFIX_ASSERT( a == 42 ) has fired --
+			which is not surprising as a has the value 17. Now open the output window (Ctrl+Alt+O) and you should
+			see the following output:
+			<figure><title>Output Window</title>
+				<graphic fileref="tut_run_dbg.png"></graphic>
+			</figure>
+			If you want to ignore this assertion, hit F5 and the fixture will run to completion.
+		</para>
+		<para>
+			Running the test in the debugger is nice, but it should also be runnable without a debugger attached.
+			Therefore, hit Ctrl+F5 to start without debugger. You should see the following output:
+			<figure><title>Console Output</title>
+				<graphic fileref="tut_run_console.png"></graphic>
+			</figure>
+			Note that this time, no breakpoint has been hit in the failing test case (Test2) -- instead, the failure
+			is logged and execution is resumed. Note that when run in the debugger, cfix by default logs output to the
+			Output Window<indexterm><primary>Output Window</primary></indexterm>. When run outside the debugger, 
+			cfix logs output to the console. Of course, you can customize this
+			behaviour by providing appropriate command line switches.
+		</para>
+		<para>
+			This concludes the tutorial. Before beginning to write tests, have a look at the various command line switches 
+			that can be used to customize the behaviour of cfix. The distribution also contains a Visual Studio sample project
+			that may serve as a starting point for further steps.
+		</para>
+		<para>
+			And finally, if you experience any problems with cfix, do not hesitate to ask!
+		</para>
+	</section>
+  </chapter>
+  <chapter id="TutorialKernelWdk">
+    <title>Tutorial (Kernel Mode, Language: C)</title>
+	<section id="TutorialKernelWdkInstallingCfix">
+		<title>Post-installation steps</title>
+		<indexterm><primary>WDK</primary></indexterm>
+		<indexterm><primary>CFIX_HOME</primary></indexterm>
+		<indexterm><primary>INCLUDE</primary></indexterm>
+		<indexterm><primary>LIB</primary></indexterm>
+		<para>
+		After having installed cfix, you will see the following folder structure:
+		<figure><title>Folder Structure<indexterm><primary>Folder Structure</primary></indexterm></title>
+			<graphic fileref="tut_foldstruct.gif">
+			</graphic>
+		</figure>
+		The bin folder contains the binaries, the ones of interest are cfix32<indexterm><primary>cfix32</primary></indexterm> 
+		and cfix64<indexterm><primary>cfix64</primary></indexterm>. The binaries contain their
+		bit-ness in their name so that you can put both the i386 and the amd64 folder in your 
+		PATH<indexterm><primary>PATH</primary></indexterm> without getting
+		conflicts. The remaining folders should be self-explanatory. 
+		</para>
+		<para>
+		<indexterm><primary>Windows Driver Kit</primary></indexterm> 
+		<indexterm><primary>WDK</primary></indexterm> 
+		
+		Like drivers, kernel mode unit tests are built using the Windows Driver Kit (WDK). The tutorial therefore assumes 
+		that you have installed a recent version of the WDK, i.e. WDK 6000 or newer.
+		</para>
+		<para>
+		In your SOURCES files, you will have to refer to the cfix header and library files. The easiest way to do
+		this is to leverage the CFIX_HOME environment variable the installer sets by default: Use 
+		$(CFIX_HOME)\include to refer to the cfix include directory, and $(CFIX_HOME)\lib\$(TARGET_DIRECTORY)
+		to refer to the library directory.
+		</para>
+		<para>
+		In any case, bear in mind that build.exe is unable to work with include paths that use spaces.
+		</para>
+	</section>
+	<section id="TutorialKernelWdkAuthoringATestSuite">
+		<title>Authoring a test suite</title>
+		<indexterm><primary>CFIX_KERNELMODE</primary></indexterm>
+		<para>
+		Having installed cfix, we can now write a first test. The source code of a kernel mode
+		unit test is identical to user mode tests, so we can use the same samples as supplied
+		in the user mode tutorial (The only differences are that ULONGs are used rather than DWORDs
+		and stdafx.h has been removed). A minimalistic test project could thus consist of the following code:
+		<programlisting>
+#include &lt;cfix.h&gt;
+
+/*++
+	Routine Description:
+		Test routine -- do the actual testing.
+--*/
+static void __stdcall Test1()
+{
+	int a = 1;
+	int b = 1;
+	CFIX_ASSERT( a + b == 2 );
+}
+
+CFIX_BEGIN_FIXTURE( MyMinimalisticFixture )
+	CFIX_FIXTURE_ENTRY( Test1 )
+CFIX_END_FIXTURE()
+			</programlisting>
+		</para>
+		<para>
+		But let us look at a more interesting example like the following:
+			<programlisting>
+//
+// Always include cfix.h!
+//
+#include &lt;cfix.h&gt;
+
+/*++
+  Routine Description:
+    Setup Routine -- will be called at the very beginning of the
+    testrun. If the setup routine fails, no testcase of this 
+    fixture will be executed.
+	
+    As WDK projects use __stdcall by default, there is usually
+    no need to explicitly specify __stdcall on your routines.
+	
+    As the routine is referenced only by the fixture definition 
+    (see below), you may declare this routine as static.
+--*/
+static void FixtureSetup()
+{
+  CFIX_ASSERT( 0 != 1 );
+}
+
+/*++
+  Routine Description:
+    Teardown Routine -- will be called at the end of the
+    testrun. 
+--*/
+static void FixtureTeardown()
+{
+  CFIX_LOG( L"Tearing down..." );
+}
+
+/*++
+  Routine Description:
+    Test routine -- do the actual testing.
+--*/
+static void Test1()
+{
+  ULONG a = 1;
+  ULONG b = 1;
+  CFIX_ASSERT_EQUALS_ULONG( a, b );
+  CFIX_ASSERT( a + b == 2 );
+
+  //
+  // Log a message -- printf-style formatting may be used.
+  //
+  CFIX_LOG( L"a=%d, b=%d", a, b );
+}
+
+/*++
+  Routine Description:
+    Another test routine -- one that will trigger a failed 
+    assertion.
+--*/
+static void Test2()
+{
+  ULONG a = 17;
+
+  //
+  // This one will fail. If run in the debugger, it will break here.
+  // if run outside the debugger, the failure will be logged and the
+  // testcase is aborted.
+  //
+  CFIX_ASSERT( a == 42 );
+}
+
+/*++
+  Description:
+    These lines define a test fixture. It is best to put this at the
+    end of the file.
+
+    'MyFixture' is the name of the fixture. It must be unique across
+    all fixtures of this driver. The same restrictions as for naming
+    routines apply, i.e. no spaces, no special characters etc.
+
+    The order of CFIX_FIXTURE_ENTRY, CFIX_FIXTURE_SETUP and 
+    CFIX_FIXTURE_TEARDOWN is irrelevant. For the current release, 
+    however, (1.1), the order of FIXTURE_ENTRYs defines the 
+    execution order.
+--*/
+CFIX_BEGIN_FIXTURE( MyFixture )
+  //
+  // Define Test1 and Test2 to be test routines. You can define any 
+  // number of test routines.
+  //
+  CFIX_FIXTURE_ENTRY( Test1 )
+  CFIX_FIXTURE_ENTRY( Test2 )
+
+  //
+  // Define FixtureSetup to be a setup routine. At most one
+  // CFIX_FIXTURE_SETUP line may be declared per fixture.  If the
+  // fixture does not require setup, omit this line.
+  //
+  CFIX_FIXTURE_SETUP( FixtureSetup )
+
+  //
+  // Define FixtureTeardown to be a teardown routine. As with
+  // setup routines, you can declare at most one such routine
+  // per fixture. If the fixture does not require teardown, 
+  // omit this line.
+  //
+  CFIX_FIXTURE_TEARDOWN( FixtureTeardown )
+CFIX_END_FIXTURE()
+
+CFIX_BEGIN_FIXTURE( MyOtherFixture )
+  //
+  // You are free to reuse certain routines in another fixture if
+  // it makes sense.
+  //
+  CFIX_FIXTURE_ENTRY( Test1 )
+CFIX_END_FIXTURE()
+			</programlisting>
+		</para>
+		<para>
+			As usual for WDK projects, we have to supply a SOURCES file. Assuming you have
+			saved your test code to a file named test.c, the SOURCES file should look as follows:
+			<programlisting>
+INCLUDES=$(CFIX_HOME)\include;$(DDK_INC_PATH)
+
+MSC_WARNING_LEVEL=/W4 /WX /Wp64
+
+#
+# It is essential that CFIX_KERNELMODE is defined here!
+#
+USER_C_FLAGS=/DCFIX_KERNELMODE
+
+
+#
+# Link against cfixkdrv.lib.
+#
+TARGETLIBS=\
+  $(CFIX_HOME)\bin\$(TARGET_DIRECTORY)\cfixkdrv.lib
+
+TARGETNAME=ktest
+TARGETPATH=bin\$(DDKBUILDENV)
+TARGETTYPE=DRIVER
+SOURCES=test.c
+			</programlisting>
+			As the comments in the file suggest, two things are of importance. First you have to
+			include /DCFIX_KERNELMODE in USER_C_FLAGS. If you forget to define CFIX_KERNELMODE,
+			the cfix headers will assume you are building a user mode test project and will, 
+			for example, try to bring in windows.h -- which, of course, will be inappropriate for
+			a kernel mode test.
+		</para>
+		<para>
+			Secondly, you have to link against cfixkdrv.lib. This library includes the stub routines
+			for the cfix API. Moreover, this library includes an implementation of DriverEntry, which
+			will turn your test project into a full-fledged driver.
+		</para>
+		<para>
+			One file is still missing -- the export definition file. Create a file named ktest.def
+			(assuming that you used TARGETNAME=ktest) and add a single line:
+			<programlisting>
+EXPORTS
+			</programlisting>
+		</para>
+		<para>
+			That's it. Open a WDK command promot with the a build environment of choice and 
+			create the test driver by running build.exe. This will result in 
+			bin\chk\i386\ktest.sys to be created.
+		</para>
+	</section>	
+	<section id="TutorialKernelWdkRunningTheTest">
+		<title>Running the test</title>
+		<indexterm><primary>WOW64</primary></indexterm>
+		<indexterm><primary>-kern</primary></indexterm>
+		<indexterm><primary>Bugcheck</primary></indexterm>
+		<indexterm><primary>IRQL</primary></indexterm>
+		<para>
+			<warning>
+				It should go without saying that you should never run test cases on your 
+				development machine or on production machines -- always run tests on dedicated 
+				test machines. The tests are run in kernel mode and can therefore crash your machine.
+			</warning>
+		</para>
+			
+		<para>
+		Running kernel mode unit tests is no different than running user mode tests. That is, tests are
+		run using the testrunner cfix32.exe (for 32 bit code) or cfix64.exe (for 64 bit code) .
+		</para>
+		
+		<para>
+		Note that a 64 bit test driver can be run either with cfix64.exe or with cfix32.exe, i.e. cfix
+		is aware of WOW64 and the possibility that the kernel uses another bitness than the user mode
+		test runner. Still, using cfix64.exe is preferrable in such cases.
+		</para>
+		
+		<note>
+		For obvious reasons, the cfix driver (cfixkr.sys) is not signed. On Vista x64 and Server 2008 x64,
+		the driver thus will not be able to load unless the test system has been booted in debug mode
+		or with Kernel Mode Code Signing disabled.
+		</note>
+		
+		<para>
+		Copy the test driver to your test machine (as always, drivers must be loaded from the local disk,
+		so any attempt to load the test driver over the network will fail). Having done that, you can
+		run cfix32.exe -kern -d ktest.sys to display the tests contained in the driver:
+		<programlisting>
+C:\drv\i386>cfix32 -kern -d ktest.sys
+Cfix version 1.1.3059.65 (chk)
+(c) 2008 - Johannes Passing - http://cfix.sf.net/
+Module: ktest (ktest.sys)
+  Fixture: MyFixture
+    Test1
+    Test2
+
+  Fixture: MyOtherFixture
+    Test1
+		</programlisting>
+		</para>
+		
+		<para>
+		Note that we have used the -kern switch. To avoid using kernel mode features accidently,
+		the -kern switch is always necessary if you intend to use kernel mode features.
+		</para>
+		
+		<para>
+		That said, we can now run the test by executing cfix32.exe -kern ktest.sys. Assuming no
+		kernel debugger has been attached, the following output will appear on your console:
+		<programlisting>
+C:\drv\i386>cfix32 -kern ktest.sys
+Cfix version 1.1.3059.65 (chk)
+(c) 2008 - Johannes Passing - http://cfix.sf.net/
+[Log]          ktest.MyFixture.Test1
+                 a=1, b=1
+
+[Success]      ktest.MyFixture.Test1
+[Failure]      ktest.MyFixture.Test2
+                 d:\dev\wdev\cfix\doc\samples\temp\test.c(65): Test2
+
+                 Expression: a == 42
+                 Last Error: 0 (The operation completed successfully. )
+
+
+
+[Log]          ktest.MyFixture.unknown
+                 Tearing down...
+
+[Log]          ktest.MyOtherFixture.Test1
+                 a=1, b=1
+
+[Success]      ktest.MyOtherFixture.Test1
+		</programlisting>
+		</para>
+		
+		<para>
+		As is the case with user mode tests, cfix will detect if a kernel debugger is attached
+		and will adapt its behaviour, i.e. it will issue a breakpoint when an assertion has failed.
+		</para>
+		
+		<para>
+		So let's run the command cfix32.exe -kern ktest.sys again on a machine that has a kernel debugger 
+		attched. Test1 passes, so the following output appears on the console first:
+		<programlisting>
+C:\drv\i386>cfix32 -kern ktest.sys
+Cfix version 1.1.3059.65 (chk)
+(c) 2008 - Johannes Passing - http://cfix.sf.net/
+[Log]          ktest.MyFixture.Test1
+                 a=1, b=1
+
+[Success]      ktest.MyFixture.Test1
+		</programlisting>
+		
+		Test2, however, fails and causes a debugger breakin. WinDBG will report
+		<programlisting>
+Break instruction exception - code 80000003 (first chance)
+ktest!Test2+0x2e:
+f9fc50fe cc              int     3
+		</programlisting>
+		and the source window will show the culprit:
+		<figure><title>WinDBG Source Window</title>
+			<graphic fileref="tut_ktest_breakin.png">
+			</graphic>
+		</figure>
+		
+		Hiting F5 will continue the test (the same rules apply as in user mode testing) and
+		the rest of the output will appear on the console:
+		<programlisting>
+[Failure]      ktest.MyFixture.Test2
+                 d:\dev\wdev\cfix\doc\samples\temp\test.c(65): Test2
+
+                 Expression: a == 42
+                 Last Error: 0 (The operation completed successfully. )
+
+
+
+[Log]          ktest.MyFixture.unknown
+                 Tearing down...
+
+[Log]          ktest.MyOtherFixture.Test1
+                 a=1, b=1
+
+[Success]      ktest.MyOtherFixture.Test1
+		</programlisting>
+		</para>
+		
+		<para>
+			Some final words on kernel mode testing: cfix kernel mode tests are always initialted
+			at PASSIVE_LEVEL. However, testcases are free to raise the IRQL to any level and still
+			call CFIX_ASSERT etc. 
+		</para>
+		<para>
+			Moreover, the cfix API (i.e. ASSERT etc) may only be used on the same
+			thread. If called from a different thread, cfix will be unable to relate the call to a testrun -- after
+			all, multiple kernel mode testruns could be run in parallel. Therefore, cfix will issue a warning
+			via DbgPrint but will otherwise ignore these calls.
+		</para>
+		<para>
+			Finally, cfix will catch and report any exceptions that your test code has raised and failed
+			to handle. However, if your code causes a bugcheck, cfix will not be able to prevent that.
+		</para>
+	</section>
+  </chapter>
+  <chapter id="API">
+	<title>API</title>
+
+	<section id="WhatsNew">
+		<title>What's new</title>
+		
+		<simplesect>
+		<title>What's new in cfix 1.1</title>
+		<para>
+			<itemizedlist>
+				<listitem>Kernel mode support</listitem>
+			</itemizedlist>	
+		</para>
+		</simplesect>
+		
+		<simplesect>
+		<title>What's new in cfix 1.2</title>
+		<para>
+			<itemizedlist>
+				<listitem><link linkend="CFIX_ASSERT_MESSAGE">CFIX_ASSERT_MESSAGE</link></listitem>
+				<listitem>ANSI support for <link linkend="CFIX_LOG">CFIX_LOG</link>, <link linkend="CFIX_INCONCLUSIVE">CFIX_INCONCLUSIVE</link>, 
+					and <link linkend="CFIX_ASSERT_MESSAGE">CFIX_ASSERT_MESSAGE</link></listitem>
+				<listitem><link linkend="CfixPeGetValue">CfixPeGetValue</link> and <link linkend="CfixPeSetValue">CfixPeSetValue</link></listitem>
+				<listitem>Kernel mode: Drivers do not need to link against aux_klib.lib any more</listitem>
+				<listitem><link linkend="CFIX_FIXTURE_BEFORE">Before</link> and <link linkend="CFIX_FIXTURE_AFTER">After</link> routines</listitem>
+				<listitem><link linkend="TestCcAPI">C++ API</link></listitem>
+				<listitem>Support for cl 13.00 and Visual Studio 2003</listitem>
+				<listitem>Command line switches -fsf, -fsr, and -fss</listitem>
+			</itemizedlist>	
+		</para>
+		</simplesect>
+	</section>
+	
+	<section id="TestAPI">
+		<title>Base API (C/C++)</title>
+		<para>
+		API usable by both test suites written in C and C++. Unless specified otherwise, this API applies to both
+		user- and kernel mode.
+		</para>
+		
+		&ApiBase;
+		&ApiBaseFixtureDef;
+	</section>
+	
+	<section id="CcAPI">
+		<title>C++ API</title>
+		<para>
+		Enhanced API for user mode test suites written in C++. The API is a seuperset of the 
+		<link linkend="TestAPI">Base API</link>, so you are free to intermix the two in a single test suite.
+		</para>
+		<para>
+		As C++ is currently not fully supported by Microsoft for kernel mode code, all C++ features are only 
+		available for user mode unit tests.
+		</para>
+		<note>
+		The C++ API uses a separate header file, cfixcc.h. 
+		</note>
+		&ApiCc;
+		&ApiCcFixtureDef;
+	</section>
+
+	<section id="APIComaptbility">
+		<title>Note on compatibility and API stability</title>
+		<para>
+			All routines, data structures and macros documented as part of this documentation set are stable -- future relases of
+			cfix will retain both binary and source level compatibility.
+		</para>
+		<para>
+			Any routines, data structures and macros not mentioned in this documentation set are subject to change in future
+			releases. Please restrict your usage of the cfix API to the documented subset. If any functionality
+			should be missing, please report to passing at users.sourceforge.net.
+		</para>
+	</section>
+  </chapter>
+</book>
