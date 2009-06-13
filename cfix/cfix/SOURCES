@@ -1,0 +1,60 @@
+#
+# Copyright:
+#		2008, Johannes Passing (passing at users.sourceforge.net)
+#
+# This file is part of cfix.
+#
+# cfix is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# cfix is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with cfix.  If not, see <http://www.gnu.org/licenses/>.
+#
+ 
+BSCMAKE_FLAGS=$(BSCMAKE_FLAGS) /n
+
+MSC_WARNING_LEVEL=/W4 /Wp64
+
+INCLUDES=$(SDKBASE)\Include;..\..\include;$(SDK_INC_PATH)\..\mfc42
+
+C_DEFINES=/D_UNICODE /DUNICODE
+
+!if "$(DDKBUILDENV)"=="chk"
+DEBUG_CRTS=1
+!endif
+
+!if "$(TARGET_DIRECTORY)"=="i386"
+USER_C_FLAGS=/analyze
+LINKER_FLAGS=/nxcompat /dynamicbase /SafeSEH
+!else
+LINKER_FLAGS=/nxcompat /dynamicbase
+!endif
+
+USE_LIBCMT=1
+
+TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
+		   $(SDK_LIB_PATH)\psapi.lib
+
+TARGETNAME=cfix
+TARGETPATH=..\..\bin\$(DDKBUILDENV)
+TARGETTYPE=DYNLINK
+
+PASS0_HEADERDIR=..\..\include
+PASS0_SOURCEDIR=obj$(BUILD_ALT_DIR)\$(TARGET_DIRECTORY)
+
+SOURCES=\
+	pe.c \
+	main.c \
+	tsexecaction.c \
+	sequenceaction.c \
+	cfix.rc \
+	cfixmsg.mc
+	
+DLLBASE=0x60f00000

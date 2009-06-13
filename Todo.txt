@@ -1,0 +1,32 @@
+TODO
+----
+Log Severities?
+Job object
+-u default if debugger attached
+
+ 
+
+CfixPe* in separate file
+
+Doc
+---
+ * Using in the debugger
+   * use -u
+   * set working dir 
+ * C++
+   * use /EHa to have destructors called
+ * Basic architecture
+ * Supported platforms
+ * Building
+ * Tutorial
+   * VS
+   * Command line
+   * WDK
+   
+   
+Future Features
+---------------
+ * AssertEqualsDword -> optionally resolve values as error messages
+ * pass additional message DLLs on cmdline
+ * (optionally) run each fixture in separate process -> robustness
+ * Dbg: choose ignore bp/abort TC
