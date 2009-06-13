@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Include>
+  <File
+     Id="FileAmd64CdiagDll"
+     Name="cdiag.dll"
+     DiskId="1"
+     Source="$(var.CFIX_TREE)\bin\fre\amd64\cdiag.dll"
+     Vital="yes"/>
+  <File
+    Id="FileAmd64CdiagPdb"
+    Name="cdiag.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\amd64\cdiag.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
+    Id="FileAmd64CfixDll"
+    Name="cfix.dll"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\amd64\cfix.dll"
+    Vital="yes"/>
+  <File
+    Id="FileAmd64CfixPdb"
+    Name="cfix.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\amd64\cfix.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
+    Id="FileAmd64Cfix64Exe"
+    Name="cfix64.exe"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\amd64\cfix64.exe"
+    Vital="yes"/>
+  <File
+    Id="FileAmd64Cfix64Pdb"
+    Name="cfix64.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\amd64\cfix64.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
+    Id="FileAmd64CfixklDll"
+    Name="cfixkl.dll"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\amd64\cfixkl.dll"
+    Vital="yes"/>
+  <File
+    Id="FileAmd64CfixklPdb"
+    Name="cfixkl.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\amd64\cfixkl.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
+    Id="FileAmd64Cfixkr64Sys"
+    Name="cfixkr64.sys"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\amd64\cfixkr64.sys"
+    Vital="yes"/>
+  <File
+    Id="FileAmd64Cfixkr64Pdb"
+    Name="cfixkr64.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\amd64\cfixkr64.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
+    Id="FileAmd64DbghelpDll"
+    Name="dbghelp.dll"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\redist\amd64\dbghelp.dll"
+    Vital="yes"/>
+
+  <File
+    Id="FileAmd64SymSrvDll"
+    Name="symsrv.dll"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\redist\amd64\symsrv.dll"
+    Vital="yes"/>
+</Include>

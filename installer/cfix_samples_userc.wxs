@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Include>
+  <File Id="FileSamplesUserStdafxCpp" Name="stdafx.cpp" Source="$(var.CFIX_TREE)\samples\UserC\stdafx.cpp" />
+  <File Id="FileSamplesUserStdafxH" Name="stdafx.h" Source="$(var.CFIX_TREE)\samples\UserC\stdafx.h" />
+  <File Id="FileSamplesUserTestsCpp" Name="tests.cpp" Source="$(var.CFIX_TREE)\samples\UserC\tests.cpp" />
+  <File Id="FileSamplesUserSln08" Name="VsSam08.sln" LongName="ExampleVs2008.sln" Source="$(var.CFIX_TREE)\samples\UserC\ExampleVs2008.sln" />
+  <File Id="FileSamplesUserVcp08" Name="VsSam08.VCP" LongName="ExampleVs2008.vcproj" Source="$(var.CFIX_TREE)\samples\UserC\ExampleVs2008.vcproj" />
+  <File Id="FileSamplesUserSln05" Name="VsSam05.sln" LongName="ExampleVs2005.sln" Source="$(var.CFIX_TREE)\samples\UserC\ExampleVs2005.sln" />
+  <File Id="FileSamplesUserVcp05" Name="VsSam05.VCP" LongName="ExampleVs2005.vcproj" Source="$(var.CFIX_TREE)\samples\UserC\ExampleVs2005.vcproj" />
+  <File Id="FileSamplesUserSln03" Name="VsSam03.sln" LongName="ExampleVs2003.sln" Source="$(var.CFIX_TREE)\samples\UserC\ExampleVs2003.sln" />
+  <File Id="FileSamplesUserVcp03" Name="VsSam03.VCP" LongName="ExampleVs2003.vcproj" Source="$(var.CFIX_TREE)\samples\UserC\ExampleVs2003.vcproj" />
+</Include>

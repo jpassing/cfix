@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WixLocalization>
+	<String Id="NewerVersionInstalled">A newer version of this product is already installed.</String>
+	<String Id="OpenTutorial">Open tutorial now.</String>
+</WixLocalization>

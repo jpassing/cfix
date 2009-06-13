@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="FixtureDefAPI">
+		<title>Fixture definition (C++ only)</title>
+
+		<para>
+		Test suites written in C++ can use the <link linkend="TestCcAPI">API</link> and 
+		<link linkend="FixtureDefCcAPI">fixture definition</link> common to both C and C++.
+		</para>
+		
+		<para>
+		As of cfix 1.2, however, C++ test suites can also be written in an object-oriented
+		fashion, using a different style of fixture definition covered in this section. 
+		</para>
+		
+		<para>
+		Rather than providing a set of global functions, a C++ fixture is written as a class. This
+		class has to derive from <link linkend="TestFixture">TestFixture</link> and may contain
+		any number of test methods. If required, before and after methods can be provided by
+		overriding the resprctive methods inherited from the base class. Setup and teardown
+		routines can be implemented using static methods.
+		</para>
+		
+		<para>
+		The following code listing shows an example of a test fixture written using C++:
+		</para>
+		
+		<programlisting>
+#include &lt;cfixcc.h&gt;
+
+class SimpleFixture : public cfixcc::<link linkend="TestFixture">TestFixture</link>
+{
+public:
+  virtual void <link linkend="TestFixture_Before">Before</link>()
+  {
+    ...
+  }
+
+  virtual void <link linkend="TestFixture_After">After</link>()
+  {
+    ...
+  }
+  
+  void Method01() 
+  {
+    ...
+  }
+
+  void Method02() 
+  {
+    ...
+  }
+};
+
+<link linkend="CFIXCC_BEGIN_CLASS">CFIXCC_BEGIN_CLASS</link>( SimpleFixture )
+  <link linkend="CFIXCC_METHOD">CFIXCC_METHOD</link>( Method01 )
+  <link linkend="CFIXCC_METHOD">CFIXCC_METHOD</link>( Method02 )
+<link linkend="CFIXCC_END_CLASS">CFIXCC_END_CLASS()</link>
+		</programlisting>
+		
+		<para>
+		Note that rather than <link linkend="CFIX_BEGIN_FIXTURE">CFIX_BEGIN_FIXTURE</link> and <link linkend="CFIX_END_FIXTURE">CFIX_END_FIXTURE</link>, 
+		<link linkend="CFIXCC_BEGIN_CLASS">CFIXCC_BEGIN_CLASS</link> (using the name of the class as argument) and 
+		<link linkend="CFIXCC_END_CLASS">CFIXCC_END_CLASS</link> have been used.
+		</para>
+		
+		<para>
+		Using <link linkend="CFIXCC_METHOD">CFIXCC_METHOD</link>, the two test methods have been added to the fixture. Note that the
+		before and after methods did not need to be specified.
+		</para>
+		
+		<note>
+		Between CFIXCC_BEGIN_CLASS and CFIXCC_END_CLASS, only use the CFIXCC_xxx macros used for C++ fixtures to add methods. 
+		Never use CFIX_FIXTURE_SETUP, CFIX_FIXTURE_TEARDOWN, CFIX_FIXTURE_BEFORE, or CFIX_FIXTURE_AFTER within a C++ fixture definition.
+		</note>
+		
+		<section id="TestFixture">
+			<title>TestFixture</title>
+			<indexterm><primary>TestFixture</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+					TestFixture is the base class all test classes have to publicly derive from. Such a test
+					class groups multiple tests to form a single fixture. That is, all methods of a test class
+					share a common environment, i.e. variables, initialization and cleanup logic. 
+				</para>
+				<para>
+					Tests are implemented by adding arbitrarily named methods to the respective class. If required, initialization
+					and cleanup logic can be implemented by overriding the methods <link linkend="TestFixture_Before">Before</link> 
+					and <link linkend="TestFixture_After">After</link>, respectively. These methods may, for example, be used to
+					initialize and free member variables of the respective test class. Such variables may then be used by the test 
+					methods.
+				</para>
+				<para>
+					In a similar manner, setup and teardown methods may be implemented to initialize and cleanup global resources.
+					In contrast to before and after routines, these routines run only once per test run. The state maintained
+					by setup and teardown routines is thus shared among all tests.
+				</para>
+				<note>
+					For each test class, a corresponding <link linkend="CFIXCC_BEGIN_CLASS">CFIXCC_BEGIN_CLASS</link>/
+					<link linkend="CFIXCC_END_CLASS">CFIXCC_END_CLASS</link> construct must be provided.
+				</note>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+namespace cfixcc
+{
+  class TestFixture
+  {
+  public:
+    TestFixture();
+    virtual ~TestFixture();
+
+    virtual void <link linkend="TestFixture_Before">Before</link>();
+    virtual void <link linkend="TestFixture_After">After</link>();
+
+    static void <link linkend="TestFixture_SetUp">SetUp</link>();
+    static void <link linkend="TestFixture_TearDown">TearDown</link>();
+  };
+}
+				</programlisting>
+			</simplesect>
+			
+			
+			<section id="TestFixture_Before">
+				<title>TestFixture::Before</title>
+				<indexterm><primary>TestFixture::Before</primary></indexterm>
+				<simplesect>
+					<title>Synopsis</title>
+					<para>
+						Method that may be overridden to implement initialization logic. This method will be called once per test method, 
+						before the individual test method is invoked. As such, this method should be used to initialize any state 
+						(for example, member variables) required by the tests.
+					</para>
+					<para>
+						This method corresponds to <link linkend="CFIX_FIXTURE_BEFORE">before routines</link> in the 
+						<link linkend="TestAPI">Base API</link>
+					</para>
+				</simplesect>
+				
+				<simplesect>
+					<title>Declaration</title>
+					<programlisting>
+virtual void Before();
+					</programlisting>
+				</simplesect>
+				
+				<simplesect>
+				<title>Remarks</title>
+				<para>
+					When the before method fails, the current test method will not be called. The after method (if present) will not be called
+					either. 
+				</para>
+				<note>
+					For certain initialization work that should occur only once per fixture (rather than once per test routine), 
+					use a <link linkend="TestFixture_SetUp">setup method</link> rather than a before method.
+				</note>
+			</simplesect>
+			</section>
+			
+			<section id="TestFixture_After">
+				<title>TestFixture::After</title>
+				<indexterm><primary>TestFixture::After</primary></indexterm>
+				<simplesect>
+					<title>Synopsis</title>
+					<para>
+						Method that may be overridden to implement cleanup logic. This method will be called once per test method, 
+						after the individual test method has been invoked. As such, this method should be used to clean up any state 
+						(for example, member variables) set up by tests ar a <link linkend="TestFixture_Before">before</link> method.
+					</para>
+					<para>
+						This method corresponds to <link linkend="CFIX_FIXTURE_AFTER">after routines</link> in the 
+						<link linkend="TestAPI">Base API</link>
+					</para>
+				</simplesect>
+				
+				<simplesect>
+					<title>Declaration</title>
+					<programlisting>
+virtual void After();
+					</programlisting>
+				</simplesect>
+				
+				<simplesect>
+				<title>Remarks</title>
+				<para>
+					This method will be called regardless of whether the test routine succeeded or not. The only situation in which 
+					the the after method is not called is when the before method of the same class has previously failed, in which 
+					case the test routine also did not run.
+				</para>
+				<note>
+					For certain cleanup work that should occur only once per fixture (rather than once per test), 
+					use a <link linkend="TestFixture_TearDown">teardown method</link> rather than an after method.
+				</note>
+			</simplesect>
+			</section>
+			
+			<section id="TestFixture_SetUp">
+				<title>TestFixture::SetUp</title>
+				<indexterm><primary>TestFixture::SetUp</primary></indexterm>
+				<simplesect>
+					<title>Synopsis</title>
+					<para>
+					This (static) method may be redefined in a test class to implement initialization of global
+					resources. The method will be called only once per fixture.
+					</para>
+				</simplesect>
+				
+				<simplesect>
+					<title>Declaration</title>
+					<programlisting>
+static void SetUp();
+					</programlisting>			
+				</simplesect>
+				
+				<simplesect>
+					<title>Remarks</title>
+					<para>
+						If the setup method fails, none of the test methods will be invoked. The teardown method will not be invoked either.
+					</para>
+					<note>
+						For certain initialization work, it may be more advantageous to use a <link linkend="TestFixture_Before">before</link> method.
+					</note>
+				</simplesect>
+			</section>
+			
+			<section id="TestFixture_TearDown">
+				<title>TestFixture::TearDown</title>
+				<indexterm><primary>TestFixture::TearDown</primary></indexterm>
+				<simplesect>
+					<title>Synopsis</title>
+					<para>
+					This (static) method may be redefined in a test class to implement cleanup of global
+					resources. The method will be called only once per fixture.
+					</para>
+				</simplesect>
+				
+				<simplesect>
+					<title>Declaration</title>
+					<programlisting>
+static void TearDown();
+					</programlisting>			
+				</simplesect>
+				
+				<simplesect>
+					<title>Remarks</title>
+					<note>
+						For certain initialization work, it may be more advantageous to use an <link linkend="TestFixture_After">after</link> method.
+					</note>
+				</simplesect>
+			</section>
+		</section>
+		
+		<section id="CFIXCC_BEGIN_CLASS">
+			<title>CFIXCC_BEGIN_CLASS</title>
+			<indexterm><primary>CFIXCC_BEGIN_CLASS</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIXCC_BEGIN_CLASS defines the start of a C++ fixture definition. For each class inheriting
+				from <link linkend="TestFixture">TestFixture</link>, one such definition must be provided.
+				The name of the respective class must be provided as argument.
+				</para>
+				<para>
+				If, for example, you have written a class <emphasis>MyTestClass</emphasis>, publicly derviving from
+				<link linkend="TestFixture">TestFixture</link>, you need to provide a fixture 
+				definition initiated by a CFIXCC_BEGIN_CLASS( <emphasis>MyTestClass</emphasis> ).
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+CFIXCC_BEGIN_CLASS( ClassName )
+				</programlisting>
+				<note>
+				Do not put quotes around the class name. The name must match the name of the respective class, which in turn
+				has to publicly derive from <link linkend="TestFixture">TestFixture</link>.
+				</note>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				When the test class resides within a custom namespace, make sure to put the fixture definition into the 
+				same namespace. Example:
+				</para>
+				<programlisting>
+#include &lt;cfixcc.h&gt;
+
+namespace test
+{
+class SimpleFixture : public cfixcc::TestFixture
+{
+public:
+  void Method01() 
+  {
+	...
+  }
+};
+
+CFIXCC_BEGIN_CLASS( SimpleFixture )
+  CFIXCC_METHOD( Method01 )
+CFIXCC_END_CLASS()
+
+} // namespace
+
+				</programlisting>
+				<para>
+				It is not allowed to specify a namespace-qualifed like <emphasis>test::SimpleFixture</emphasis> as argument 
+				to CFIXCC_BEGIN_CLASS. Please also note that cfix ignores the namespace when deriving the fixture name from the class.
+				That is, the class name itself, without namespace qualification, must uniquely identify a fixture.
+				</para>
+			</simplesect>
+			&TestApiCcDefaultRequirements12;
+		</section>
+		
+		<section id="CFIXCC_END_CLASS">
+			<title>CFIXCC_END_CLASS</title>
+			<indexterm><primary>CFIXCC_END_CLASS</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIXCC_END_CLASS defines the end of a C++ fixture definition. 
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+CFIXCC_END_CLASS()
+				</programlisting>
+			</simplesect>
+			
+			&TestApiCcDefaultRequirements12;
+		</section>
+		
+		<section id="CFIXCC_METHOD">
+			<title>CFIXCC_METHOD</title>
+			<indexterm><primary>CFIXCC_METHOD</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Used to add a test method to the fixture. CFIXCC_METHOD may be used any number of times per fixture.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				
+				<programlisting>
+CFIXCC_METHOD( Method )
+				</programlisting>
+				
+				<para>
+				Test methods must have the following signature:
+				</para>
+				<programlisting>
+void TestMethod();
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+				<programlisting>
+#include &lt;cfixcc.h&gt;
+
+class SimpleFixture : public cfixcc::TestFixture
+{
+public:
+  void Method01() 
+  {
+	...
+  }
+
+  void Method02() 
+  {
+	...
+  }
+};
+
+CFIXCC_BEGIN_CLASS( SimpleFixture )
+  CFIXCC_METHOD( Method01 )
+  CFIXCC_METHOD( Method02 )
+CFIXCC_END_CLASS()
+				</programlisting>
+				
+			</simplesect>
+			&TestApiCcDefaultRequirements12;
+		</section>
+		
+		<section id="CFIXCC_METHOD_EXPECT_EXCEPTION">
+			<title>CFIXCC_METHOD_EXPECT_EXCEPTION</title>
+			<indexterm><primary>CFIXCC_METHOD_EXPECT_EXCEPTION</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Used to add a test method to the fixture that is expected to throw an exception of a particular type.
+				If the method does not throw this exception, the test is treated as having failed. If the method throws
+				an exception of a different, non-compatible type, CFIXCC_METHOD_EXPECT_EXCEPTION will not handle this exception.
+				Rather, the exception is treated as unexpected and the default handling of unexpected exception applies.
+				</para>
+				<para>
+				CFIXCC_METHOD_EXPECT_EXCEPTION may be used any number of times per fixture.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				
+				<programlisting>
+CFIXCC_METHOD_EXPECT_EXCEPTION( Method, ExceptionClass )
+				</programlisting>
+				
+				<para>
+				Test methods must have the following signature:
+				</para>
+				<programlisting>
+void TestMethod();
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				Exceptions are caught by reference. Heap allocated exceptions are not supported by 
+				CFIXCC_METHOD_EXPECT_EXCEPTION.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+				<programlisting>
+#include &lt;cfixcc.h&gt;
+
+class FooException {};
+
+class SimpleFixture : public cfixcc::TestFixture
+{
+public:
+  void Method01() 
+  {
+	...
+  }
+  void MethodThatThrows() 
+  {
+	throw FooException();
+  }
+};
+
+CFIXCC_BEGIN_CLASS( SimpleFixture )
+  CFIXCC_METHOD( Method01 )
+  CFIXCC_METHOD_EXPECT_EXCEPTION( MethodThatThrows, FooException )
+CFIXCC_END_CLASS()
+				</programlisting>
+			</simplesect>
+			
+			&TestApiCcDefaultRequirements12;
+		</section>
+	</section>
+	

@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN">
+<html>
+	<head>
+		<title>cfix &#151; C and C++ Unit Testing Framework for Win32 and Windows NT Kernel Mode</title>
+		<meta name="description" content="cfix is an xUnit testing framework for C/C++, specialized for Win32 (32/64 bit), written by Johannes Passing." />
+	    <meta name="keywords" content="cfix, unit testing, c, c++, win32, windows, native code" />
+		<link rel="stylesheet" href="assets/master.css" type="text/css">
+		<!--[if lt IE 7]>
+		<link rel="stylesheet" href="assets/master-ie6patch.css" type="text/css">
+		<style>
+			#main_content { padding: 10px; }
+		</style>
+		<![endif]-->
+		
+		<style>
+			.rssdesc	{ padding-left: 20px; padding-right: 20px; }
+			.rssfooter	{ padding-left: 20px; font-style: italic; font-size: 9pt; color: gray; }
+		</style>
+	</head>
+	<body>
+		<div id='tab'>
+			<div class='tab_passive'><a href='xxxxxxx'>Xxxxxxxxxxxx</a></div>
+			<div class='tab_passive2active'><img src='assets/img/tab_passive2active.png' alt=''/></div>
+			<div class='tab_active'><a href='index.html'>cfix &#x2013;  C/C++ Unit Testing for Win32 and NT</a></div>
+			<div class='tab_activeend'><img src='assets/img/tab_activeend.png' alt=''/></div>
+			<div class='tab_pad'>&#xA0;</div>
+			<div class='tab_clear'></div>
+	    </div>
+		<div id='header'>
+			<img src='assets/img/logo-cfix.gif' alt='cfix -- C/C++ Unit Testing for Win32 and NT' style="margin-left: 10px"/>
+	    </div>
+	    <div id='menu'>
+	        <div id='menu_box'>
+		        <ul id='mainmenu'>
+		            <li><a href='index.html'>Home</a></li>
+					<li><a href='doc/index.html'>Documentation</a></li>
+					<li><a href='http://sourceforge.net/projects/cfix/'>Project Page</a></li>
+					<li><a href='http://sourceforge.net/project/showfiles.php?group_id=218233&amp;package_id=263204'>Download</a></li>
+					<li><a href='https://sourceforge.net/tracker/?func=browse&amp;group_id=218233&amp;atid=1043037'>Bug Tracker</a></li>
+		        </ul>
+		    </div>
+	    </div>
+	    <div id='main'>
+		    
+	        <div id='main_content_wide' >
+				<h1>cfix &#151; Unit Testing for C and C++</h1>
+				
+				<span class='heading'>CFIX AT A GLANCE</span>
+				<hr />
+				
+				<p>
+				<img src='cfix-tick.png' align='left' alt='xUnit testing framework for C/C++'/>
+				cfix is an xUnit testing framework for C/C++, specialized for unmanaged Windows development (32/64 bit). cfix supports 
+				development of <b>both user and kernel mode</b> unit tests.
+				</p>
+				<p>
+				cifx unit tests are compiled and linked into a DLL. The testrunner application provided by cfix allows selectively running tests of one or more of 
+				such test-DLLs. Execution and behaviour in case of failing testcases can be highly customized. Moreover, cfix has been designed 
+				to work well in conjunction with the Windows Debuggers (Visual Studio, WinDBG). 
+				</p>
+				<p>
+				As of cfix 1.3, the framework is <b>source-compatible to WinUnit</b>, i.e. a WinUnit test suite can be recompiled
+				into a full-fledged cfix test suite.
+				</p>
+				<p>
+				Have a look at the <a href='doc/Strategy.html'>Tool strategy chapter in the documentation</a> to learn about the architecture of cfix.
+				</p>
+				
+				<br /><br />
+				
+				<span class='heading'>FIRST STEPS</span>
+				<hr />
+				
+				<table width='100%'>
+				<tr><td width='49%' valign='top'>
+					<img src='download.png' align='left' vspace='5' hspace='5'/><a href='http://sourceforge.net/project/showfiles.php?group_id=218233&package_id=263204'><b>Download</b> the current release of cfix.</a>
+					The release contains both 32 bit (i386) and 64 bit (amd64) binaries. 
+					cfix runs on Windows 2000, XP, Server 2003, Vista, Server 2008, and Windows 7 beta. <br /><br />
+					The installation does <i>not</i> require administrative privileges.
+					
+				</td>
+				<td width='2%'>
+				</td>
+				<td width='49%' valign='top'>
+					<img src='help.png' align='left' vspace='5' hspace='5'/><a href='doc/TutorialUserVsCc.html'/>Read the <b>tutorial</b></a> to see how to properly configure Visual Studio and
+					how to create and run a test suite. All documentation is also contained in the download package as a Html Help (CHM) file.
+				</td></tr>
+				</table>
+				
+				
+				<br /><br />
+				
+				<span class='heading'>NEWS</span><a href='http://sourceforge.net/export/rss2_projnews.php?group_id=218233&rss_fulltext=1'><img src='feed.png' align='right' border='0' /></a>
+				<hr />
+				
+				<h3 class='rss'>cfix 1.3.0 released, introduces WinUnit compatibility</h3>
+				<p class='rssdesc'>
+Besides several minor improvements, version 1.3 introduces source-level compatibility to WinUnit: That is, existing WinUnit tests can be recompiled into cfix tests without source modification. Along with the existing C and C++ APIs, the WinUnit API denotes the third API set supported by cfix.
+				</p><p class='rssdesc'>	
+For a quick overview of the new features, please refer to the respective post on <a href='http://jpassing.wordpress.com/?p=213'>JP's blog</a>.
+				</p><p class='rssdesc'>	
+Updated binaries and source code are now <a href='http://sourceforge.net/project/showfiles.php?group_id=218233&package_id=263204'>available for download</a>.
+				</p>
+				<p class='rssfooter'>2009-03-03 20:00</p>
+				
+				<h3 class='rss'>cfix 1.2.0 released</h3>
+				<p class='rssdesc'>
+					Version 1.2 introduces a number of improvements, the most important being improved support for C++: In addition to the existing C API, cfix 1.2 introduces a new, easier to use, C++ specific API.
+				</p><p class='rssdesc'>		
+					For a quick overview of the new features, please refer to the respective post on <a href='http://jpassing.wordpress.com/?p=163'>JP's blog</a>.
+				</p><p class='rssdesc'>		 
+					Updated binaries and source code are now available for download.
+				</p>
+				<p class='rssfooter'>2008-11-10 11:00</p>
+				
+				<h3 class='rss'>cfix 1.1.1 released</h3>
+				<p class='rssdesc'>
+					As <a href='http://jpassing.wordpress.com/?p=97'>discussed last week</a>, cfix 1.1.0 has suffered from a potential deadlocking issue when run in the VisualStudio 2008 debugger. cfix 1.1.1 mitigates this problem and should now work equally well with Visual Studio 2005 and 2008. 
+				</p><p class='rssdesc'>		
+					When run in a debugger, cfix now will not try to capture a stack trace for a failed assertion any more. These stack traces usually have been redundant to what the debugger provides, yet the logic to implement this has been the reason for the interference with the VS 2008 debugger. When run outside the debugger, cfix will capture and display a stack trace as before.  
+				</p><p class='rssdesc'>		 
+					Updated binaries and source code are now available for download.
+				</p>
+				<p class='rssfooter'>2008-08-26 11:13</p>
+				
+				
+				
+				<h3 class='rss'> cfix 1.1 introduces NT kernel mode unit tests</h3>
+				<p class='rssdesc'>
+					cfix 1.1, the latest version of the cfix unit testing framework has been released. cfix 1.1 introduces a variety of new features, the most important clearly being the ability to write kernel mode unit tests. That is, cfix now allows developers to author testcases that are run in kernel mode. 
+				</p><p class='rssdesc'>						 
+					Read more about kernel mode unit testing and other new features of cfix 1.1 on <a href='http://jpassing.wordpress.com/2008/07/14/cfix-11-introduces-nt-kernel-mode-unit-tests/'>JP's blog</a>.
+				</p>
+				<p class='rssfooter'>2008-07-14 14:49</p>
+			
+			
+
+				<h3 class='rss'>cfix 1.0.1 adds support for Windows 2000</h3>
+				<p class='rssdesc'>
+					Despite the fact that mainstream support for Windows 2000 has ended in 2005 and the system is well on its way to retirement, Windows 2000 is still in wide use today. As such, it remains being an important target platform for many software packages. 
+				</p><p class='rssdesc'>						 
+					The fact that cfix has not provided support for Windows 2000 was thus unfortunate -- after all, if Windows 2000 is among the target platforms of your software, you should be able to run your tests on this platform. 
+				</p><p class='rssdesc'>	 
+					cfix 1.0.1 remedies this shortcoming and adds Windows 2000 i386 SP4 as an supported platform.  
+				</p>
+				<p class='rssfooter'>2008-06-03 18:42</p>
+
+	
+	  
+			</div>
+	        <div id='main_clear'></div>
+    	</div>
+	  
+		<div id='footer'>
+			cfix &#151; C and C++ Unit Testing Framework for Win32 and Windows NT Kernel Mode<br />
+			(C) 2009 Johannes Passing
+			<br />
+			<br />Feedback? Send to passing at users.sourceforge.net.
+			<br />
+		</div>
+		
+		<script type="text/javascript">
+			var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+			document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+		</script>
+		<script type="text/javascript">
+			try {
+			var pageTracker = _gat._getTracker("UA-9197378-2");
+			pageTracker._trackPageview();
+			} catch(err) {}
+		</script>
+    </body>
+  </html>

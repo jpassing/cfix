@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="WinUnitFixtureDefAPI">
+	<title>Fixture definition (C++ only)</title>
+
+	<para>
+	The WinUnit API supports two kinds of tests -- standalone tests (definded with
+	<link linkend='BEGIN_TEST'>BEGIN_TEST</link> and <link linkend='BEGIN_TEST'>END_TEST</link>),
+	and fixtures (defined with <link linkend='FIXTURE'>FIXTURE</link> and 
+	<link linkend='BEGIN_TESTF'>BEGIN_TESTF</link>/<link linkend='BEGIN_TESTF'>END_TESTF</link>).
+	</para>
+	
+	<programlisting>
+#include &lt;winunit.h&gt;
+
+//
+// 'Standalone' tests.
+//
+<link linkend='BEGIN_TEST'>BEGIN_TEST</link>( ExampleStandaloneTest )
+{
+  WIN_ASSERT_EQUAL( 1, 1 );
+  WIN_ASSERT_STRING_EQUAL( "foo bar", "foo bar" );
+}
+<link linkend='BEGIN_TEST'>END_TEST</link>
+
+//
+// Fixture.
+//
+<link linkend='FIXTURE'>FIXTURE</link>( TestFixture );
+
+<link linkend='SETUP'>SETUP</link>( TestFixture )
+{    
+  WIN_TRACE( L"Setting up" );
+}
+
+<link linkend='TEARDOWN'>TEARDOWN</link>( TestFixture )
+{
+  WIN_TRACE( L"Tearing down" );
+}
+
+<link linkend='BEGIN_TESTF'>BEGIN_TESTF</link>( Test, TestFixture )
+{
+  WIN_ASSERT_EQUAL( 1, 1 );
+  WIN_ASSERT_STRING_EQUAL( "foo bar", "foo bar" );
+}
+<link linkend='BEGIN_TESTF'>END_TESTF</link>
+	</programlisting>
+	
+	<section id="BEGIN_TEST">
+		<title>BEGIN_TEST</title>
+		<indexterm><primary>BEGIN_TEST</primary></indexterm>
+		<indexterm><primary>END_TEST</primary></indexterm>
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			BEGIN_TEST introduces a routine that constitues a standalone test, i.e. a test that is not
+			part of a fixture.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+BEGIN_TEST( Name )
+			</programlisting>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Name</emphasis> Name of the test. The name must be a valid C++ 
+			identifier; it must follow the naming rules for functions.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+			<programlisting>
+BEGIN_TEST( TestThrow )
+{
+    WIN_ASSERT_THROWS(
+		RaiseSimpleException(), 
+		SimpleException,
+        _T( "Expecting SimpleException" ) );
+}
+END_TEST
+			</programlisting>
+			
+			<note>
+			Note that END_TEST must be used to mark the end of the
+			test.
+			</note>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+	</section>
+	
+	<section id="FIXTURE">
+		<title>FIXTURE</title>
+		<indexterm><primary>FIXTURE</primary></indexterm>
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			FIXTURE defines a fixture to which tests can be assigned to using
+			<link linkend='BEGIN_TESTF'>BEGIN_TESTF</link>. For
+			a fixture to be workable, note that at least one test has to be added using the aforementioned
+			constructs.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+FIXTURE( Name )
+			</programlisting>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>Name</emphasis> Name of the fixture. The name must be a valid C++ 
+			identifier; it must follow the naming rules for functions.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+			<programlisting>
+FIXTURE( TestFixture );
+			</programlisting>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+	</section>
+
+	<section id="SETUP">
+		<title>SETUP</title>
+		<indexterm><primary>SETUP</primary></indexterm>
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			Used to implement a setup routine. This routine will be called once per test routine, before the test 
+			routine itself is invoked. As such, setup routines should be used to initialize any state (i.e. static
+			variables, environment) required by the test routines. 
+			</para>
+			<para>
+			Using SETUP to implement a setup routine for a fixture is optional. Note, however, that at most 
+			one setup routine may be defined per fixture.
+			</para>
+			<note>
+			WinUnit setup routines correspond to and have the same semantics as <emphasis>before</emphasis> 
+			routines in the cfix API.
+			</note>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+SETUP( FixtureName )
+			</programlisting>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>FixtureName</emphasis> Name of the fixture to assign the setup routine to. The fixture (and its name)
+			must have been defined previously using <link linkend='FIXTURE'>FIXTURE</link>.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+			<programlisting>
+FIXTURE( TestFixture );
+
+SETUP( TestFixture )
+{    
+  WIN_TRACE( L"Setting up" );
+}
+			</programlisting>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+	</section>
+	
+	<section id="TEARDOWN">
+		<title>TEARDOWN</title>
+		<indexterm><primary>TEARDOWN</primary></indexterm>
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			Used to implement a teardown routine. This routine will be called once per test routine, after the test 
+			routine itself has completed. As such, teardown routines should be used to clean up any state that has been 
+			set up by <link linkend='SETUP'>SETUP</link> and test routines.
+			</para>
+			<para>
+			Using TEARDOWN to implement a teardown routine for a fixture is optional. Note, however, that at most 
+			one teardown routine may be defined per fixture.
+			</para>
+			<note>
+			WinUnit teardown routines correspond to and have the same semantics as <emphasis>after</emphasis> 
+			routines in the cfix API.
+			</note>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+TEARDOWN( FixtureName )
+			</programlisting>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>FixtureName</emphasis> Name of the fixture to assign the teardown routine to. The fixture (and its name)
+			must have been defined previously using <link linkend='FIXTURE'>FIXTURE</link>.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+			<programlisting>
+FIXTURE( TestFixture );
+
+TEARDOWN( TestFixture )
+{    
+  WIN_TRACE( L"Tearing down" );
+}
+			</programlisting>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+	</section>
+	
+	<section id="BEGIN_TESTF">
+		<title>BEGIN_TESTF</title>
+		<indexterm><primary>BEGIN_TESTF</primary></indexterm>
+		<indexterm><primary>END_TESTF</primary></indexterm>
+		<simplesect>
+			<title>Synopsis</title>
+			<para>
+			BEGIN_TESTF is used to implement a test that is part of a fixture. It is similar to
+			<link linkend='BEGIN_TEST'>BEGIN_TEST</link>, yet also adds the test to the corresponding fixture.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Declaration</title>
+			<programlisting>
+BEGIN_TESTF( TestName, FixtureName )
+			</programlisting>
+		</simplesect>
+		
+		<simplesect>
+			<title>Parameters</title>
+			<para>
+			[in] <emphasis>TestName</emphasis> Name of the test routine. The name must be unique within the fixture and has
+			to be a valid C++ identifier; it must follow the naming rules for functions.
+			</para>
+			<para>
+			[in] <emphasis>FixtureName</emphasis> Name of the fixture to assign the test routine to. The fixture (and its name)
+			must have been defined previously using <link linkend='FIXTURE'>FIXTURE</link>.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Usage example</title>
+			<programlisting>
+FIXTURE( TestFixture );
+
+BEGIN_TESTF( Test01, TestFixture )
+{
+    WIN_ASSERT_THROWS(
+		RaiseSimpleException(), 
+		SimpleException,
+        _T( "Expecting SimpleException" ) );
+}
+END_TESTF
+			</programlisting>
+			
+			<note>
+			Note that END_TESTF must be used to mark the end of the
+			test.
+			</note>
+		</simplesect>
+		&TestApiWuDefaultRequirements13;
+	</section>
+</section>	

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Include>
+  <File Id="FileSamplesUserCcStdafxCpp" Name="stdafx.cpp" Source="$(var.CFIX_TREE)\samples\UserCc\stdafx.cpp" />
+  <File Id="FileSamplesUserCcStdafxH" Name="stdafx.h" Source="$(var.CFIX_TREE)\samples\UserCc\stdafx.h" />
+  <File Id="FileSamplesUserCcSimpleCpp" Name="simple.cpp" Source="$(var.CFIX_TREE)\samples\UserCc\simple.cpp" />
+  <File Id="FileSamplesUserCcImprovedCpp" Name="improved.cpp" Source="$(var.CFIX_TREE)\samples\UserCc\improved.cpp" />
+  <File Id="FileSamplesUserCcAdderCpp" Name="adder.cpp" Source="$(var.CFIX_TREE)\samples\UserCc\adder.cpp" />
+  <File Id="FileSamplesUserCcAdderH" Name="adder.h" Source="$(var.CFIX_TREE)\samples\UserCc\adder.h" />
+  <File Id="FileSamplesUserCcSln08" Name="VsSaCc08.sln" LongName="ExampleCcVs2008.sln" Source="$(var.CFIX_TREE)\samples\UserCc\ExampleCcVs2008.sln" />
+  <File Id="FileSamplesUserCcVcp08" Name="VsSaCc08.VCP" LongName="ExampleCcVs2008.vcproj" Source="$(var.CFIX_TREE)\samples\UserCc\ExampleCcVs2008.vcproj" />
+  <File Id="FileSamplesUserCcSln05" Name="VsSaCc05.sln" LongName="ExampleCcVs2005.sln" Source="$(var.CFIX_TREE)\samples\UserCc\ExampleCcVs2005.sln" />
+  <File Id="FileSamplesUserCcVcp05" Name="VsSaCc05.VCP" LongName="ExampleCcVs2005.vcproj" Source="$(var.CFIX_TREE)\samples\UserCc\ExampleCcVs2005.vcproj" />
+  <File Id="FileSamplesUserCcSln03" Name="VsSaCc03.sln" LongName="ExampleCcVs2003.sln" Source="$(var.CFIX_TREE)\samples\UserCc\ExampleCcVs2003.sln" />
+  <File Id="FileSamplesUserCcVcp03" Name="VsSaCc03.VCP" LongName="ExampleCcVs2003.vcproj" Source="$(var.CFIX_TREE)\samples\UserCc\ExampleCcVs2003.vcproj" />
+</Include>

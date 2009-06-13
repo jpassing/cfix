@@ -1,0 +1,280 @@
+body
+{
+	background-image: url('img/bg.jpg');
+	background-color: #012700;
+	background-repeat: no-repeat;
+	
+	font-family: Tahoma, Verdana, Arial, Helvetica;
+	font-size: 10pt;
+	text-align: center;
+	
+	margin-top: 60px;
+}
+
+h1
+{
+	font-size: 16pt;
+}
+
+h2
+{
+	font-size: 14pt;
+}
+
+h3
+{
+	font-size: 12pt;
+}
+
+h4
+{
+	font-size: 10pt;
+}
+
+
+#header	
+{ 
+	background-color: white;
+	width: 820px;
+	height: 60px;
+	margin: 0 auto;
+	text-align: left;
+	padding-top: 20px;
+}
+
+#menu	
+{ 
+	background-color: white;
+	height: 40px;
+	margin: 0 auto;
+	
+	width: 820px;
+}
+
+#main 
+{
+	background-color: white;
+	position: relative;
+	width: 820px;
+	margin: 0 auto;
+	text-align: left;
+	padding-bottom: 30px;
+}
+
+#footer 
+{
+	background-color: #012700;
+	position: relative;
+	width: 820px;
+	margin: 0 auto;
+	text-align: center;
+	
+	margin-top: 1px;
+	padding-top: 10px;
+	
+	color: gray;
+	font-size: 8pt;
+}
+
+#main_sidebar
+{
+	width: 200px;
+	float: left;
+	padding: 5px;
+}
+
+#main_content
+{
+	width: 580px;
+	float: left;
+	padding-right: 15px;
+	padding-left: 15px;
+	padding-top: 0px;
+}
+
+#main_content_wide
+{
+        width: 780px;
+        float: left;
+        padding-right: 15px;
+        padding-left: 15px;
+        padding-top: 0px;
+}
+
+#main_clear
+{
+	height: 1px;
+	font-size: 1px;
+	float: none;
+	clear: both;
+}
+
+.submenu
+{
+	padding-top: 10px;
+	padding-bottom: 20px;
+}
+
+.submenu_box
+{
+	background-color: #012700;
+	color: white;
+	padding: 4px;
+	padding-left: 14px;
+}
+
+.submenu_content ul
+{
+	margin: 0;
+	padding: 5px 0px 5px 30px;
+}
+.submenu_content li
+{
+	list-style-type: square;
+	padding-top: 4pt;
+}
+
+.submenu_content a
+{
+	color: #012700;
+	text-decoration: none;
+}
+
+.submenu_content a:hover
+{
+	color: #7EB800;
+}
+
+#menu_box
+{
+	margin-left: 5px;
+	margin-right: 5px;
+	border: 2px solid #E5E5E5;
+}
+
+ul#mainmenu
+{
+		list-style: none;
+		padding: 0;
+		margin: 0 20px;
+		height: 25px;
+}
+
+ul#mainmenu li
+{
+		float: left;
+}
+
+ul#mainmenu li a
+{
+		text-decoration: none;
+		color: black;
+		display: block;
+		padding: 0 10px;
+		line-height: 25px;
+		vertical-align: middle;
+		font-weight: bold;
+}
+
+ul#mainmenu li a:hover
+{
+		text-decoration: underline;
+		color: black;
+		background-color: #E5E5E5;
+}
+
+#tab	
+{ 
+	width: 810px;
+	height: 30px;
+	margin: 0 auto;
+}
+
+.tab_active
+{
+	background-image: url('img/tab_active.png');
+	background-repeat: repeat-x;
+	padding-top: 10px;
+	padding-left: 10px;
+	padding-right: 5px;
+	height: 30px;
+	float: left;
+}
+
+.tab_passive
+{
+	background-image: url('img/tab_passive.png');
+	background-repeat: repeat-x;
+	padding-top: 10px;
+	padding-left: 5px;
+	padding-right: 5px;
+	height: 30px;
+	float: left;
+}
+
+.tab_passive a
+{
+	color: black;
+}
+
+.tab_active a
+{
+	color: black;
+}
+
+.tab_active2passive
+{
+	height: 30px;
+	float: left;
+}
+
+.tab_passive2active
+{
+	height: 30px;
+	float: left;
+}
+
+.tab_passiveend
+{
+	height: 30px;
+	float: left;
+}
+
+.tab_activeend
+{
+	height: 30px;
+	float: left;
+}
+
+.tab_clear
+{
+	float: none;
+	clear: both;
+}
+
+a
+{
+	color: #557A00;
+	text-decoration: none;
+}
+
+a:hover
+{
+	text-decoration: underline;
+}
+
+.download
+{
+	border: 2px solid #E5E5E5;
+}
+
+.download img
+{
+	border: 0px;
+}
+
+hr {
+	border: none 0; 
+	border-top: 1px dashed #2D5D78;
+	height: 1px;
+}

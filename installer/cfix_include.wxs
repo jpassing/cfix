@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Include>
+  <File Id="FileCdiagH" Name="cdiag.h" Source="$(var.CFIX_TREE)\include\cdiag.h" Vital="yes"/>
+  <File Id="FileCdiagMsgH" Name="cdiagmsg.h" Source="$(var.CFIX_TREE)\include\cdiagmsg.h"  Vital="yes"/>
+  <File Id="FileCfixH" Name="cfix.h" Source="$(var.CFIX_TREE)\include\cfix.h"  Vital="yes"/>
+  <File Id="FileCfixCcH" Name="cfixcc.h" Source="$(var.CFIX_TREE)\include\cfixcc.h"  Vital="yes"/>
+  <File Id="FileCfixApiH" Name="cfixapi.h" Source="$(var.CFIX_TREE)\include\cfixapi.h"  Vital="yes"/>
+  <File Id="FileCfixAuxH" Name="cfixaux.h" Source="$(var.CFIX_TREE)\include\cfixaux.h"  Vital="yes"/>
+  <!-- <File Id="FileCfixKlMsgH" Name="CFIXKL_1.H" LongName="cfixklmsg.h" Source="$(var.CFIX_TREE)\include\cfixklmsg.h"  Vital="yes"/>-->
+  <!-- <File Id="FileCfixKrH" Name="cfixkr.h" Source="$(var.CFIX_TREE)\include\cfixkr.h"  Vital="yes"/>-->
+  <!-- <File Id="FileCfixKrioH" Name="cfixkrio.h" Source="$(var.CFIX_TREE)\include\cfixkrio.h"  Vital="yes"/>-->
+  <File Id="FileCfixMsgH" Name="cfixmsg.h" Source="$(var.CFIX_TREE)\include\cfixmsg.h"  Vital="yes"/>
+  <File Id="FileCfixPeH" Name="cfixpe.h" Source="$(var.CFIX_TREE)\include\cfixpe.h"  Vital="yes"/>
+</Include>

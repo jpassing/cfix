@@ -1,0 +1,31 @@
+BSCMAKE_FLAGS=$(BSCMAKE_FLAGS) /n
+
+#
+# N.B. The WinUnit code requires /W3.
+#
+MSC_WARNING_LEVEL=/W3
+
+INCLUDES=..\..\..\..\include;..\..\..\..\..\..\include
+
+!if "$(TARGET_DIRECTORY)"=="i386"
+USER_C_FLAGS=/D_UNICODE /DUNICODE /analyze /EHa
+LINKER_FLAGS=/nxcompat /dynamicbase /SafeSEH
+!else
+USER_C_FLAGS=/D_UNICODE /DUNICODE /EHa
+LINKER_FLAGS=/nxcompat /dynamicbase
+!endif
+
+!if "$(DDKBUILDENV)"=="chk"
+DEBUG_CRTS=1
+C_DEFINES = $(C_DEFINES) /D_DEBUG
+!endif
+
+USE_LIBCMT=1
+USE_STL=1
+
+TARGETNAME=wusamplelibw
+TARGETPATH=..\..\..\..\..\..\bin\$(DDKBUILDENV)
+TARGETTYPE=LIBRARY
+
+SOURCES=\
+	..\BinaryNumber.cpp 

@@ -1,0 +1,80 @@
+p
+{
+	line-height: 16pt;
+	margin-left: 20px;
+}
+
+.itemizedlist li
+{
+	list-style-type: square;
+	line-height: 16pt;
+	padding-top: 10px;
+}
+
+.toc b	/* Table of Contents */
+{
+	margin-left: -20px;
+}
+.toc 
+{
+	margin-left: 20px;
+}
+
+.heading
+{
+	font-size: 10pt;
+	color: gray;
+	line-height: 7px;
+}
+
+hr {
+	border: none 0; 
+	border-top: 1px dashed #2D5D78;
+	height: 1px;
+}
+
+.figure
+{
+	text-align: center;
+}
+
+td 
+{
+	font-size: 10pt;
+}
+
+dd 
+{
+	margin-left: 20px;
+}
+
+.programlisting
+{
+	font-size: 9pt;
+	margin-left: 30px;
+	margin-right: 30px;
+	background-color: #f5f5f5;
+	padding: 5px;
+	border: 1px coral solid;
+	border-color: #2D5D78;
+	border-width: thin;
+}
+
+.table table 
+{
+	border-collapse: collapse;
+	margin-left: 20px;
+}
+
+.table th 
+{
+	padding: 0 0.5em;
+	text-align: left;
+	font-size: 10pt;
+}
+
+.table td 
+{
+	border-bottom: 1px solid #CCC;
+	padding: 5px;
+}

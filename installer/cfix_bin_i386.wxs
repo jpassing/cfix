@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Include>
+  <File
+	  Id="FileI386CdiagDll"
+	  Name="cdiag.dll"
+	  DiskId="1"
+	  Source="$(var.CFIX_TREE)\bin\fre\i386\cdiag.dll"
+	  Vital="yes"/>
+  <File
+    Id="FileI386CdiagPdb"
+    Name="cdiag.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\i386\cdiag.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
+    Id="FileI386CfixDll"
+    Name="cfix.dll"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\i386\cfix.dll"
+    Vital="yes"/>
+  <File
+    Id="FileI386CfixPdb"
+    Name="cfix.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\i386\cfix.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
+    Id="FileI386Cfix32Exe"
+    Name="cfix32.exe"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\i386\cfix32.exe"
+    Vital="yes"/>
+  <File
+    Id="FileI386Cfix32Pdb"
+    Name="cfix32.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\i386\cfix32.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
+    Id="FileI386CfixklDll"
+    Name="cfixkl.dll"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\i386\cfixkl.dll"
+    Vital="yes"/>
+  <File
+    Id="FileI386CfixklPdb"
+    Name="cfixkl.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\i386\cfixkl.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
+    Id="FileI386Cfixkr32Sys"
+    Name="cfixkr32.sys"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\i386\cfixkr32.sys"
+    Vital="yes"/>
+  <File
+    Id="FileI386Cfixkr32Pdb"
+    Name="cfixkr32.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\i386\cfixkr32.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
+    Id="FileI386DbghelpDll"
+    Name="dbghelp.dll"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\redist\i386\dbghelp.dll"
+    Vital="yes"/>
+  <File
+    Id="FileI386SymSrvDll"
+    Name="symsrv.dll"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\redist\i386\symsrv.dll"
+    Vital="yes"/>
+</Include>

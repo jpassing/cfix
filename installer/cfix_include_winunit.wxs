@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Include>
+  <File Id="FileWinunitH" Name="winunit.h" Source="$(var.CFIX_TREE)\compat\winunit\include\winunit.h" Vital="yes"/>
+</Include>

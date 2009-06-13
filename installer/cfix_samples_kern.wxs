@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Include>
+  <File Id="FileSamplesKernelKtestDef" Name="ktest.def" Source="$(var.CFIX_TREE)\samples\Kernel\kern.def" />
+  <File Id="FileSamplesKernelSources" Name="SOURCES" Source="$(var.CFIX_TREE)\samples\Kernel\SOURCES" />
+  <File Id="FileSamplesKernelMakefile" Name="makefile" Source="$(var.CFIX_TREE)\samples\Kernel\makefile" />
+  <File Id="FileSamplesKernelSuiteC" Name="suite.c" Source="$(var.CFIX_TREE)\samples\Kernel\suite.c" />
+</Include>

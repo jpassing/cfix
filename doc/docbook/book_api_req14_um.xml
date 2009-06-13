@@ -1,0 +1,37 @@
+<simplesect>
+	<title>Requirements</title>
+	
+	<table frame="all" tocentry="0">
+		<tgroup cols="3" align="left" colsep="1" rowsep="1">
+			<thead>
+				<row>
+				  <entry></entry>
+				  <entry>User Mode</entry>
+				  <entry>Kernel Mode</entry>
+				</row>
+			</thead>
+			<tbody>
+				<row>
+				  <entry>Available since</entry>
+				  <entry>1.4</entry>
+				  <entry>Not supported</entry>
+				</row>
+				<row>
+				  <entry>Header</entry>
+				  <entry>Declared in cfix.h</entry>
+				  <entry>Not supported</entry>
+				</row>
+				<row>
+				  <entry>Library</entry>
+				  <entry>Link to cfix.lib</entry>
+				  <entry>Not supported</entry>
+				</row>
+				<row>
+				  <entry>DLL</entry>
+				  <entry>cfix.dll</entry>
+				  <entry>Not supported</entry>
+				</row>
+			</tbody>
+		</tgroup>
+	</table>
+</simplesect>
