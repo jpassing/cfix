@@ -1,0 +1,33 @@
+#
+# setup VisualC++ source browsing
+#
+#BROWSER_INFO=1
+BSCMAKE_FLAGS=$(BSCMAKE_FLAGS) /n
+
+MSC_WARNING_LEVEL=/W4 /Wp64
+
+INCLUDES=..\..\..\include
+
+!if "$(TARGET_DIRECTORY)"=="i386"
+USER_C_FLAGS=/D_UNICODE /DUNICODE /analyze
+LINKER_FLAGS=/nxcompat /dynamicbase /SafeSEH
+!else
+USER_C_FLAGS=/D_UNICODE /DUNICODE
+LINKER_FLAGS=/nxcompat /dynamicbase
+!endif
+
+!if "$(DDKBUILDENV)"=="chk"
+DEBUG_CRTS=1
+!endif
+
+USE_LIBCMT=1
+
+TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib
+
+TARGETNAME=testlib1
+TARGETPATH=..\..\..\bin\$(DDKBUILDENV)
+TARGETTYPE=DYNLINK
+
+SOURCES=\
+	suite.c
+	

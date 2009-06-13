@@ -1,0 +1,42 @@
+<simplesect>
+	<title>Requirements</title>
+	
+	<table frame="all" tocentry="0">
+		<tgroup cols="4" align="left" colsep="1" rowsep="1">
+			<thead>
+				<row>
+				  <entry></entry>
+				  <entry>User Mode</entry>
+				  <entry>Kernel Mode</entry>
+				</row>
+			</thead>
+			<tbody>
+				<row>
+				  <entry>Available since</entry>
+				  <entry>1.0</entry>
+				  <entry>1.1</entry>
+				</row>
+				<row>
+				  <entry>Header</entry>
+				  <entry>Declared in cfix.h</entry>
+				  <entry>Declared in cfix.h</entry>
+				</row>
+				<row>
+				  <entry>Library</entry>
+				  <entry>Link to cfix.lib</entry>
+				  <entry>Link to cfixkdrv.lib</entry>
+				</row>
+				<row>
+				  <entry>DLL</entry>
+				  <entry>cfix.dll</entry>
+				  <entry>N/A</entry>
+				</row>
+				<row>
+				  <entry>IRQL</entry>
+				  <entry>N/A</entry>
+				  <entry>Callable at any IRQL</entry>
+				</row>
+			</tbody>
+		</tgroup>
+	</table>
+</simplesect>
