@@ -582,8 +582,8 @@ static HRESULT CfixrunsExecCtxCreateChildThread(
 
 	UNREFERENCED_PARAMETER( MainThreadId );
 	ASSERT( ContextForChild );
-	ASSERT( CurrentState && CurrentState->CurrentTestCase );
-	if ( ! CurrentState || ! CurrentState->CurrentTestCase )
+	ASSERT( CurrentState && CurrentState->CurrentFixture );
+	if ( ! CurrentState || ! CurrentState->CurrentFixture )
 	{
 		CfixrunpOutputLogMessage(
 			Context->State->LogSession,

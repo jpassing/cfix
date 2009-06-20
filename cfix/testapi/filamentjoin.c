@@ -64,4 +64,12 @@ static void SpawnAndAutoJoin()
 CFIX_BEGIN_FIXTURE( FilamentJoin )
 	CFIX_FIXTURE_ENTRY( SpawnAndJoinPolitely )
 	CFIX_FIXTURE_ENTRY( SpawnAndAutoJoin )
+
+	//
+	// Threads have to work in all these situations, too.
+	//
+	CFIX_FIXTURE_SETUP( SpawnAndAutoJoin )
+	CFIX_FIXTURE_TEARDOWN( SpawnAndAutoJoin )
+	CFIX_FIXTURE_BEFORE( SpawnAndAutoJoin )
+	CFIX_FIXTURE_AFTER( SpawnAndAutoJoin )
 CFIX_END_FIXTURE()

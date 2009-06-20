@@ -34,7 +34,6 @@ typedef struct _THREAD_START_PARAMETERS
 	PVOID UserParaneter;
 	
 	PVOID ParentContext;
-
 	PCFIXP_FILAMENT Filament;
 
 	//
@@ -51,9 +50,19 @@ static DWORD CfixsThreadStart(
 	BOOL Dummy;
 	DWORD ExitCode;
 
+	PVOID ParentContext;
+	PCFIXP_FILAMENT Filament;
+	PTHREAD_START_ROUTINE StartAddress;
+	PVOID UserParaneter;
+
 	ASSERT( Parameters->StartAddress );
 	ASSERT( Parameters->Filament );
 	__assume( Parameters->Filament );
+
+	ParentContext	= Parameters->ParentContext;
+	Filament		= Parameters->Filament;
+	StartAddress	= Parameters->StartAddress;
+	UserParaneter	= Parameters->UserParaneter;
 
 	//
 	// Set current filament s.t. it is accessible by callees
@@ -73,28 +82,31 @@ static DWORD CfixsThreadStart(
 
 	( VOID ) SetEvent( Parameters->InitializationCompleted );
 
+	//
+	// N.B. From now on, Parameters may not be touched any more.
+	//
+
 	__try
 	{
-		ExitCode = ( Parameters->StartAddress )( Parameters->UserParaneter );
+		ExitCode = ( StartAddress )( UserParaneter );
 	}
 	__except ( CfixpExceptionFilter( 
 		GetExceptionInformation(), 
-		Parameters->Filament,
+		Filament,
 		&Dummy ) )
 	{
 		NOP;
 		ExitCode = ( DWORD ) CFIX_EXIT_THREAD_ABORTED;
 	}
 
-	Parameters->Filament->ExecutionContext->AfterChildThreadFinish(
-		Parameters->Filament->ExecutionContext,
-		Parameters->Filament->MainThreadId,
-		Parameters->ParentContext );
+	Filament->ExecutionContext->AfterChildThreadFinish(
+		Filament->ExecutionContext,
+		Filament->MainThreadId,
+		ParentContext );
 
 	VERIFY( S_OK == CfixpSetCurrentFilament( 
 		NULL, 
 		NULL ) );
-	free( Parameters );
 
 	return ExitCode;
 }
@@ -111,19 +123,12 @@ HANDLE CfixCreateThread2(
 {
 	PCFIXP_FILAMENT Filament;
 	HRESULT Hr;
-	PTHREAD_START_PARAMETERS Parameters;
+	THREAD_START_PARAMETERS Parameters;
 	HANDLE Thread;
 
 	if ( Flags > CFIX_THREAD_FLAG_CRT )
 	{
 		SetLastError( ERROR_INVALID_PARAMETER );
-		return NULL;
-	}
-
-	Parameters = malloc( sizeof( THREAD_START_PARAMETERS ) );
-	if ( ! Parameters )
-	{
-		SetLastError( ERROR_OUTOFMEMORY );
 		return NULL;
 	}
 
@@ -137,12 +142,12 @@ HANDLE CfixCreateThread2(
 		return NULL;
 	}
 
-	Parameters->StartAddress		= StartAddress;
-	Parameters->UserParaneter		= UserParameter;
-	Parameters->Filament			= Filament;
+	Parameters.StartAddress		= StartAddress;
+	Parameters.UserParaneter		= UserParameter;
+	Parameters.Filament			= Filament;
 
-	Parameters->InitializationCompleted = CreateEvent( NULL, FALSE, FALSE, NULL );
-	if ( Parameters->InitializationCompleted == NULL )
+	Parameters.InitializationCompleted = CreateEvent( NULL, FALSE, FALSE, NULL );
+	if ( Parameters.InitializationCompleted == NULL )
 	{
 		//
 		// Keep last error.
@@ -156,7 +161,7 @@ HANDLE CfixCreateThread2(
 	Hr = Filament->ExecutionContext->CreateChildThread(
 		Filament->ExecutionContext,
 		Filament->MainThreadId,
-		&Parameters->ParentContext );
+		&Parameters.ParentContext );
 	if ( FAILED( Hr ) )
 	{
 		SetLastError( Hr );
@@ -174,7 +179,7 @@ HANDLE CfixCreateThread2(
 			ThreadAttributes,
 			( unsigned) StackSize,
 			( unsigned ( * )( void * ) ) CfixsThreadStart,
-			Parameters,
+			&Parameters,
 			CreationFlags,
 			( unsigned * ) ThreadId );
 	}
@@ -184,7 +189,7 @@ HANDLE CfixCreateThread2(
 			ThreadAttributes,
 			StackSize,
 			CfixsThreadStart,
-			Parameters,
+			&Parameters,
 			CreationFlags,
 			ThreadId );
 	}
@@ -202,10 +207,10 @@ HANDLE CfixCreateThread2(
 		//
 
 		( VOID ) WaitForSingleObject( 
-			Parameters->InitializationCompleted,
+			Parameters.InitializationCompleted,
 			INFINITE );
-		VERIFY( CloseHandle( Parameters->InitializationCompleted ) );
-		Parameters->InitializationCompleted = NULL;
+		VERIFY( CloseHandle( Parameters.InitializationCompleted ) );
+		Parameters.InitializationCompleted = NULL;
 	}
 
 	return Thread;
