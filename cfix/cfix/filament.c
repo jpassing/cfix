@@ -103,13 +103,15 @@ BOOL CfixpTeardownFilamentTls()
 VOID CfixpInitializeFilament(
 	__in PCFIX_EXECUTION_CONTEXT ExecutionContext,
 	__in ULONG MainThreadId,
+	__in ULONG Flags,
 	__out PCFIXP_FILAMENT Filament
 	)
 {
 	ZeroMemory( Filament, sizeof( CFIXP_FILAMENT ) );
 
-	Filament->ExecutionContext = ExecutionContext;
-	Filament->MainThreadId = MainThreadId;
+	Filament->ExecutionContext	= ExecutionContext;
+	Filament->MainThreadId		= MainThreadId;
+	Filament->Flags				= Flags;
 
 	InitializeCriticalSection( &Filament->ChildThreads.Lock );
 }

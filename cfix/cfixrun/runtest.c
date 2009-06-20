@@ -63,17 +63,17 @@ static HRESULT CfixrunsCreateTsExecAction(
 	ASSERT( State != NULL );
 
 	ExecutionFlags = 0;
-	if ( State->Options->ShortcutFixtureOnFailure )
+	if ( State->Options->ShortCircuitFixtureOnFailure )
 	{
-		ExecutionFlags |= CFIX_FIXTURE_EXECUTION_SHORTCUT_FIXTURE_ON_FAILURE;
+		ExecutionFlags |= CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_FIXTURE_ON_FAILURE;
 	}
-	if ( State->Options->ShortcutRunOnFailure )
+	if ( State->Options->ShortCircuitRunOnFailure )
 	{
-		ExecutionFlags |= CFIX_FIXTURE_EXECUTION_SHORTCUT_RUN_ON_FAILURE;
+		ExecutionFlags |= CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_RUN_ON_FAILURE;
 	}
-	if ( State->Options->ShortcutRunOnSetupFailure )
+	if ( State->Options->ShortCircuitRunOnSetupFailure )
 	{
-		ExecutionFlags |= CFIX_FIXTURE_EXECUTION_SHORTCUT_RUN_ON_SETUP_FAILURE;
+		ExecutionFlags |= CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_RUN_ON_SETUP_FAILURE;
 	}
 
 	return CfixCreateFixtureExecutionAction(

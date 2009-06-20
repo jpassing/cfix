@@ -445,7 +445,7 @@ static VOID CfixsReferenceTestModuleMethod(
 	InterlockedIncrement( &Module->ReferenceCount );
 }
 
-static VOID CfixsDereferenceTestModuleMethod(
+static VOID CfixsDereferenceTestModule(
 	__in PCFIX_TEST_MODULE TestModule
 	)
 {
@@ -487,6 +487,9 @@ static HRESULT CfixsRunTestRoutine(
 	CfixpInitializeFilament(
 		Context, 
 		GetCurrentThreadId(),
+		IsDebuggerPresent()
+			? 0
+			: CFIXP_FILAMENT_FLAG_CAPTURE_STACK_TRACES,
 		&Filament );
 
 	Hr = CfixpSetCurrentFilament( 
@@ -544,14 +547,12 @@ static HRESULT CfixsRunTestRoutine(
 	}
 }
 
-static HRESULT CfixsRunTestCaseMethod(
-	__in PCFIX_FIXTURE Fixture,
+static HRESULT CfixsRunTestCaseTestModule(
 	__in PCFIX_TEST_CASE TestCase,
 	__in PCFIX_EXECUTION_CONTEXT Context
 	)
 {
-	if ( ! Fixture || 
-		 ! TestCase || 
+	if ( ! TestCase || 
 		 ! Context ||
 		 Context->Version != CFIX_TEST_CONTEXT_VERSION )
 	{
@@ -563,7 +564,7 @@ static HRESULT CfixsRunTestCaseMethod(
 		Context );
 }
 
-static HRESULT CfixsRunSetupMethod(
+static HRESULT CfixsRunSetupTestModule(
 	__in PCFIX_FIXTURE Fixture,
 	__in PCFIX_EXECUTION_CONTEXT Context
 	)
@@ -616,7 +617,7 @@ static HRESULT CfixsRunSetupMethod(
 	return Hr;
 }
 
-static HRESULT CfixsRunTeardownMethod(
+static HRESULT CfixsRunTeardownTestModule(
 	__in PCFIX_FIXTURE Fixture,
 	__in PCFIX_EXECUTION_CONTEXT Context
 	)
@@ -652,7 +653,7 @@ static HRESULT CfixsRunTeardownMethod(
 	}
 }
 
-static HRESULT CfixsRunBeforeMethod(
+static HRESULT CfixsRunBeforeTestModule(
 	__in PCFIX_FIXTURE Fixture,
 	__in PCFIX_EXECUTION_CONTEXT Context
 	)
@@ -688,7 +689,7 @@ static HRESULT CfixsRunBeforeMethod(
 	}
 }
 
-static HRESULT CfixsRunAfterMethod(
+static HRESULT CfixsRunAfterTestModule(
 	__in PCFIX_FIXTURE Fixture,
 	__in PCFIX_EXECUTION_CONTEXT Context
 	)
@@ -814,13 +815,13 @@ HRESULT CFIXCALLTYPE CfixCreateTestModuleFromPeImage(
 	Module->ReferenceCount = 1;
 
 	Module->Base.Version				= CFIX_TEST_MODULE_VERSION;
-	Module->Base.Routines.RunTestCase	= CfixsRunTestCaseMethod;
-	Module->Base.Routines.Setup			= CfixsRunSetupMethod;
-	Module->Base.Routines.Teardown		= CfixsRunTeardownMethod;
-	Module->Base.Routines.Before		= CfixsRunBeforeMethod;
-	Module->Base.Routines.After			= CfixsRunAfterMethod;
+	Module->Base.Routines.RunTestCase	= CfixsRunTestCaseTestModule;
+	Module->Base.Routines.Setup			= CfixsRunSetupTestModule;
+	Module->Base.Routines.Teardown		= CfixsRunTeardownTestModule;
+	Module->Base.Routines.Before		= CfixsRunBeforeTestModule;
+	Module->Base.Routines.After			= CfixsRunAfterTestModule;
 	Module->Base.Routines.Reference		= CfixsReferenceTestModuleMethod;
-	Module->Base.Routines.Dereference	= CfixsDereferenceTestModuleMethod;
+	Module->Base.Routines.Dereference	= CfixsDereferenceTestModule;
 	Module->Base.Routines.GetInformationStackFrame = CfixpGetInformationStackframe;
 	
 	//

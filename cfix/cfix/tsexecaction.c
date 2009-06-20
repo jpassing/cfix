@@ -133,7 +133,6 @@ static HRESULT CfixsRunTestCaseFixtureExecutionAction(
 	// Before-routine succeeded, proceed with actual test routine.
 	//
 	HrTestCase = Action->Module->Routines.RunTestCase(
-		Action->Fixture,
 		TestCase,
 		Context );
 
@@ -234,16 +233,16 @@ static HRESULT CfixsRunFixtureExecutionAction(
 		// N.B. Event has already been delivered to execution context.
 		//
 		FixtureRanToCompletion = FALSE;
-		if ( Action->Flags & CFIX_FIXTURE_EXECUTION_SHORTCUT_RUN_ON_SETUP_FAILURE )
+		if ( Action->Flags & CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_RUN_ON_SETUP_FAILURE )
 		{
 			//
-			// Shortcut run by returning failure HR.
+			// Short-circuit run by returning failure HR.
 			//
 		}
 		else
 		{
 			//
-			// Shortcut fixture by setting HR back to success.
+			// Short-circuit fixture by setting HR back to success.
 			//
 			Hr = S_OK;
 		}
@@ -257,14 +256,14 @@ static HRESULT CfixsRunFixtureExecutionAction(
 	}
 	else
 	{
-		BOOL FixtureShortcut = FALSE;
+		BOOL FixtureShortCircuit = FALSE;
 		HRESULT TeardownHr;
 		
 		//
 		// Run all testcases.
 		//
 		for ( Index = 0; 
-			  ! FixtureShortcut && Index < Action->Fixture->TestCaseCount; 
+			  ! FixtureShortCircuit && Index < Action->Fixture->TestCaseCount; 
 			  Index++ )
 		{
 			BOOL TestCaseRanToCompletion;
@@ -284,7 +283,7 @@ static HRESULT CfixsRunFixtureExecutionAction(
 				&Action->Fixture->TestCases[ Index ] );
 			if ( FAILED( Hr ) )
 			{
-				FixtureShortcut = TRUE;
+				FixtureShortCircuit = TRUE;
 				break;
 			}
 
@@ -305,12 +304,12 @@ static HRESULT CfixsRunFixtureExecutionAction(
 				 CFIX_E_AFTER_ROUTINE_FAILED == Hr ||
 				 CFIX_E_TEST_ROUTINE_FAILED == Hr )
 			{
-				if ( Action->Flags & CFIX_FIXTURE_EXECUTION_SHORTCUT_FIXTURE_ON_FAILURE )
+				if ( Action->Flags & CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_FIXTURE_ON_FAILURE )
 				{
 					//
-					// Shortcut fixture.
+					// Short-circuit fixture.
 					//
-					FixtureShortcut = TRUE;
+					FixtureShortCircuit = TRUE;
 
 					if ( Action->Flags & CFIX_FIXTURE_EXECUTION_ESCALATE_FIXTURE_FAILUES )
 					{
@@ -339,7 +338,7 @@ static HRESULT CfixsRunFixtureExecutionAction(
 				//
 				// Maintain failure HR s.t. run is aborted
 				//
-				FixtureShortcut = TRUE;
+				FixtureShortCircuit = TRUE;
 			}
 			else if ( FAILED( Hr ) )
 			{
@@ -356,7 +355,7 @@ static HRESULT CfixsRunFixtureExecutionAction(
 				TestCaseRanToCompletion );
 		}
 
-		FixtureRanToCompletion = ! FixtureShortcut;
+		FixtureRanToCompletion = ! FixtureShortCircuit;
 
 		//
 		// Teardown. Teardown failures are not severe - action

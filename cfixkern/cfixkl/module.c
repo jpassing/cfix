@@ -842,7 +842,6 @@ static HRESULT CfixklsRunAfterRoutine(
 
 
 static HRESULT CfixklsRunTestCaseRoutine(
-	__in PCFIX_FIXTURE Fixture,
 	__in PCFIX_TEST_CASE TestCase,
 	__in PCFIX_EXECUTION_CONTEXT Context
 	)
@@ -854,8 +853,7 @@ static HRESULT CfixklsRunTestCaseRoutine(
 	BOOL Abort;
 	BOOL RanToCompletion;
 
-	if ( ! Fixture || 
-		 ! TestCase || 
+	if ( ! TestCase || 
 		 ! Context ||
 		 Context->Version != CFIX_TEST_CONTEXT_VERSION )
 	{
@@ -863,7 +861,7 @@ static HRESULT CfixklsRunTestCaseRoutine(
 	}
 
 	Module = CONTAINING_RECORD(
-		Fixture->Module,
+		TestCase->Fixture->Module,
 		CFIXKLP_TEST_MODULE,
 		Base );
 
@@ -874,7 +872,7 @@ static HRESULT CfixklsRunTestCaseRoutine(
 		Module->ReflectorHandle,
 		Module->DriverBaseAddress,
 		Context,
-		( USHORT ) Fixture->Reserved,		// Contains FixtureKey
+		( USHORT ) TestCase->Fixture->Reserved,		// Contains FixtureKey
 		( USHORT ) TestCase->Routine,
 		&RanToCompletion,
 		&Abort,

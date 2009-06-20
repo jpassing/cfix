@@ -187,17 +187,17 @@ BOOL CfixrunParseCommandLine(
 			}
 			else if ( 0 == wcscmp( FlagName, L"fsf" ) )
 			{
-				Options->ShortcutFixtureOnFailure = TRUE;
+				Options->ShortCircuitFixtureOnFailure = TRUE;
 				State = StateExpectAny;
 			}
 			else if ( 0 == wcscmp( FlagName, L"fsr" ) )
 			{
-				Options->ShortcutRunOnFailure = TRUE;
+				Options->ShortCircuitRunOnFailure = TRUE;
 				State = StateExpectAny;
 			}
 			else if ( 0 == wcscmp( FlagName, L"fss" ) )
 			{
-				Options->ShortcutRunOnSetupFailure = TRUE;
+				Options->ShortCircuitRunOnSetupFailure = TRUE;
 				State = StateExpectAny;
 			}
 

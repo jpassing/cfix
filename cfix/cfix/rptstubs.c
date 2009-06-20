@@ -89,10 +89,11 @@ DWORD CfixpExceptionFilter(
 		//
 		// Capture stacktrace.
 		//
-		if ( CfixpIsStackTraceCreationDisabled || FAILED( CfixpCaptureStackTrace(
-			ExcpPointers->ContextRecord,
-			&Event.Base.StackTrace,
-			CFIXP_MAX_STACKFRAMES ) ) )
+		if ( ! CfixpFlagOn( Filament->Flags, CFIXP_FILAMENT_FLAG_CAPTURE_STACK_TRACES ) || 
+			FAILED( CfixpCaptureStackTrace(
+				ExcpPointers->ContextRecord,
+				&Event.Base.StackTrace,
+				CFIXP_MAX_STACKFRAMES ) ) )
 		{
 			Event.Base.StackTrace.FrameCount = 0;
 		}
@@ -185,10 +186,11 @@ CFIXAPI CFIX_REPORT_DISPOSITION CFIXCALLTYPE CfixPeReportFailedAssertion(
 	//
 	// Capture stacktrace.
 	//
-	if ( CfixpIsStackTraceCreationDisabled || FAILED( CfixpCaptureStackTrace(
-		NULL,
-		&Event.Base.StackTrace,
-		CFIXP_MAX_STACKFRAMES ) ) )
+	if ( ! CfixpFlagOn( Filament->Flags, CFIXP_FILAMENT_FLAG_CAPTURE_STACK_TRACES ) || 
+		 FAILED( CfixpCaptureStackTrace(
+			NULL,
+			&Event.Base.StackTrace,
+			CFIXP_MAX_STACKFRAMES ) ) )
 	{
 		Event.Base.StackTrace.FrameCount = 0;
 	}
@@ -391,10 +393,11 @@ CFIXAPI VOID CFIXCALLTYPE CfixPeReportInconclusiveness(
 	//
 	// Capture stacktrace.
 	//
-	if ( CfixpIsStackTraceCreationDisabled || FAILED( CfixpCaptureStackTrace(
-		NULL,
-		&Event.Base.StackTrace,
-		CFIXP_MAX_STACKFRAMES ) ) )
+	if ( ! CfixpFlagOn( Filament->Flags, CFIXP_FILAMENT_FLAG_CAPTURE_STACK_TRACES ) || 
+		 FAILED( CfixpCaptureStackTrace(
+			NULL,
+			&Event.Base.StackTrace,
+			CFIXP_MAX_STACKFRAMES ) ) )
 	{
 		Event.Base.StackTrace.FrameCount = 0;
 	}

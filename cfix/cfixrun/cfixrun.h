@@ -77,9 +77,9 @@ typedef struct _CFIXRUN_OPTIONS
 	BOOL PauseAtBeginning;
 	BOOL EnableKernelFeatures;
 
-	BOOL ShortcutFixtureOnFailure;
-	BOOL ShortcutRunOnFailure;
-	BOOL ShortcutRunOnSetupFailure;
+	BOOL ShortCircuitFixtureOnFailure;
+	BOOL ShortCircuitRunOnFailure;
+	BOOL ShortCircuitRunOnSetupFailure;
 
 	//
 	// Output Options.

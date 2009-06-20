@@ -277,7 +277,7 @@ void TestActionRun()
 
 		TEST_HR( CfixCreateFixtureExecutionAction(
 			Mod->Fixtures[ Index ],
-			CFIX_FIXTURE_EXECUTION_SHORTCUT_RUN_ON_SETUP_FAILURE,	// legacy behavior
+			CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_RUN_ON_SETUP_FAILURE,	// legacy behavior
 			( ULONG ) -1, // All tests.
 			&TsexecAction ) );
 		for ( Runs = 0; Runs < 3; Runs++ )

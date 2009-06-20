@@ -83,8 +83,8 @@ void TestCmdLineParser()
 	TEST( 0 == wcscmp( Options.ProgressOutputTargetName, L"b" ) );
 	TEST( ! Options.OmitSourceInfoInStackTrace );
 	TEST( Options.EnableKernelFeatures );
-	TEST( Options.ShortcutRunOnFailure );
-	TEST( Options.ShortcutRunOnSetupFailure );
+	TEST( Options.ShortCircuitRunOnFailure );
+	TEST( Options.ShortCircuitRunOnSetupFailure );
 
 	TEST( ParseCommandLine( L"runtest -Y -ts -r -n a /fsf -p b foo.dll", &Options ) );
 	TEST( Options.RecursiveSearch );
@@ -94,7 +94,7 @@ void TestCmdLineParser()
 	TEST( 0 == wcscmp( Options.FixturePrefix, L"b" ) );
 	TEST( Options.OmitSourceInfoInStackTrace );
 	TEST( Options.PauseAtBeginning );
-	TEST( Options.ShortcutFixtureOnFailure );
+	TEST( Options.ShortCircuitFixtureOnFailure );
 
 	TEST ( ParseCommandLine( L"runtest -r", &Options ) );
 	TEST( 0 == wcscmp( Options.InputFile, L"-r" ) );

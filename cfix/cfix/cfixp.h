@@ -71,7 +71,7 @@ BOOL CfixpIsFixtureExport32(
 #define CfixpIsFixtureExport CfixpIsFixtureExport32
 #endif
 
-#define CfixpIsStackTraceCreationDisabled ( IsDebuggerPresent() )
+#define CfixpFlagOn( Flags, FlagToTest ) ( ( Flags ) & ( FlagToTest ) )
 
 /*----------------------------------------------------------------------
  *
@@ -154,6 +154,13 @@ typedef struct _CFIXP_FILAMENT
 		//
 		HANDLE Threads[ CFIX_MAX_THREADS ];
 	} ChildThreads;
+
+	//
+	// Capture stack backtraces for failed reports.
+	//
+	#define CFIXP_FILAMENT_FLAG_CAPTURE_STACK_TRACES	1
+
+	ULONG Flags;
 } CFIXP_FILAMENT, *PCFIXP_FILAMENT;
 
 /*++
@@ -163,6 +170,7 @@ typedef struct _CFIXP_FILAMENT
 VOID CfixpInitializeFilament(
 	__in PCFIX_EXECUTION_CONTEXT ExecutionContext,
 	__in ULONG MainThreadId,
+	__in ULONG Flags,
 	__out PCFIXP_FILAMENT Filament
 	);
 
