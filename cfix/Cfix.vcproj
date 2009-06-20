@@ -215,6 +215,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\testapi\filamentjoin.c"
+					>
+				</File>
+				<File
 					RelativePath=".\testapi\optionstest.c"
 					>
 				</File>

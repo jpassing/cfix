@@ -32,6 +32,54 @@
 //
 static DWORD CfixsTlsSlotForFilament = TLS_OUT_OF_INDEXES;
 
+static HRESULT CfixsGetCurrentThreadHandle( 
+	__out HANDLE *Thread
+	)
+{
+	if ( ! DuplicateHandle(
+		GetCurrentProcess(),
+		GetCurrentThread(),
+		GetCurrentProcess(),
+		Thread,
+		0,
+		FALSE,
+		DUPLICATE_SAME_ACCESS ) )
+	{
+		return HRESULT_FROM_WIN32( GetLastError() );
+	}
+	else
+	{
+		return S_OK;
+	}
+}
+
+static HRESULT CfixsRegisterChildThreadFilament(
+	__in PCFIXP_FILAMENT Filament,
+	__in HANDLE Thread
+	)
+{
+	HRESULT Hr;
+	EnterCriticalSection( &Filament->ChildThreads.Lock );
+	
+	if ( Filament->ChildThreads.ThreadCount ==
+		_countof( Filament->ChildThreads.Threads ) - 1 )
+	{
+		Hr = CFIX_E_TOO_MANY_CHILD_THREADS;
+		goto Cleanup;
+	}
+
+	Filament->ChildThreads.Threads[ 
+		Filament->ChildThreads.ThreadCount++ ] = Thread;
+
+	Hr = S_OK;
+
+Cleanup:
+	LeaveCriticalSection( &Filament->ChildThreads.Lock );
+
+	return Hr;
+}
+
+
 /*----------------------------------------------------------------------
  * 
  * Privates.
@@ -48,20 +96,35 @@ BOOL CfixpTeardownFilamentTls()
 	return TlsFree( CfixsTlsSlotForFilament );
 }
 
-/*----------------------------------------------------------------------
- * 
- * Internal.
- *
- */
-
 VOID CfixpInitializeFilament(
 	__in PCFIX_EXECUTION_CONTEXT ExecutionContext,
 	__in ULONG MainThreadId,
 	__out PCFIXP_FILAMENT Filament
 	)
 {
+	ZeroMemory( Filament, sizeof( CFIXP_FILAMENT ) );
+
 	Filament->ExecutionContext = ExecutionContext;
 	Filament->MainThreadId = MainThreadId;
+
+	InitializeCriticalSection( &Filament->ChildThreads.Lock );
+}
+
+VOID CfixpDestroyFilament(
+	__in PCFIXP_FILAMENT Filament
+	)
+{
+	ULONG Index;
+
+	//
+	// Close all handles to child threads.
+	//
+	for ( Index = 0; Index < Filament->ChildThreads.ThreadCount; Index++ )
+	{
+		VERIFY( CloseHandle( Filament->ChildThreads.Threads[ Index ] ) );
+	}
+
+	DeleteCriticalSection( &Filament->ChildThreads.Lock );
 }
 
 HRESULT CfixpSetCurrentFilament(
@@ -69,8 +132,15 @@ HRESULT CfixpSetCurrentFilament(
 	__out_opt PCFIXP_FILAMENT *Prev
 	)
 {
+	HANDLE CurrentThread;
 	HRESULT Hr;
 	PCFIXP_FILAMENT OldFilament;
+
+	Hr = CfixsGetCurrentThreadHandle( &CurrentThread );
+	if ( FAILED( Hr ) )
+	{
+		return Hr;
+	}
 
 	( VOID ) CfixpGetCurrentFilament( &OldFilament );
 
@@ -78,10 +148,35 @@ HRESULT CfixpSetCurrentFilament(
 	{
 		OldFilament->ExecutionContext->Dereference( OldFilament->ExecutionContext );
 	}
+	else
+	{
+		ASSERT( NewFilament != NULL );
+	}
+
+	if ( NewFilament != NULL &&
+		 GetCurrentThreadId() != NewFilament->MainThreadId )
+	{
+		//
+		// This is not the main thread - so register as child thread.
+		//
+		// N.B. Use real handle to thread, not a pseudo-handle. The
+		// handle will be closed by CfixpDestroyFilament.
+		//
+		Hr = CfixsRegisterChildThreadFilament( NewFilament, CurrentThread );
+		if ( FAILED( Hr ) )
+		{
+			( VOID ) TlsSetValue( CfixsTlsSlotForFilament, NULL );
+			return Hr;
+		}
+	}
 
 	if ( NewFilament != NULL )
 	{
 		NewFilament->ExecutionContext->Reference( NewFilament->ExecutionContext );
+	}
+	else
+	{
+		ASSERT( OldFilament != NULL );
 	}
 
 	( VOID ) TlsSetValue( CfixsTlsSlotForFilament, NewFilament );
@@ -113,4 +208,32 @@ HRESULT CfixpGetCurrentFilament(
 	{
 		return CFIX_E_UNKNOWN_THREAD;
 	}
+}
+
+HRESULT CfixpJoinChildThreadsFilament(
+	__in PCFIXP_FILAMENT Filament,
+	__in ULONG Timeout
+	)
+{
+	HRESULT Hr = S_OK;
+	DWORD WaitResult;
+
+	EnterCriticalSection( &Filament->ChildThreads.Lock );
+	
+	if ( Filament->ChildThreads.ThreadCount > 0 )
+	{
+		WaitResult = WaitForMultipleObjects(
+			Filament->ChildThreads.ThreadCount,
+			Filament->ChildThreads.Threads,
+			TRUE,
+			Timeout );
+		if ( WaitResult == WAIT_TIMEOUT )
+		{
+			Hr = CFIX_E_FILAMENT_JOIN_TIMEOUT;
+		}
+	}
+
+	LeaveCriticalSection( &Filament->ChildThreads.Lock );
+
+	return Hr;
 }

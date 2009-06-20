@@ -517,9 +517,18 @@ static HRESULT CfixsRunTestRoutine(
 		RoutineRanToCompletion = FALSE;
 	}
 
+	//
+	// Wait for all child threads to complete.
+	//
+	( VOID ) CfixpJoinChildThreadsFilament(
+		&Filament,
+		INFINITE );
+
 	VERIFY( S_OK == CfixpSetCurrentFilament( 
 		PrevFilament,
 		NULL ) );
+
+	CfixpDestroyFilament( &Filament );
 
 	if ( AbortRun )
 	{

@@ -121,7 +121,7 @@ HRESULT CFIXCALLTYPE CfixpGetInformationStackframe(
 
 /*----------------------------------------------------------------------
  *
- * Execution context.
+ * Filament.
  *
  */
 
@@ -139,6 +139,21 @@ typedef struct _CFIXP_FILAMENT
 {
 	PCFIX_EXECUTION_CONTEXT ExecutionContext;
 	ULONG MainThreadId;
+
+	struct
+	{
+		//
+		// Lock guarding this sub-struct.
+		//
+		CRITICAL_SECTION Lock;
+
+		ULONG ThreadCount;
+
+		//
+		// Handles of child threads.
+		//
+		HANDLE Threads[ MAXIMUM_WAIT_OBJECTS ];
+	} ChildThreads;
 } CFIXP_FILAMENT, *PCFIXP_FILAMENT;
 
 /*++
@@ -149,6 +164,14 @@ VOID CfixpInitializeFilament(
 	__in PCFIX_EXECUTION_CONTEXT ExecutionContext,
 	__in ULONG MainThreadId,
 	__out PCFIXP_FILAMENT Filament
+	);
+
+/*++
+	Routine Description:
+		Destroy a filament structure. 
+--*/
+VOID CfixpDestroyFilament(
+	__in PCFIXP_FILAMENT Filament
 	);
 
 /*++
@@ -180,6 +203,15 @@ HRESULT CfixpSetCurrentFilament(
 --*/
 HRESULT CfixpGetCurrentFilament(
 	__out PCFIXP_FILAMENT *Filament
+	);
+
+/*++
+	Routine Description:
+		Wait for all child threads to finish.
+--*/
+HRESULT CfixpJoinChildThreadsFilament(
+	__in PCFIXP_FILAMENT Filament,
+	__in ULONG Timeout
 	);
 
 /*++

@@ -229,3 +229,21 @@
 //
 #define CFIX_E_LOADING_DBGHELP_FAILED    ((HRESULT)0x80048014L)
 
+//
+// MessageId: CFIX_E_TOO_MANY_CHILD_THREADS
+//
+// MessageText:
+//
+// The maximum number of child threads has been exceeded.
+//
+#define CFIX_E_TOO_MANY_CHILD_THREADS    ((HRESULT)0x80048015L)
+
+//
+// MessageId: CFIX_E_FILAMENT_JOIN_TIMEOUT
+//
+// MessageText:
+//
+// At least one child thread did not complete within the alotted time.
+//
+#define CFIX_E_FILAMENT_JOIN_TIMEOUT     ((HRESULT)0x80048016L)
+

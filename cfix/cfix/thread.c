@@ -36,6 +36,12 @@ typedef struct _THREAD_START_PARAMETERS
 	PVOID ParentContext;
 
 	PCFIXP_FILAMENT Filament;
+
+	//
+	// Event set by child thread when its cfix-related initialization
+	// has been completed.
+	//
+	HANDLE InitializationCompleted;
 } THREAD_START_PARAMETERS, *PTHREAD_START_PARAMETERS;
 
 static DWORD CfixsThreadStart(
@@ -64,6 +70,8 @@ static DWORD CfixsThreadStart(
 		Parameters->Filament->ExecutionContext,
 		Parameters->Filament->MainThreadId,
 		Parameters->ParentContext );
+
+	( VOID ) SetEvent( Parameters->InitializationCompleted );
 
 	__try
 	{
@@ -104,6 +112,7 @@ HANDLE CfixCreateThread2(
 	PCFIXP_FILAMENT Filament;
 	HRESULT Hr;
 	PTHREAD_START_PARAMETERS Parameters;
+	HANDLE Thread;
 
 	if ( Flags > CFIX_THREAD_FLAG_CRT )
 	{
@@ -132,6 +141,15 @@ HANDLE CfixCreateThread2(
 	Parameters->UserParaneter		= UserParameter;
 	Parameters->Filament			= Filament;
 
+	Parameters->InitializationCompleted = CreateEvent( NULL, FALSE, FALSE, NULL );
+	if ( Parameters->InitializationCompleted == NULL )
+	{
+		//
+		// Keep last error.
+		//
+		return NULL;
+	}
+
 	//
 	// Notify parent and obtain ParentContext.
 	//
@@ -152,7 +170,7 @@ HANDLE CfixCreateThread2(
 	//
 	if ( Flags & CFIX_THREAD_FLAG_CRT )
 	{
-		return ( HANDLE ) _beginthreadex(
+		Thread = ( HANDLE ) _beginthreadex(
 			ThreadAttributes,
 			( unsigned) StackSize,
 			( unsigned ( * )( void * ) ) CfixsThreadStart,
@@ -162,7 +180,7 @@ HANDLE CfixCreateThread2(
 	}
 	else
 	{
-		return CreateThread(
+		Thread = CreateThread(
 			ThreadAttributes,
 			StackSize,
 			CfixsThreadStart,
@@ -170,6 +188,27 @@ HANDLE CfixCreateThread2(
 			CreationFlags,
 			ThreadId );
 	}
+
+	if ( Thread != NULL )
+	{
+		//
+		// Thread has been spawned. However, we need to make sure
+		// That execution on *this* thread does not continue until
+		// the new thread has properly completed its cfix-related
+		// initialization work and has registered wit the current
+		// filament. Otherwise, it may occur that the current
+		// test case completed before the child thread has got
+		// a chance to begin its initialization -> race.
+		//
+
+		( VOID ) WaitForSingleObject( 
+			Parameters->InitializationCompleted,
+			INFINITE );
+		VERIFY( CloseHandle( Parameters->InitializationCompleted ) );
+		Parameters->InitializationCompleted = NULL;
+	}
+
+	return Thread;
 }
 
 HANDLE CfixCreateThread(

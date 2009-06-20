@@ -196,3 +196,19 @@ SymbolicName	= CFIX_E_LOADING_DBGHELP_FAILED
 Language		= English
 The library dbghelp.dll could not be loaded.
 .
+
+MessageId		= 0x8015
+Severity		= Warning
+Facility		= Interface
+SymbolicName	= CFIX_E_TOO_MANY_CHILD_THREADS
+Language		= English
+The maximum number of child threads has been exceeded.
+.
+
+MessageId		= 0x8016
+Severity		= Warning
+Facility		= Interface
+SymbolicName	= CFIX_E_FILAMENT_JOIN_TIMEOUT
+Language		= English
+At least one child thread did not complete within the alotted time.
+.
