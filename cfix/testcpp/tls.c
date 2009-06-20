@@ -96,6 +96,8 @@ static DWORD CALLBACK ThreadProc( PVOID Pv )
 	// BABEFACE not visible.
 	//
 	CFIX_ASSERT( CfixPeGetValue( 0 ) == NULL );
+
+	return 0;
 }
 
 static void TestTlsNotVisibleOnChildThread()
