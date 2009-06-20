@@ -554,6 +554,13 @@ CFIXAPI HRESULT CFIXCALLTYPE CfixAddEntrySequenceAction(
 	__in PCFIX_ACTION ActionToAdd
 	);
 
+typedef enum CFIX_MODULE_TYPE
+{
+	CfixModuleDll		= 0,
+	CfixModuleExe		= 1,
+	CfixModuleDriver	= 2,
+} CFIX_MODULE_TYPE;
+
 typedef struct _CFIX_MODULE_INFO
 {
 	ULONG SizeOfStruct;
@@ -565,9 +572,12 @@ typedef struct _CFIX_MODULE_INFO
 
 	//
 	// Subsystem. IMAGE_SUBSYSTEM_*.
+	//
 	WORD Subsystem;
 
 	BOOL FixtureExportsPresent;
+
+	CFIX_MODULE_TYPE ModuleType;
 } CFIX_MODULE_INFO, *PCFIX_MODULE_INFO;
 
 /*++

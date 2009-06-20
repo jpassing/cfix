@@ -162,11 +162,19 @@
 						>
 					</File>
 					<File
+						RelativePath=".\cfix\exe.c"
+						>
+					</File>
+					<File
 						RelativePath=".\cfix\pe.c"
 						>
 					</File>
 					<File
 						RelativePath=".\cfix\rptstubs.c"
+						>
+					</File>
+					<File
+						RelativePath=".\cfix\thread.c"
 						>
 					</File>
 					<File

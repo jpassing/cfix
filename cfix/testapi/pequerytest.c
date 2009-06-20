@@ -86,6 +86,7 @@ static void QueryNonCfixDllSameArch()
 	TEST( Info.MachineType == SAME_MACHINE_TYPE );
 	TEST( Info.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI );
 	TEST( Info.FixtureExportsPresent == FALSE );
+	TEST( Info.ModuleType == CfixModuleDll );
 }
 
 static void QueryCfixDllSameArch()
@@ -101,6 +102,7 @@ static void QueryCfixDllSameArch()
 	TEST( Info.MachineType == SAME_MACHINE_TYPE );
 	TEST( Info.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI );
 	TEST( Info.FixtureExportsPresent == TRUE );
+	TEST( Info.ModuleType == CfixModuleDll );
 }
 
 static void QueryNonCfixDllDifferentArch()
@@ -116,6 +118,7 @@ static void QueryNonCfixDllDifferentArch()
 	TEST( Info.MachineType == DIFFERENT_MACHINE_TYPE );
 	TEST( Info.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI );
 	TEST( Info.FixtureExportsPresent == FALSE );
+	TEST( Info.ModuleType == CfixModuleDll );
 }
 
 static void QueryCfixDllDifferentArch()
@@ -131,6 +134,7 @@ static void QueryCfixDllDifferentArch()
 	TEST( Info.MachineType == DIFFERENT_MACHINE_TYPE );
 	TEST( Info.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI );
 	TEST( Info.FixtureExportsPresent == TRUE );
+	TEST( Info.ModuleType == CfixModuleDll );
 }
 
 static void QueryCfixDriverDifferentArch()
@@ -146,6 +150,26 @@ static void QueryCfixDriverDifferentArch()
 	TEST( Info.MachineType == DIFFERENT_MACHINE_TYPE );
 	TEST( Info.Subsystem == IMAGE_SUBSYSTEM_NATIVE );
 	TEST( Info.FixtureExportsPresent == TRUE );
+	TEST( Info.ModuleType == CfixModuleDriver );
+}
+
+static void QueryCfixExe()
+{
+	CFIX_MODULE_INFO Info;
+	WCHAR Path[ MAX_PATH ];
+
+#ifdef WIN64
+	TEST( PathCombine( Path, DifferentArchBinPath, L"cfix32.exe" ) );
+#else
+	TEST( PathCombine( Path, SameArchBinPath, L"cfix32.exe" ) );
+#endif
+
+	Info.SizeOfStruct = sizeof( CFIX_MODULE_INFO );
+	TEST( S_OK == CfixQueryPeImage( Path, &Info ) );
+
+	TEST( Info.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI );
+	TEST( Info.FixtureExportsPresent == FALSE );
+	TEST( Info.ModuleType == CfixModuleExe );
 }
 
 CFIX_BEGIN_FIXTURE( PeQuery )
@@ -157,4 +181,5 @@ CFIX_BEGIN_FIXTURE( PeQuery )
 	CFIX_FIXTURE_ENTRY( QueryCfixDllSameArch )
 	CFIX_FIXTURE_ENTRY( QueryCfixDllDifferentArch )
 	CFIX_FIXTURE_ENTRY( QueryCfixDriverDifferentArch )
+	CFIX_FIXTURE_ENTRY( QueryCfixExe )
 CFIX_END_FIXTURE()

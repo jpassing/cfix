@@ -27,9 +27,7 @@
 #include "cfixp.h"
 #include <stdlib.h>
 #include <Psapi.h>
-#include <windows.h>
 #include <shlwapi.h>
-#include <process.h> 
 
 #pragma warning( push )
 #pragma warning( disable: 6011; disable: 6387 )
@@ -459,98 +457,6 @@ static VOID CfixsDereferenceTestModuleMethod(
 	}
 }
 
-static DWORD CfixsExceptionFilter(
-	__in PEXCEPTION_POINTERS ExcpPointers,
-	__in PCFIX_EXECUTION_CONTEXT Context,
-	__in ULONG MainThreadId,
-	__out PBOOL AbortRun
-	)
-{
-	DWORD ExcpCode = ExcpPointers->ExceptionRecord->ExceptionCode;
-
-	if ( EXCEPTION_TESTCASE_INCONCLUSIVE == ExcpCode ||
-		 EXCEPTION_TESTCASE_FAILED == ExcpCode )
-	{
-		//
-		// Testcase failed/turned out to be inconclusive.
-		//
-		*AbortRun = FALSE;
-		return EXCEPTION_EXECUTE_HANDLER;
-	}
-	else if ( EXCEPTION_TESTCASE_FAILED_ABORT == ExcpCode )
-	{
-		//
-		// Testcase failed and is to be aborted.
-		//
-		*AbortRun = TRUE;
-		return EXCEPTION_EXECUTE_HANDLER;
-	}
-	else if ( EXCEPTION_BREAKPOINT == ExcpCode )
-	{
-		//
-		// May happen when CfixBreakAlways was used. Do not handle
-		// the exception, s.t. the debugger gets the opportunity to
-		// attach.
-		//
-		return EXCEPTION_CONTINUE_SEARCH; 
-	}
-	else if ( EXCEPTION_STACK_OVERFLOW == ExcpCode )
-	{
-		//
-		// I will not handle that one.
-		//
-		return EXCEPTION_CONTINUE_SEARCH; 
-	}
-	else
-	{
-		CFIX_REPORT_DISPOSITION Disp;
-		CFIXP_EVENT_WITH_STACKTRACE Event;
-
-		//
-		// Notify.
-		//
-		Context->OnUnhandledException(
-			Context,
-			MainThreadId,
-			ExcpPointers );
-
-		//
-		// Capture stacktrace.
-		//
-		if ( CfixpIsStackTraceCreationDisabled || FAILED( CfixpCaptureStackTrace(
-			ExcpPointers->ContextRecord,
-			&Event.Base.StackTrace,
-			CFIXP_MAX_STACKFRAMES ) ) )
-		{
-			Event.Base.StackTrace.FrameCount = 0;
-		}
-
-		//
-		// Report unhandled exception.
-		//
-		Event.Base.Type = CfixEventUncaughtException;
-		memcpy( 
-			&Event.Base.Info.UncaughtException,
-			ExcpPointers->ExceptionRecord,
-			sizeof( EXCEPTION_RECORD ) );
-
-		Disp = Context->ReportEvent(
-			Context,
-			MainThreadId,
-			&Event.Base );
-
-		*AbortRun = ( Disp == CfixAbort );
-		if ( Disp == CfixBreak )
-		{
-			return EXCEPTION_CONTINUE_SEARCH;
-		}
-		else
-		{
-			return EXCEPTION_EXECUTE_HANDLER;
-		}
-	}
-}
-
 static HRESULT CfixsRunTestRoutine(
 	__in CFIX_PE_TESTCASE_ROUTINE Routine,
 	__in PCFIX_EXECUTION_CONTEXT Context
@@ -596,7 +502,7 @@ static HRESULT CfixsRunTestRoutine(
 
 		RoutineRanToCompletion = TRUE;
 	}
-	__except ( CfixsExceptionFilter( 
+	__except ( CfixpExceptionFilter( 
 		GetExceptionInformation(), 
 		Context,
 		GetCurrentThreadId(),
@@ -955,178 +861,6 @@ Cleanup:
 	return Hr;
 }
 
-/*----------------------------------------------------------------------
- *
- * Thread start wrapper.
- *
- */
-
-typedef struct _THREAD_START_PARAMETERS
-{
-	PTHREAD_START_ROUTINE StartAddress;
-	PVOID UserParaneter;
-	PCFIX_EXECUTION_CONTEXT ExecutionContext;
-	PVOID ParentContext;
-	ULONG ParentThreadId;
-} THREAD_START_PARAMETERS, *PTHREAD_START_PARAMETERS;
-
-static DWORD CfixsThreadStart(
-	__in PTHREAD_START_PARAMETERS Parameters
-	)
-{
-	BOOL Dummy;
-	DWORD ExitCode;
-
-	ASSERT( Parameters->StartAddress );
-	ASSERT( Parameters->ExecutionContext );
-	__assume( Parameters->ExecutionContext );
-
-	//
-	// Set current context s.t. it is accessible by callees
-	// without having to pass it explicitly.
-	//
-	VERIFY( S_OK == CfixpSetCurrentExecutionContext( 
-		Parameters->ExecutionContext, 
-		Parameters->ParentThreadId,
-		NULL ) );
-
-	//
-	// Notify execution context about the thread having been spawned.
-	//
-	Parameters->ExecutionContext->BeforeChildThreadStart(
-		Parameters->ExecutionContext,
-		Parameters->ParentThreadId,
-		Parameters->ParentContext );
-
-	__try
-	{
-		ExitCode = ( Parameters->StartAddress )( Parameters->UserParaneter );
-	}
-	__except ( CfixsExceptionFilter( 
-		GetExceptionInformation(), 
-		Parameters->ExecutionContext,
-		Parameters->ParentThreadId,
-		&Dummy ) )
-	{
-		NOP;
-		ExitCode = ( DWORD ) CFIX_EXIT_THREAD_ABORTED;
-	}
-
-	Parameters->ExecutionContext->AfterChildThreadFinish(
-		Parameters->ExecutionContext,
-		Parameters->ParentThreadId,
-		Parameters->ParentContext );
-
-	VERIFY( S_OK == CfixpSetCurrentExecutionContext( 
-		NULL, 
-		Parameters->ParentThreadId,
-		NULL ) );
-	free( Parameters );
-
-	return ExitCode;
-}
-
-HANDLE CfixCreateThread2(
-	__in PSECURITY_ATTRIBUTES ThreadAttributes,
-	__in SIZE_T StackSize,
-	__in PTHREAD_START_ROUTINE StartAddress,
-	__in PVOID UserParameter,
-	__in DWORD CreationFlags,
-	__out_opt PDWORD ThreadId,
-	__in ULONG Flags
-	)
-{
-	HRESULT Hr;
-	PTHREAD_START_PARAMETERS Parameters;
-	ULONG ParentThreadId;
-	PCFIX_EXECUTION_CONTEXT CurrentContext;
-
-	if ( Flags > CFIX_THREAD_FLAG_CRT )
-	{
-		SetLastError( ERROR_INVALID_PARAMETER );
-		return NULL;
-	}
-
-	Parameters = malloc( sizeof( THREAD_START_PARAMETERS ) );
-	if ( ! Parameters )
-	{
-		SetLastError( ERROR_OUTOFMEMORY );
-		return NULL;
-	}
-
-	//
-	// The current context is inherited to the new thread.
-	//
-	Hr = CfixpGetCurrentExecutionContext( &CurrentContext, &ParentThreadId );
-	if ( FAILED( Hr ) )
-	{
-		SetLastError( Hr );
-		return NULL;
-	}
-
-	Parameters->StartAddress		= StartAddress;
-	Parameters->UserParaneter		= UserParameter;
-	Parameters->ExecutionContext	= CurrentContext;
-	Parameters->ParentThreadId		= ParentThreadId;
-
-	//
-	// Notify parent and obtain ParentContext.
-	//
-	Hr = CurrentContext->CreateChildThread(
-		CurrentContext,
-		ParentThreadId,
-		&Parameters->ParentContext );
-	if ( FAILED( Hr ) )
-	{
-		SetLastError( Hr );
-		return NULL;
-	}
-
-	//
-	// Spawn thread using proxy ThreadStart routine which will
-	// perform the BeforeChildThreadStart and AfterChildThreadFinish
-	// callbacks.
-	//
-	if ( Flags & CFIX_THREAD_FLAG_CRT )
-	{
-		return ( HANDLE ) _beginthreadex(
-			ThreadAttributes,
-			( unsigned) StackSize,
-			( unsigned ( * )( void * ) ) CfixsThreadStart,
-			Parameters,
-			CreationFlags,
-			( unsigned * ) ThreadId );
-	}
-	else
-	{
-		return CreateThread(
-			ThreadAttributes,
-			StackSize,
-			CfixsThreadStart,
-			Parameters,
-			CreationFlags,
-			ThreadId );
-	}
-}
-
-HANDLE CfixCreateThread(
-	__in PSECURITY_ATTRIBUTES ThreadAttributes,
-	__in SIZE_T StackSize,
-	__in PTHREAD_START_ROUTINE StartAddress,
-	__in PVOID UserParameter,
-	__in DWORD CreationFlags,
-	__out_opt PDWORD ThreadId
-	)
-{
-	return CfixCreateThread2(
-		ThreadAttributes,
-		StackSize,
-		StartAddress,
-		UserParameter,
-		CreationFlags,
-		ThreadId,
-		0 );
-}
 
 #pragma warning( pop )
 

@@ -26,6 +26,7 @@
 #include <cfixapi.h>
 #include <cfixpe.h>
 #include <crtdbg.h>
+#include <windows.h>
 
 #define ASSERT _ASSERTE
 
@@ -50,6 +51,17 @@ BOOL CfixpTeardownContextTls();
 BOOL CfixpTeardownTestTls();
 VOID CfixpTeardownStackTraceCapturing();
 
+/*++
+	Routine Description:
+		SEH Exception filter that is to be used for a try/except
+		block around any test routines to be executed.
+--*/
+DWORD CfixpExceptionFilter(
+	__in PEXCEPTION_POINTERS ExcpPointers,
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG MainThreadId,
+	__out PBOOL AbortRun
+	);
 
 /*----------------------------------------------------------------------
  *
@@ -124,6 +136,20 @@ HRESULT CFIXCALLTYPE CfixpGetInformationStackframe(
  * Execution context.
  *
  */
+
+typedef struct _CFIXP_CONTEXT_INFO
+{
+	PCFIX_EXECUTION_CONTEXT ExecutionContext;
+	ULONG MainThreadId;
+
+	//
+	// Fields for Exe-embedded tests.
+	struct
+	{
+		HANDLE YieldEvent;
+	} ExeEmbedded;
+} CFIXP_CONTEXT_INFO, *PCFIXP_CONTEXT_INFO;
+
 
 /*++
 	Routine Description:
