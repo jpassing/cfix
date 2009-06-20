@@ -65,7 +65,7 @@ typedef struct _TSEXEC_ACTION
  * Methods.
  *
  */
-static VOID CfixsDeleteTsexecActionMethod( 
+static VOID CfixsDeleteFixtureExecutionAction( 
 	__in PTSEXEC_ACTION Action 
 	)
 {
@@ -73,7 +73,7 @@ static VOID CfixsDeleteTsexecActionMethod(
 	free( Action );
 }
 
-static VOID CfixsReferenceTsexecActionMethod(
+static VOID CfixsReferenceFixtureExecutionAction(
 	__in PCFIX_ACTION This
 	)
 {
@@ -87,7 +87,7 @@ static VOID CfixsReferenceTsexecActionMethod(
 	InterlockedIncrement( &Action->ReferenceCount );
 }
 
-static VOID CfixsDereferenceTsexecActionMethod(
+static VOID CfixsDereferenceFixtureExecutionAction(
 	__in PCFIX_ACTION This
 	)
 {
@@ -100,11 +100,11 @@ static VOID CfixsDereferenceTsexecActionMethod(
 
 	if ( 0 == InterlockedDecrement( &Action->ReferenceCount ) )
 	{
-		CfixsDeleteTsexecActionMethod( Action );
+		CfixsDeleteFixtureExecutionAction( Action );
 	}
 }
 
-static HRESULT CfixsRunTestCase(
+static HRESULT CfixsRunTestCaseFixtureExecutionAction(
 	__in PTSEXEC_ACTION Action,
 	__in PCFIX_TEST_CASE TestCase,
 	__in PCFIX_EXECUTION_CONTEXT Context
@@ -172,7 +172,7 @@ static HRESULT CfixsRunTestCase(
 	return HrTestCase;
 }
 
-static HRESULT CfixsRunTsexecActionMethod(
+static HRESULT CfixsRunFixtureExecutionAction(
 	__in PCFIX_ACTION This,
 	__in PCFIX_EXECUTION_CONTEXT Context
 	)
@@ -288,7 +288,7 @@ static HRESULT CfixsRunTsexecActionMethod(
 				break;
 			}
 
-			Hr = CfixsRunTestCase(
+			Hr = CfixsRunTestCaseFixtureExecutionAction(
 				Action,
 				&Action->Fixture->TestCases[ Index ],
 				Context );
@@ -433,9 +433,9 @@ CFIXAPI HRESULT CFIXCALLTYPE CfixCreateFixtureExecutionAction(
 	NewAction->TestCaseIndex	= TestCase;
 
 	NewAction->Base.Version		= CFIX_ACTION_VERSION;
-	NewAction->Base.Run			= CfixsRunTsexecActionMethod;
-	NewAction->Base.Reference	= CfixsReferenceTsexecActionMethod;
-	NewAction->Base.Dereference	= CfixsDereferenceTsexecActionMethod;
+	NewAction->Base.Run			= CfixsRunFixtureExecutionAction;
+	NewAction->Base.Reference	= CfixsReferenceFixtureExecutionAction;
+	NewAction->Base.Dereference	= CfixsDereferenceFixtureExecutionAction;
 
 	//
 	// Addref module to lock it.
