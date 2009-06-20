@@ -34,8 +34,7 @@
 
 DWORD CfixpExceptionFilter(
 	__in PEXCEPTION_POINTERS ExcpPointers,
-	__in PCFIX_EXECUTION_CONTEXT Context,
-	__in ULONG MainThreadId,
+	__in PCFIXP_FILAMENT Filament,
 	__out PBOOL AbortRun
 	)
 {
@@ -82,9 +81,9 @@ DWORD CfixpExceptionFilter(
 		//
 		// Notify.
 		//
-		Context->OnUnhandledException(
-			Context,
-			MainThreadId,
+		Filament->ExecutionContext->OnUnhandledException(
+			Filament->ExecutionContext,
+			Filament->MainThreadId,
 			ExcpPointers );
 
 		//
@@ -107,9 +106,9 @@ DWORD CfixpExceptionFilter(
 			ExcpPointers->ExceptionRecord,
 			sizeof( EXCEPTION_RECORD ) );
 
-		Disp = Context->ReportEvent(
-			Context,
-			MainThreadId,
+		Disp = Filament->ExecutionContext->ReportEvent(
+			Filament->ExecutionContext,
+			Filament->MainThreadId,
 			&Event.Base );
 
 		*AbortRun = ( Disp == CfixAbort );
@@ -147,19 +146,18 @@ CFIXAPI CFIX_REPORT_DISPOSITION CFIXCALLTYPE CfixPeReportFailedAssertion(
 	__in PCWSTR Expression
 	)
 {
-	PCFIX_EXECUTION_CONTEXT Context;
 	CFIX_REPORT_DISPOSITION Disp;
 	CFIXP_EVENT_WITH_STACKTRACE Event;
+	PCFIXP_FILAMENT Filament;
 	HRESULT Hr;
-	ULONG MainThreadId;
 
 	DWORD LastError = GetLastError();
 	
 	//
-	// Context should be in TLS as this routine should only be called
+	// Filament should be in TLS as this routine should only be called
 	// from within a test routine.
 	//
-	Hr = CfixpGetCurrentExecutionContext( &Context, &MainThreadId );
+	Hr = CfixpGetCurrentFilament( &Filament );
 	if ( FAILED( Hr ) )
 	{
 		WCHAR Buffer[ 200 ] = { 0 };
@@ -195,9 +193,9 @@ CFIXAPI CFIX_REPORT_DISPOSITION CFIXCALLTYPE CfixPeReportFailedAssertion(
 		Event.Base.StackTrace.FrameCount = 0;
 	}
 
-	Disp = Context->ReportEvent(
-		Context,
-		MainThreadId,
+	Disp = Filament->ExecutionContext->ReportEvent(
+		Filament->ExecutionContext,
+		Filament->MainThreadId,
 		&Event.Base );
 
 	if ( Disp == CfixBreakAlways )
@@ -364,16 +362,15 @@ CFIXAPI VOID CFIXCALLTYPE CfixPeReportInconclusiveness(
 	__in PCWSTR Message
 	)
 {
-	PCFIX_EXECUTION_CONTEXT Context;
 	CFIXP_EVENT_WITH_STACKTRACE Event;
+	PCFIXP_FILAMENT Filament;
 	HRESULT Hr;
-	ULONG MainThreadId;
 
 	//
-	// Context should be in TLS as this routine should only be called
+	// Filament should be in TLS as this routine should only be called
 	// from within a test routine.
 	//
-	Hr = CfixpGetCurrentExecutionContext( &Context, &MainThreadId );
+	Hr = CfixpGetCurrentFilament( &Filament );
 	if ( FAILED( Hr ) )
 	{
 		WCHAR Buffer[ 200 ] = { 0 };
@@ -408,9 +405,9 @@ CFIXAPI VOID CFIXCALLTYPE CfixPeReportInconclusiveness(
 	Event.Base.Type							= CfixEventInconclusiveness;
 	Event.Base.Info.Inconclusiveness.Message = Message;
 
-	( VOID ) Context->ReportEvent(
-		Context,
-		MainThreadId,
+	( VOID ) Filament->ExecutionContext->ReportEvent(
+		Filament->ExecutionContext,
+		Filament->MainThreadId,
 		&Event.Base );
 
 	//
@@ -459,16 +456,15 @@ static CFIXAPI VOID CfixsPeReportLog(
 	__in PCWSTR Message
 	)
 {
-	PCFIX_EXECUTION_CONTEXT Context;
+	PCFIXP_FILAMENT Filament;
 	HRESULT Hr;
 	CFIX_TESTCASE_EXECUTION_EVENT Event;
-	ULONG MainThreadId;
 
 	//
-	// Context should be in TLS as this routine should only be called
+	// Filament should be in TLS as this routine should only be called
 	// from within a test routine.
 	//
-	Hr = CfixpGetCurrentExecutionContext( &Context, &MainThreadId );
+	Hr = CfixpGetCurrentFilament( &Filament );
 	if ( FAILED( Hr ) )
 	{
 		WCHAR Buffer[ 200 ] = { 0 };
@@ -497,9 +493,9 @@ static CFIXAPI VOID CfixsPeReportLog(
 	Event.Type				= CfixEventLog;
 	Event.Info.Log.Message	= Message;
 
-	( VOID ) Context->ReportEvent(
-		Context,
-		MainThreadId,
+	( VOID ) Filament->ExecutionContext->ReportEvent(
+		Filament->ExecutionContext,
+		Filament->MainThreadId,
 		&Event );
 }
 

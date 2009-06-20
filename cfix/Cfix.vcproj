@@ -158,11 +158,11 @@
 					Name="usermode"
 					>
 					<File
-						RelativePath=".\cfix\curctx.c"
+						RelativePath=".\cfix\exe.c"
 						>
 					</File>
 					<File
-						RelativePath=".\cfix\exe.c"
+						RelativePath=".\cfix\filament.c"
 						>
 					</File>
 					<File

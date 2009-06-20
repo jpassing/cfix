@@ -32,9 +32,10 @@ typedef struct _THREAD_START_PARAMETERS
 {
 	PTHREAD_START_ROUTINE StartAddress;
 	PVOID UserParaneter;
-	PCFIX_EXECUTION_CONTEXT ExecutionContext;
+	
 	PVOID ParentContext;
-	ULONG ParentThreadId;
+
+	PCFIXP_FILAMENT Filament;
 } THREAD_START_PARAMETERS, *PTHREAD_START_PARAMETERS;
 
 static DWORD CfixsThreadStart(
@@ -45,24 +46,23 @@ static DWORD CfixsThreadStart(
 	DWORD ExitCode;
 
 	ASSERT( Parameters->StartAddress );
-	ASSERT( Parameters->ExecutionContext );
-	__assume( Parameters->ExecutionContext );
+	ASSERT( Parameters->Filament );
+	__assume( Parameters->Filament );
 
 	//
-	// Set current context s.t. it is accessible by callees
+	// Set current filament s.t. it is accessible by callees
 	// without having to pass it explicitly.
 	//
-	VERIFY( S_OK == CfixpSetCurrentExecutionContext( 
-		Parameters->ExecutionContext, 
-		Parameters->ParentThreadId,
+	VERIFY( S_OK == CfixpSetCurrentFilament( 
+		Parameters->Filament,
 		NULL ) );
 
 	//
 	// Notify execution context about the thread having been spawned.
 	//
-	Parameters->ExecutionContext->BeforeChildThreadStart(
-		Parameters->ExecutionContext,
-		Parameters->ParentThreadId,
+	Parameters->Filament->ExecutionContext->BeforeChildThreadStart(
+		Parameters->Filament->ExecutionContext,
+		Parameters->Filament->MainThreadId,
 		Parameters->ParentContext );
 
 	__try
@@ -71,22 +71,20 @@ static DWORD CfixsThreadStart(
 	}
 	__except ( CfixpExceptionFilter( 
 		GetExceptionInformation(), 
-		Parameters->ExecutionContext,
-		Parameters->ParentThreadId,
+		Parameters->Filament,
 		&Dummy ) )
 	{
 		NOP;
 		ExitCode = ( DWORD ) CFIX_EXIT_THREAD_ABORTED;
 	}
 
-	Parameters->ExecutionContext->AfterChildThreadFinish(
-		Parameters->ExecutionContext,
-		Parameters->ParentThreadId,
+	Parameters->Filament->ExecutionContext->AfterChildThreadFinish(
+		Parameters->Filament->ExecutionContext,
+		Parameters->Filament->MainThreadId,
 		Parameters->ParentContext );
 
-	VERIFY( S_OK == CfixpSetCurrentExecutionContext( 
+	VERIFY( S_OK == CfixpSetCurrentFilament( 
 		NULL, 
-		Parameters->ParentThreadId,
 		NULL ) );
 	free( Parameters );
 
@@ -103,10 +101,9 @@ HANDLE CfixCreateThread2(
 	__in ULONG Flags
 	)
 {
+	PCFIXP_FILAMENT Filament;
 	HRESULT Hr;
 	PTHREAD_START_PARAMETERS Parameters;
-	ULONG ParentThreadId;
-	PCFIX_EXECUTION_CONTEXT CurrentContext;
 
 	if ( Flags > CFIX_THREAD_FLAG_CRT )
 	{
@@ -122,9 +119,9 @@ HANDLE CfixCreateThread2(
 	}
 
 	//
-	// The current context is inherited to the new thread.
+	// The current filament is inherited to the new thread.
 	//
-	Hr = CfixpGetCurrentExecutionContext( &CurrentContext, &ParentThreadId );
+	Hr = CfixpGetCurrentFilament( &Filament );
 	if ( FAILED( Hr ) )
 	{
 		SetLastError( Hr );
@@ -133,15 +130,14 @@ HANDLE CfixCreateThread2(
 
 	Parameters->StartAddress		= StartAddress;
 	Parameters->UserParaneter		= UserParameter;
-	Parameters->ExecutionContext	= CurrentContext;
-	Parameters->ParentThreadId		= ParentThreadId;
+	Parameters->Filament			= Filament;
 
 	//
 	// Notify parent and obtain ParentContext.
 	//
-	Hr = CurrentContext->CreateChildThread(
-		CurrentContext,
-		ParentThreadId,
+	Hr = Filament->ExecutionContext->CreateChildThread(
+		Filament->ExecutionContext,
+		Filament->MainThreadId,
 		&Parameters->ParentContext );
 	if ( FAILED( Hr ) )
 	{

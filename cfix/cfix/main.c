@@ -44,7 +44,7 @@ BOOL APIENTRY DllMain(
 			return FALSE;
 		}
 
-		if ( ! CfixpSetupContextTls() )
+		if ( ! CfixpSetupFilamentTls() )
 		{
 			CfixpTeardownStackTraceCapturing();
 			return FALSE;
@@ -65,7 +65,7 @@ BOOL APIENTRY DllMain(
 		_CrtDumpMemoryLeaks();
 #endif
 		CfixpTeardownStackTraceCapturing();
-		return CfixpTeardownContextTls() && CfixpTeardownTestTls();
+		return CfixpTeardownFilamentTls() && CfixpTeardownTestTls();
 	}
 	else
 	{

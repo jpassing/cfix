@@ -462,9 +462,12 @@ static HRESULT CfixsRunTestRoutine(
 	__in PCFIX_EXECUTION_CONTEXT Context
 	)
 {
-	HRESULT Hr;
 	BOOL AbortRun = FALSE;
-	PCFIX_EXECUTION_CONTEXT PrevContext;
+	HRESULT Hr;
+
+	CFIXP_FILAMENT Filament;
+	PCFIXP_FILAMENT PrevFilament;
+
 	BOOL RoutineRanToCompletion;
 
 	if ( ! Routine )
@@ -473,18 +476,22 @@ static HRESULT CfixsRunTestRoutine(
 	}
 
 	//
-	// Set current context s.t. it is accessible by callees
+	// Set current filament s.t. it is accessible by callees
 	// without having to pass it explicitly.
 	//
-	// N.B. PrevContext is only required is this routine is called
+	// N.B. PrevFilament is only required is this routine is called
 	// recursively - which is only the case if a testcases uses 
 	// the API to run another testcase (and that is what the cfix 
 	// testcase does). PrevContext will be NULL otherwise.
 	//
-	Hr = CfixpSetCurrentExecutionContext( 
+	CfixpInitializeFilament(
 		Context, 
 		GetCurrentThreadId(),
-		&PrevContext );
+		&Filament );
+
+	Hr = CfixpSetCurrentFilament( 
+		&Filament,
+		&PrevFilament);
 	if ( FAILED( Hr ) )
 	{
 		return Hr;
@@ -504,16 +511,14 @@ static HRESULT CfixsRunTestRoutine(
 	}
 	__except ( CfixpExceptionFilter( 
 		GetExceptionInformation(), 
-		Context,
-		GetCurrentThreadId(),
+		&Filament,
 		&AbortRun ) )
 	{
 		RoutineRanToCompletion = FALSE;
 	}
 
-	VERIFY( S_OK == CfixpSetCurrentExecutionContext( 
-		PrevContext, 
-		GetCurrentThreadId(),
+	VERIFY( S_OK == CfixpSetCurrentFilament( 
+		PrevFilament,
 		NULL ) );
 
 	if ( AbortRun )

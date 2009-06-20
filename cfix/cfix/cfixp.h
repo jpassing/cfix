@@ -43,25 +43,13 @@ extern HMODULE CfixpModule;
 /*++
 	Routines to be called from DllMain.
 --*/
-BOOL CfixpSetupContextTls();
+BOOL CfixpSetupFilamentTls();
 BOOL CfixpSetupTestTls();
 BOOL CfixpSetupStackTraceCapturing();
 
-BOOL CfixpTeardownContextTls();
+BOOL CfixpTeardownFilamentTls();
 BOOL CfixpTeardownTestTls();
 VOID CfixpTeardownStackTraceCapturing();
-
-/*++
-	Routine Description:
-		SEH Exception filter that is to be used for a try/except
-		block around any test routines to be executed.
---*/
-DWORD CfixpExceptionFilter(
-	__in PEXCEPTION_POINTERS ExcpPointers,
-	__in PCFIX_EXECUTION_CONTEXT Context,
-	__in ULONG MainThreadId,
-	__out PBOOL AbortRun
-	);
 
 /*----------------------------------------------------------------------
  *
@@ -137,42 +125,71 @@ HRESULT CFIXCALLTYPE CfixpGetInformationStackframe(
  *
  */
 
-typedef struct _CFIXP_CONTEXT_INFO
+/*++
+	Structure description:
+		A filament is a set of at least one thread. All thereads
+		of a filament execute as part of a single test run and
+		share an execution context.
+
+		A filament starts off with one thread, the main thread. This
+		thread may spawn any number of child threads, which all become
+		part of the filament.
+--*/		
+typedef struct _CFIXP_FILAMENT
 {
 	PCFIX_EXECUTION_CONTEXT ExecutionContext;
 	ULONG MainThreadId;
-} CFIXP_CONTEXT_INFO, *PCFIXP_CONTEXT_INFO;
-
+} CFIXP_FILAMENT, *PCFIXP_FILAMENT;
 
 /*++
 	Routine Description:
-		Obtain the execution context for the current thread.
+		Initialize a filament structure. 
+--*/
+VOID CfixpInitializeFilament(
+	__in PCFIX_EXECUTION_CONTEXT ExecutionContext,
+	__in ULONG MainThreadId,
+	__out PCFIXP_FILAMENT Filament
+	);
+
+/*++
+	Routine Description:
+		Set the filament for the current thread.
 
 		Can be used to report events, although usage of the 
 		wrapper functions is preferred.
 
 	Parameters:
-		Context		- context to set.
-		PrevContext - context that has been set before. Can be used
+		Filament	- Filament to set.
+		Prev		- context that has been set before. Can be used
 					  to stack/unstack contexts.
 --*/
-HRESULT CfixpSetCurrentExecutionContext(
-	__in PCFIX_EXECUTION_CONTEXT Context,
-	__in ULONG MainThreadId,
-	__out_opt PCFIX_EXECUTION_CONTEXT *PrevContext
+HRESULT CfixpSetCurrentFilament(
+	__in PCFIXP_FILAMENT Filament,
+	__out_opt PCFIXP_FILAMENT *Prev
 	);
 
 /*++
 	Routine Description:
-		Obtain the execution context for the current thread.
+		Obtain the filament of the current thread.
 
 		Can be used to report events, although usage of the 
 		wrapper functions is preferred.
 
 	Parameters:
-		Context		- current context.
+		Filament	- current filament.
 --*/
-HRESULT CfixpGetCurrentExecutionContext(
-	__out PCFIX_EXECUTION_CONTEXT *Context,
-	__out PULONG MainThreadId
+HRESULT CfixpGetCurrentFilament(
+	__out PCFIXP_FILAMENT *Filament
 	);
+
+/*++
+	Routine Description:
+		SEH Exception filter that is to be used for a try/except
+		block around any test routines to be executed.
+--*/
+DWORD CfixpExceptionFilter(
+	__in PEXCEPTION_POINTERS ExcpPointers,
+	__in PCFIXP_FILAMENT Filament,
+	__out PBOOL AbortRun
+	);
+

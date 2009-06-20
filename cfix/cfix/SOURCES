@@ -60,7 +60,7 @@ PASS0_SOURCEDIR=obj$(BUILD_ALT_DIR)\$(TARGET_DIRECTORY)
 SOURCES=\
 	pe.c \
 	thread.c \
-	curctx.c \
+	filament.c \
 	rptstubs.c \
 	main.c \
 	tsexecaction.c \
