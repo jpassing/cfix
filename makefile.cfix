@@ -305,7 +305,7 @@ installer: docs
 #
 #----------------------------------------------------------------------
 
-release: installer srcrelease
+release: build installer srcrelease
 
 srcrelease: cleantemps
 	if exist rtm\cfix-src rd /S /Q rtm\cfix-src
