@@ -247,6 +247,7 @@ static NTSTATUS CfixkrsCallRoutineIoctl(
 	Channel.Signature						= CFIXKRP_REPORT_CHANNEL_SIGNATURE;
 	Channel.Dispositions.FailedAssertion	= Request->Dispositions.FailedAssertion;
 	Channel.Dispositions.UnhandledException = Request->Dispositions.UnhandledException;
+	KeInitializeSpinLock( &Channel.EventBuffer.Lock );
 
 	//
 	// Event structures will be appended to the output buffer

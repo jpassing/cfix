@@ -48,6 +48,7 @@ static VOID CfixkrsQueueEvent(
 	)
 {
 	PCFIXKR_EXECUTION_EVENT Event;
+	KIRQL OldIrql;
 	ULONG StructureBaseSize;
 	ULONG StructureTotalSize;
 
@@ -63,6 +64,11 @@ static VOID CfixkrsQueueEvent(
 		    ( Type == CfixEventUncaughtException && ExceptionRecord ) ||
 			( Type == CfixEventInconclusiveness && Message ) ||
 			( Type == CfixEventLog && Message ) );
+
+	//
+	// Only one thread may write to the buffer at a time.
+	//
+	KeAcquireSpinLock( &Channel->EventBuffer.Lock, &OldIrql );
 
 	//
 	// First do the stuff common to all event types.
@@ -81,7 +87,7 @@ static VOID CfixkrsQueueEvent(
 		// Too small.
 		//
 		Channel->EventBuffer.BufferTruncated = TRUE;
-		return;
+		goto Cleanup;
 	}
 
 	Event = ( PCFIXKR_EXECUTION_EVENT ) 
@@ -127,7 +133,7 @@ static VOID CfixkrsQueueEvent(
 	}
 	else if ( ! NT_SUCCESS( RtlStringCbLengthW( File, MAX_USHORT, &FileLengthCb ) ) )
 	{
-		return;
+		goto Cleanup;
 	}
 
 	if ( Routine == NULL )
@@ -136,7 +142,7 @@ static VOID CfixkrsQueueEvent(
 	}
 	else if ( ! NT_SUCCESS( RtlStringCbLengthW( Routine, MAX_USHORT, &RoutineLengthCb ) ) )
 	{
-		return;
+		goto Cleanup;
 	}
 
 	if ( Message == NULL )
@@ -145,7 +151,7 @@ static VOID CfixkrsQueueEvent(
 	}
 	else if ( ! NT_SUCCESS( RtlStringCbLengthW( Message, MAX_USHORT, &MessageLengthCb ) ) )
 	{
-		return;
+		goto Cleanup;
 	}
 
 	if ( Expression == NULL )
@@ -154,7 +160,7 @@ static VOID CfixkrsQueueEvent(
 	}
 	else if ( ! NT_SUCCESS( RtlStringCbLengthW( Expression, MAX_USHORT, &ExpressionLengthCb ) ) )
 	{
-		return;
+		goto Cleanup;
 	}
 
 	//
@@ -192,11 +198,11 @@ static VOID CfixkrsQueueEvent(
 		// buffer shortage.
 		//
 		Channel->EventBuffer.BufferTruncated = TRUE;
-		return;
+		goto Cleanup;
 	}
 	else if ( StructureTotalSize > MAX_USHORT )
 	{
-		return;
+		goto Cleanup;
 	}
 
 	Event->Type = Type;
@@ -310,6 +316,11 @@ static VOID CfixkrsQueueEvent(
 	//
 	Channel->EventBuffer.BufferLength += StructureTotalSize;
 	Channel->EventBuffer.EventCount++;
+
+Cleanup:
+	KeReleaseSpinLock( &Channel->EventBuffer.Lock, OldIrql );
+
+	return;
 }
 
 static VOID CfixkrsAbortCurrentTestCase(

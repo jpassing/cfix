@@ -123,6 +123,11 @@ typedef struct _CFIXKRP_REPORT_CHANNEL
 	struct
 	{
 		//
+		// Lock guarding this sub-struct.
+		//
+		KSPIN_LOCK Lock;
+
+		//
 		// [in] Total size of buffer, in bytes.
 		//
 		ULONG BufferSize;
