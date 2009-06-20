@@ -135,6 +135,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\cfixkr\filament.c"
+					>
+				</File>
+				<File
 					RelativePath=".\cfixkr\main.c"
 					>
 				</File>

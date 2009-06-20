@@ -25,6 +25,7 @@
 
 #include <cfixkr.h>
 #include <cfixpe.h>
+#include <hashtable.h>
 
 #define CFIXKR_POOL_TAG 'xifC'
 
@@ -246,19 +247,6 @@ VOID CfixkrpDereferenceConnection(
 
 /*++
 	Routine Description:
-		Get the channel attached to the currently executing thread.
-
-		This routine is only to be used by the reports stub
-		routines.
-
-		Callable at any IRQL.
---*/
-PCFIXKRP_REPORT_CHANNEL CfixkrpGetReportChannelCurrentThread(
-	__in PCFIXKRP_DRIVER_CONNECTION Connection
-	);
-
-/*++
-	Routine Description:
 		Report information about an uncaught exception thrown by 
 		a test routine.
 
@@ -452,6 +440,114 @@ NTSTATUS CfixkrpQueryModuleTestAdapter(
 	__in ULONG MaximumBufferSize,
 	__out PUCHAR IoBuffer,
 	__out PULONG BufferSize
+	);
+
+/*----------------------------------------------------------------------
+ *
+ * Filament management.
+ *
+ */
+
+/*++
+	Structure description:
+		A filament is a set of at least one thread. All thereads
+		of a filament execute as part of a single test run and
+		share an execution context.
+
+		A filament starts off with one thread, the main thread. This
+		thread may spawn any number of child threads, which all become
+		part of the filament.
+--*/	
+typedef struct _CFIXKRP_FILAMENT
+{
+	PCFIXKRP_REPORT_CHANNEL Channel;
+	ULONG MainThreadId;
+} CFIXKRP_FILAMENT, *PCFIXKRP_FILAMENT;
+
+typedef struct _CFIXKRP_FILAMENT_REGISTRY
+{
+	//
+	// Lock guarding the hashtable.
+	//
+	// N.B. Uses non-default IRQL.
+	//
+	KSPIN_LOCK Lock;
+
+	//
+	// Table mapping threads to filaments.
+	//
+	JPHT_HASHTABLE Table;
+} CFIXKRP_FILAMENT_REGISTRY, *PCFIXKRP_FILAMENT_REGISTRY;
+
+/*++
+	Routine Description:
+		Initialize a filament registry. A registry may be shared
+		at any scope.
+--*/
+NTSTATUS CfixkrpInitializeFilamentRegistry(
+	__out PCFIXKRP_FILAMENT_REGISTRY Registry
+	);
+
+VOID CfixkrpDeleteFilamentRegistry(
+	__in PCFIXKRP_FILAMENT_REGISTRY Registry
+	);
+
+VOID CfixkrpInitializeFilament(
+	__in PCFIXKRP_REPORT_CHANNEL Channel,
+	__in ULONG MainThreadId,
+	__out PCFIXKRP_FILAMENT Filament
+	);
+
+VOID CfixkrpDeleteFilament(
+	__in PCFIXKRP_FILAMENT Filament
+	);
+
+/*++
+	Routine Description:
+		Associate the current thread with the given filament.
+
+		Callable at IRQL <= DISPATCH_LEVEL
+--*/
+NTSTATUS CfixkrpSetCurrentFilament(
+	__in PCFIXKRP_FILAMENT_REGISTRY Registry,
+	__in PCFIXKRP_FILAMENT Filament
+	);
+
+/*++
+	Routine Description:
+		Disassociate the current thread with the given filament.
+
+		Callable at IRQL <= DISPATCH_LEVEL.
+--*/
+VOID CfixkrpResetCurrentFilament(
+	__in PCFIXKRP_FILAMENT_REGISTRY Registry
+	);
+
+
+/*++
+	Routine Description:
+		Obtain the filament associated with the current thread.
+
+		Returns NULL if no association exists.
+
+		Callable at any IRQL.
+--*/
+PCFIXKRP_FILAMENT CfixkrpGetCurrentFilament(
+	__in PCFIXKRP_FILAMENT_REGISTRY Registry
+	);
+
+/*++
+	Routine Description:
+		Obtain the filament associated with the current thread.
+
+		Returns NULL if no association exists.
+
+		See CfixkrpGetCurrentFilament.
+
+		Callable at any IRQL.
+--*/
+PCFIXKRP_FILAMENT CfixkrpGetCurrentFilamentFromConnection(
+	__in PCFIXKRP_DRIVER_CONNECTION Connection
 	);
 
 /*----------------------------------------------------------------------

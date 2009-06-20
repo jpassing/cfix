@@ -23,30 +23,10 @@
  * along with cfix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <wdm.h>
-#include <hashtable.h>
+#include <ntddk.h>
 #include "cfixkrp.h"
 
-//
-// Not defined in wdm.h, but holds for i386 and amd64.
-//
-#define SYNCH_LEVEL (IPI_LEVEL-2)
-
 #define CFIXKRP_DRIVER_CONNECTION_SIGNATURE 'nnoC'
-
-typedef struct _CFIXKRP_THREAD_CHANNEL
-{
-	union
-	{
-		PRKTHREAD Thread;
-		JPHT_HASHTABLE_ENTRY HashtableEntry;
-	} Key;
-
-	PCFIXKRP_REPORT_CHANNEL Channel;
-} CFIXKRP_THREAD_CHANNEL, *PCFIXKRP_THREAD_CHANNEL;
-
-C_ASSERT( FIELD_OFFSET( CFIXKRP_THREAD_CHANNEL, Key.Thread ) ==
-		  FIELD_OFFSET( CFIXKRP_THREAD_CHANNEL, Key.HashtableEntry.Key ) );
 
 /*++
 	Structure Description:
@@ -92,49 +72,13 @@ typedef struct _CFIXKRP_DRIVER_CONNECTION
 	PCFIXKRP_TEST_ADAPTER Adapter;
 
 	//
-	// Hashtable containing the mapping between threads and channels,
+	// Registry containing the mapping between threads and channels,
 	// i.e. which channel is to be used for any events occuring
 	// on the current thread.
 	//
-	struct
-	{
-		KSPIN_LOCK Lock;
-
-		//
-		// Lock. Use CfixkrsAcquireChannelLock to acquire ownership.
-		// IRQL is raised to SYNCH_LEVEL i.o. to allow reports calls
-		// at DIRQL.
-		//
-		JPHT_HASHTABLE Table;
-	} Channels;
+	CFIXKRP_FILAMENT_REGISTRY FilamentRegistry;
 } CFIXKRP_DRIVER_CONNECTION, *PCFIXKRP_DRIVER_CONNECTION;
 
-/*----------------------------------------------------------------------
- *
- * Hashtable Callbacks.
- *
- */
-static ULONG CfixkrsHashThreadChannel(
-	__in ULONG_PTR Key
-	)
-{
-	//
-	// N.B. Key is the PRKTHREAD.
-	//
-	return ( ULONG ) Key;
-}
-
-
-static BOOLEAN CfixkrsEqualsThreadChannel(
-	__in ULONG_PTR KeyLhs,
-	__in ULONG_PTR KeyRhs
-	)
-{
-	//
-	// N.B. Keys are PRKTHREADs, which are the primkeys.
-	//
-	return ( BOOLEAN ) ( KeyLhs == KeyRhs );
-}
 
 /*----------------------------------------------------------------------
  *
@@ -172,25 +116,6 @@ static VOID CfixkrsReleaseDriverUnloadProtection(
 	KeLeaveCriticalRegion();
 }
 
-static VOID CfixkrsAcquireChannelLock( 
-	__in PCFIXKRP_DRIVER_CONNECTION Connection,
-	__out PKIRQL OldIrql	
-	)
-{
-	KeRaiseIrql( SYNCH_LEVEL, OldIrql );
-	KeAcquireSpinLockAtDpcLevel( 
-		&Connection->Channels.Lock );
-}
-
-static VOID CfixkrsReleaseChannelLock( 
-	__in PCFIXKRP_DRIVER_CONNECTION Connection,
-	__in KIRQL OldIrql
-	)
-{
-	KeReleaseSpinLockFromDpcLevel( &Connection->Channels.Lock );
-	KeLowerIrql( OldIrql );
-}
-
 /*----------------------------------------------------------------------
  *
  * Lifecycle management.
@@ -217,14 +142,7 @@ VOID CfixkrpDereferenceConnection(
 
 	if ( 0 == InterlockedDecrement( &Conn->ReferenceCount ) )
 	{
-		//
-		// The channel hashtable should be empty - after all, when it was
-		// not, it would mean that a test routine is still active.
-		// If a routine was still active, deleting this object
-		// would be an invalid operation.
-		//
-		ASSERT( JphtGetEntryCountHashtable( &Conn->Channels.Table ) == 0 );
-		JphtDeleteHashtable( &Conn->Channels.Table );
+		CfixkrpDeleteFilamentRegistry( &Conn->FilamentRegistry );
 
 		//
 		// Unregister. As the registry holds a weak reference, it still
@@ -283,115 +201,6 @@ static VOID CfixkrsExternalDereferenceConnection(
 	// Normal dereference - this might free the object.
 	//
 	CfixkrpDereferenceConnection( Conn );
-}
-
-/*----------------------------------------------------------------------
- *
- * Current Report Channel handling.
- *
- */
-static NTSTATUS CfixkrsSetReportChannelCurrentThread(
-	__in PCFIXKRP_DRIVER_CONNECTION Connection,
-	__in PCFIXKRP_REPORT_CHANNEL Channel
-	)
-{
-	PJPHT_HASHTABLE_ENTRY OldEntry;
-	KIRQL OldIrql;
-	PCFIXKRP_THREAD_CHANNEL ThreadChannel;
-
-	ASSERT( Connection );
-	ASSERT( Channel );
-	ASSERT( Channel->Signature == CFIXKRP_REPORT_CHANNEL_SIGNATURE );
-
-	//
-	// Add a new entry to the hashtable.
-	//
-	ThreadChannel = ExAllocatePoolWithTag( 
-		NonPagedPool, 
-		sizeof( CFIXKRP_THREAD_CHANNEL ), 
-		CFIXKR_POOL_TAG );
-	if ( ThreadChannel == NULL )
-	{
-		return STATUS_NO_MEMORY;
-	}
-
-	ThreadChannel->Key.Thread	= KeGetCurrentThread();
-	ThreadChannel->Channel		= Channel;
-
-	CfixkrsAcquireChannelLock( Connection, &OldIrql );
-	JphtPutEntryHashtable(
-		&Connection->Channels.Table,
-		&ThreadChannel->Key.HashtableEntry,
-		&OldEntry );
-	CfixkrsReleaseChannelLock( Connection, OldIrql );
-
-	//
-	// If OldEntry != NULL, we must have enetered a recusion, which
-	// should not occur.
-	//
-	ASSERT( OldEntry == NULL );
-
-	return TRUE;
-}
-
-static VOID CfixkrsResetReportChannelCurrentThread(
-	__in PCFIXKRP_DRIVER_CONNECTION Connection
-	)
-{
-	PJPHT_HASHTABLE_ENTRY Entry;
-	KIRQL OldIrql;
-	PCFIXKRP_THREAD_CHANNEL ThreadChannel;
-
-	ASSERT( Connection );
-
-	CfixkrsAcquireChannelLock( Connection, &OldIrql );
-	JphtRemoveEntryHashtable( 
-		&Connection->Channels.Table,
-		( ULONG_PTR ) KeGetCurrentThread(),
-		&Entry );
-	CfixkrsReleaseChannelLock( Connection, OldIrql );
-
-	ASSERT( Entry != NULL );
-
-	ThreadChannel = CONTAINING_RECORD(
-		Entry,
-		CFIXKRP_THREAD_CHANNEL,
-		Key.HashtableEntry );
-
-	ExFreePoolWithTag( ThreadChannel, CFIXKR_POOL_TAG );
-}
-
-PCFIXKRP_REPORT_CHANNEL CfixkrpGetReportChannelCurrentThread(
-	__in PCFIXKRP_DRIVER_CONNECTION Connection
-	)
-{
-	PJPHT_HASHTABLE_ENTRY Entry;
-	KIRQL OldIrql;
-	PCFIXKRP_THREAD_CHANNEL ThreadChannel;
-
-	ASSERT( Connection );
-
-	CfixkrsAcquireChannelLock( Connection, &OldIrql );
-	Entry = JphtGetEntryHashtable( 
-		&Connection->Channels.Table,
-		( ULONG_PTR ) KeGetCurrentThread() );
-	CfixkrsReleaseChannelLock( Connection, OldIrql );
-
-	if ( Entry != NULL )
-	{
-		ThreadChannel = CONTAINING_RECORD(
-			Entry,
-			CFIXKRP_THREAD_CHANNEL,
-			Key.HashtableEntry );
-
-		ASSERT( ThreadChannel->Channel->Signature == CFIXKRP_REPORT_CHANNEL_SIGNATURE );
-
-		return ThreadChannel->Channel;
-	}
-	else
-	{
-		return NULL;
-	}
 }
 
 /*----------------------------------------------------------------------
@@ -490,23 +299,16 @@ NTSTATUS CfixkrpCreateAndRegisterDriverConnection(
 	ASSERT( TempConn->ExternalReferenceCount == 1 );
 
 	//
-	// Initialize hashtable.
+	// Initialize filament registry.
 	//
-	if ( ! JphtInitializeHashtable(
-		&TempConn->Channels.Table,
-		CfixkrpAllocateNonpagedHashtableMemory,
-		CfixkrpFreeHashtableMemory,
-		CfixkrsHashThreadChannel,
-		CfixkrsEqualsThreadChannel,
-		31 ) )
+	Status = CfixkrpInitializeFilamentRegistry( &TempConn->FilamentRegistry );
+	if ( ! NT_SUCCESS( Status ) )
 	{
 		Status = STATUS_NO_MEMORY;
 		goto Cleanup;
 	}
 	HashtableInitialized = TRUE;
 
-	KeInitializeSpinLock( &TempConn->Channels.Lock );
-	
 	Status = ExInitializeResourceLite( &TempConn->DriverUnloadLock );
 	if ( ! NT_SUCCESS( Status ) )
 	{
@@ -548,7 +350,7 @@ Cleanup:
 
 		if ( HashtableInitialized )
 		{
-			JphtDeleteHashtable( &TempConn->Channels.Table );
+			CfixkrpDeleteFilamentRegistry( &TempConn->FilamentRegistry );
 		}
 		
 		ExFreePoolWithTag( TempConn, CFIXKR_POOL_TAG );
@@ -625,6 +427,7 @@ NTSTATUS CfixkrpCallRoutineDriverConnection(
 	)
 {
 	KIRQL Irql;
+	CFIXKRP_FILAMENT Filament;
 	CFIX_PE_TESTCASE_ROUTINE Routine;
 	NTSTATUS Status;
 
@@ -634,6 +437,14 @@ NTSTATUS CfixkrpCallRoutineDriverConnection(
 	ASSERT( Channel );
 	ASSERT( RoutineRanToCompletion );
 	ASSERT( AbortRun );
+
+	//
+	// Create a new filament.
+	//
+	CfixkrpInitializeFilament(
+		Channel,
+		( ULONG ) ( ULONG_PTR ) PsGetCurrentThreadId(),
+		&Filament );
 
 	//
 	// Get routine.
@@ -651,11 +462,11 @@ NTSTATUS CfixkrpCallRoutineDriverConnection(
 	ASSERT( Routine != NULL );
 	
 	//
-	// Associate the current thread with the given report channel.
+	// Associate the current thread with the new filament.
 	//
-	Status = CfixkrsSetReportChannelCurrentThread(
-		Connection,
-		Channel );
+	Status = CfixkrpSetCurrentFilament(
+		&Connection->FilamentRegistry,
+		&Filament );
 	if ( ! NT_SUCCESS( Status ) )
 	{
 		return Status;
@@ -716,10 +527,17 @@ NTSTATUS CfixkrpCallRoutineDriverConnection(
 		CfixkrsReleaseDriverUnloadProtection( Connection );
 
 		//
-		// Disassociate channel from current thread.
+		// Disassociate filament from current thread.
 		//
-		CfixkrsResetReportChannelCurrentThread( Connection );
+		CfixkrpResetCurrentFilament( &Connection->FilamentRegistry );
 	}
 
 	return STATUS_SUCCESS;
+}
+
+PCFIXKRP_FILAMENT CfixkrpGetCurrentFilamentFromConnection(
+	__in PCFIXKRP_DRIVER_CONNECTION Connection
+	)
+{
+	return CfixkrpGetCurrentFilament( &Connection->FilamentRegistry );
 }

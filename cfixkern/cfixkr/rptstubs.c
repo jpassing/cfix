@@ -370,15 +370,15 @@ static VOID CFIXCALLTYPE CfixkrsFailStub(
 	)
 {
 	PCFIXKRP_DRIVER_CONNECTION Conn = ( PCFIXKRP_DRIVER_CONNECTION ) Context;
-	PCFIXKRP_REPORT_CHANNEL Channel;
+	PCFIXKRP_FILAMENT Filament;
 
 	ASSERT( Conn );
 
-	Channel = CfixkrpGetReportChannelCurrentThread( Conn );
-	if ( Channel != NULL )
+	Filament = CfixkrpGetCurrentFilamentFromConnection( Conn );
+	if ( Filament != NULL )
 	{
 		CfixkrsAbortCurrentTestCase( 
-			Channel, 
+			Filament->Channel, 
 			EXCEPTION_TESTCASE_FAILED );
 	}
 	else
@@ -400,17 +400,17 @@ static CFIX_REPORT_DISPOSITION CfixkrsReportFailedAssertionStub(
 	)
 {
 	PCFIXKRP_DRIVER_CONNECTION Conn = ( PCFIXKRP_DRIVER_CONNECTION ) Context;
-	PCFIXKRP_REPORT_CHANNEL Channel;
+	PCFIXKRP_FILAMENT Filament;
 
 	ASSERT( Conn );
 
-	Channel = CfixkrpGetReportChannelCurrentThread( Conn );
-	if ( Channel != NULL )
+	Filament = CfixkrpGetCurrentFilamentFromConnection( Conn );
+	if ( Filament != NULL )
 	{
 		CFIX_REPORT_DISPOSITION Disp;
 	
 		CfixkrsQueueEvent(
-			Channel,
+			Filament->Channel,
 			NULL,
 			CfixEventFailedAssertion,
 			NULL,
@@ -420,7 +420,7 @@ static CFIX_REPORT_DISPOSITION CfixkrsReportFailedAssertionStub(
 			Expression,
 			NULL );
 
-		Disp = Channel->Dispositions.FailedAssertion;
+		Disp = Filament->Channel->Dispositions.FailedAssertion;
 
 		if ( Disp == CfixBreakAlways )
 		{
@@ -436,7 +436,7 @@ static CFIX_REPORT_DISPOSITION CfixkrsReportFailedAssertionStub(
 			// CfixsExceptionFilter installed a few frames deeper.
 			//
 			CfixkrsAbortCurrentTestCase( 
-				Channel, 
+				Filament->Channel, 
 				EXCEPTION_TESTCASE_FAILED_ABORT );
 			
 		}
@@ -453,7 +453,7 @@ static CFIX_REPORT_DISPOSITION CfixkrsReportFailedAssertionStub(
 			else
 			{
 				CfixkrsAbortCurrentTestCase( 
-					Channel, 
+					Filament->Channel, 
 					EXCEPTION_TESTCASE_FAILED );
 			}
 		}
@@ -575,13 +575,13 @@ static VOID CfixkrsReportInconclusivenessStub(
 	)
 {
 	PCFIXKRP_DRIVER_CONNECTION Conn = ( PCFIXKRP_DRIVER_CONNECTION ) Context;
-	PCFIXKRP_REPORT_CHANNEL Channel;
+	PCFIXKRP_FILAMENT Filament;
 
-	Channel = CfixkrpGetReportChannelCurrentThread( Conn );
-	if ( Channel != NULL )
+	Filament = CfixkrpGetCurrentFilamentFromConnection( Conn );
+	if ( Filament != NULL )
 	{
 		CfixkrsQueueEvent(
-			Channel,
+			Filament->Channel,
 			NULL,
 			CfixEventInconclusiveness,
 			NULL,
@@ -592,6 +592,11 @@ static VOID CfixkrsReportInconclusivenessStub(
 			Message != NULL
 				? Message
 				: L"" );
+
+		CfixkrsAbortCurrentTestCase( 
+			Filament->Channel, 
+			EXCEPTION_TESTCASE_INCONCLUSIVE );
+
 	}
 	else
 	{
@@ -601,8 +606,6 @@ static VOID CfixkrsReportInconclusivenessStub(
 		//
 		DbgPrint( ( "CFIXKR: Inconclusiveness reported on unknown thread.\n" ) );
 	}
-
-	CfixkrsAbortCurrentTestCase( Channel, EXCEPTION_TESTCASE_INCONCLUSIVE );
 }
 
 static VOID CfixkrsReportLogStub(
@@ -612,10 +615,10 @@ static VOID CfixkrsReportLogStub(
 	)
 {
 	PCFIXKRP_DRIVER_CONNECTION Conn = ( PCFIXKRP_DRIVER_CONNECTION ) Context;
-	PCFIXKRP_REPORT_CHANNEL Channel;
+	PCFIXKRP_FILAMENT Filament;
 
-	Channel = CfixkrpGetReportChannelCurrentThread( Conn );
-	if ( Channel != NULL )
+	Filament = CfixkrpGetCurrentFilamentFromConnection( Conn );
+	if ( Filament != NULL )
 	{
 		WCHAR Buffer[ 200 ] = { 0 };
 		PCWSTR Message;
@@ -646,7 +649,7 @@ static VOID CfixkrsReportLogStub(
 		}
 
 		CfixkrsQueueEvent(
-			Channel,
+			Filament->Channel,
 			NULL,
 			CfixEventLog,
 			NULL,
@@ -703,7 +706,7 @@ static PVOID CFIXCALLTYPE CfixkrsGetValueStub(
 	)
 {
 	PCFIXKRP_DRIVER_CONNECTION Conn = ( PCFIXKRP_DRIVER_CONNECTION ) Context;
-	PCFIXKRP_REPORT_CHANNEL Channel;
+	PCFIXKRP_FILAMENT Filament;
 
 	ASSERT( Conn );
 	
@@ -712,10 +715,10 @@ static PVOID CFIXCALLTYPE CfixkrsGetValueStub(
 		return NULL;
 	}
 
-	Channel = CfixkrpGetReportChannelCurrentThread( Conn );
-	if ( Channel != NULL && Tag == 0 )
+	Filament = CfixkrpGetCurrentFilamentFromConnection( Conn );
+	if ( Filament != NULL && Tag == 0 )
 	{
-		return Channel->TlsValue;
+		return Filament->Channel->TlsValue;
 	}
 	else
 	{
@@ -733,7 +736,7 @@ static VOID CFIXCALLTYPE CfixkrsSetValueStub(
 	)
 {
 	PCFIXKRP_DRIVER_CONNECTION Conn = ( PCFIXKRP_DRIVER_CONNECTION ) Context;
-	PCFIXKRP_REPORT_CHANNEL Channel;
+	PCFIXKRP_FILAMENT Filament;
 
 	ASSERT( Conn );
 
@@ -742,10 +745,10 @@ static VOID CFIXCALLTYPE CfixkrsSetValueStub(
 		return;
 	}
 
-	Channel = CfixkrpGetReportChannelCurrentThread( Conn );
-	if ( Channel != NULL && Tag == 0  )
+	Filament = CfixkrpGetCurrentFilamentFromConnection( Conn );
+	if ( Filament != NULL && Tag == 0  )
 	{
-		Channel->TlsValue = Value;
+		Filament->Channel->TlsValue = Value;
 	}
 	else
 	{
