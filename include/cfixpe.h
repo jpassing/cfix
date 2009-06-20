@@ -47,6 +47,8 @@
 #define MAKELONG(a, b)      ((LONG)(((SHORT)((ULONG_PTR)(a) & 0xffff)) | ((ULONG)((SHORT)((DWORD_PTR)(b) & 0xffff))) << 16))
 #endif
 
+#define CFIX_MAX_THREADS	MAXIMUM_WAIT_OBJECTS
+
 /*++
 	Exception Description:
 		Thrown when a test case turns out to be inconclusive. 

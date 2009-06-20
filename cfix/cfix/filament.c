@@ -53,6 +53,9 @@ static HRESULT CfixsGetCurrentThreadHandle(
 	}
 }
 
+#pragma warning( push )
+#pragma warning( disable: 6386 )	// False buffer overflow warning.
+
 static HRESULT CfixsRegisterChildThreadFilament(
 	__in PCFIXP_FILAMENT Filament,
 	__in HANDLE Thread
@@ -62,7 +65,7 @@ static HRESULT CfixsRegisterChildThreadFilament(
 	EnterCriticalSection( &Filament->ChildThreads.Lock );
 	
 	if ( Filament->ChildThreads.ThreadCount ==
-		_countof( Filament->ChildThreads.Threads ) - 1 )
+		_countof( Filament->ChildThreads.Threads ) )
 	{
 		Hr = CFIX_E_TOO_MANY_CHILD_THREADS;
 		goto Cleanup;
@@ -79,6 +82,7 @@ Cleanup:
 	return Hr;
 }
 
+#pragma warning( pop )
 
 /*----------------------------------------------------------------------
  * 

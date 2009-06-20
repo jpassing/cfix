@@ -152,7 +152,7 @@ typedef struct _CFIXP_FILAMENT
 		//
 		// Handles of child threads.
 		//
-		HANDLE Threads[ MAXIMUM_WAIT_OBJECTS ];
+		HANDLE Threads[ CFIX_MAX_THREADS ];
 	} ChildThreads;
 } CFIXP_FILAMENT, *PCFIXP_FILAMENT;
 

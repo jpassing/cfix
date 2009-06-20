@@ -22,6 +22,7 @@
  */
 
 #include <cfix.h>
+#include <cfixmsg.h>
 
 static DWORD CALLBACK ThreadProc( PVOID Pv )
 {
@@ -61,9 +62,37 @@ static void SpawnAndAutoJoin()
 		CFIX_THREAD_FLAG_CRT ) ) );
 }
 
+static void SpawnAndAutoJoinLotsOfThreads()
+{
+	ULONG Index;
+
+	for ( Index = 0; Index < CFIX_MAX_THREADS; Index++ )
+	{
+		CFIX_ASSERT( CloseHandle( CfixCreateThread2(
+			NULL,
+			0,
+			ThreadProc,
+			NULL,
+			0,
+			NULL,
+			CFIX_THREAD_FLAG_CRT ) ) );
+	}
+
+	CFIX_ASSERT( ! CfixCreateThread2(
+			NULL,
+			0,
+			ThreadProc,
+			NULL,
+			0,
+			NULL,
+			CFIX_THREAD_FLAG_CRT ) );
+	CFIX_ASSERT( GetLastError() == ( DWORD ) CFIX_E_TOO_MANY_CHILD_THREADS );
+}
+
 CFIX_BEGIN_FIXTURE( FilamentJoin )
 	CFIX_FIXTURE_ENTRY( SpawnAndJoinPolitely )
 	CFIX_FIXTURE_ENTRY( SpawnAndAutoJoin )
+	CFIX_FIXTURE_ENTRY( SpawnAndAutoJoinLotsOfThreads )
 
 	//
 	// Threads have to work in all these situations, too.

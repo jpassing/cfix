@@ -41,6 +41,7 @@ typedef struct _THREAD_START_PARAMETERS
 	// has been completed.
 	//
 	HANDLE InitializationCompleted;
+	HRESULT InitializationResult;
 } THREAD_START_PARAMETERS, *PTHREAD_START_PARAMETERS;
 
 static DWORD CfixsThreadStart(
@@ -68,9 +69,16 @@ static DWORD CfixsThreadStart(
 	// Set current filament s.t. it is accessible by callees
 	// without having to pass it explicitly.
 	//
-	VERIFY( S_OK == CfixpSetCurrentFilament( 
+	// This may fail when there are too many child threads already.
+	//
+	Parameters->InitializationResult = CfixpSetCurrentFilament( 
 		Parameters->Filament,
-		NULL ) );
+		NULL );
+	if ( FAILED( Parameters->InitializationResult ) )
+	{
+		( VOID ) SetEvent( Parameters->InitializationCompleted );
+		return 0;
+	}
 
 	//
 	// Notify execution context about the thread having been spawned.
@@ -211,6 +219,13 @@ HANDLE CfixCreateThread2(
 			INFINITE );
 		VERIFY( CloseHandle( Parameters.InitializationCompleted ) );
 		Parameters.InitializationCompleted = NULL;
+
+		if ( FAILED( Parameters.InitializationResult ) )
+		{
+			CloseHandle( Thread );
+			SetLastError( Parameters.InitializationResult );
+			return NULL;
+		}
 	}
 
 	return Thread;
