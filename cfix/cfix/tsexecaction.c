@@ -66,7 +66,18 @@ static ULONG CfixsGetTestFlagsFixtureExecutionAction(
 {
 	ULONG Flags = 0;
 
-	if ( CfixpFlagOn(
+	if ( IsDebuggerPresent() )
+	{
+		//
+		// Using dbghelp to create stack traces can lead to deadlocks
+		// when the current process is being debugged and a certain
+		// combination of VS and IE is installed.
+		//
+		// To play it safe, do not capture stack traces whenever
+		// a debugger is attached.
+		//
+	}
+	else if ( CfixpFlagOn(
 		Action->Flags,
 		CFIX_FIXTURE_EXECUTION_CAPTURE_STACK_TRACES ) )
 	{
@@ -444,19 +455,6 @@ CFIXAPI HRESULT CFIXCALLTYPE CfixCreateFixtureExecutionAction(
 	{
 		Hr = E_OUTOFMEMORY;
 		goto Cleanup;
-	}
-
-	if ( IsDebuggerPresent() )
-	{
-		//
-		// Using dbghelp to create stack traces can lead to deadlocks
-		// when the current process is being debugged and a certain
-		// combination of VS and IE is installed.
-		//
-		// To play it safe, do not capture stack traces whenever
-		// a debugger is attached.
-		//
-		Flags &= ~CFIX_FIXTURE_EXECUTION_CAPTURE_STACK_TRACES;
 	}
 
 	NewAction->Signature		= TSEXEC_ACTION_SIGNATURE;
