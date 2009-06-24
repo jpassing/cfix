@@ -459,11 +459,13 @@ static VOID CfixsDereferenceTestModule(
 
 static HRESULT CfixsRunTestRoutine(
 	__in CFIX_PE_TESTCASE_ROUTINE Routine,
-	__in PCFIX_EXECUTION_CONTEXT Context
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG Flags
 	)
 {
 	BOOL AbortRun = FALSE;
 	HRESULT Hr;
+	ULONG FilamentFlags = 0;
 
 	CFIXP_FILAMENT Filament;
 	PCFIXP_FILAMENT PrevFilament;
@@ -473,6 +475,12 @@ static HRESULT CfixsRunTestRoutine(
 	if ( ! Routine )
 	{
 		return E_UNEXPECTED;
+	}
+
+	ASSERT( Flags <= CFIX_TEST_FLAG_CAPTURE_STACK_TRACES );
+	if ( CfixpFlagOn( Flags, CFIX_TEST_FLAG_CAPTURE_STACK_TRACES ) )
+	{
+		FilamentFlags |= CFIXP_FILAMENT_FLAG_CAPTURE_STACK_TRACES;
 	}
 
 	//
@@ -487,9 +495,7 @@ static HRESULT CfixsRunTestRoutine(
 	CfixpInitializeFilament(
 		Context, 
 		GetCurrentThreadId(),
-		IsDebuggerPresent()
-			? 0
-			: CFIXP_FILAMENT_FLAG_CAPTURE_STACK_TRACES,
+		FilamentFlags,
 		&Filament );
 
 	Hr = CfixpSetCurrentFilament( 
@@ -549,7 +555,8 @@ static HRESULT CfixsRunTestRoutine(
 
 static HRESULT CfixsRunTestCaseTestModule(
 	__in PCFIX_TEST_CASE TestCase,
-	__in PCFIX_EXECUTION_CONTEXT Context
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG Flags
 	)
 {
 	if ( ! TestCase || 
@@ -561,12 +568,14 @@ static HRESULT CfixsRunTestCaseTestModule(
 
 	return CfixsRunTestRoutine( 
 		( CFIX_PE_TESTCASE_ROUTINE ) TestCase->Routine,
-		Context );
+		Context,
+		Flags );
 }
 
 static HRESULT CfixsRunSetupTestModule(
 	__in PCFIX_FIXTURE Fixture,
-	__in PCFIX_EXECUTION_CONTEXT Context
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG Flags
 	)
 {
 	HRESULT Hr;
@@ -591,7 +600,8 @@ static HRESULT CfixsRunSetupTestModule(
 	{
 		Hr = CfixsRunTestRoutine( 
 			( CFIX_PE_TESTCASE_ROUTINE ) Fixture->SetupRoutine,
-			Context );
+			Context,
+			Flags );
 
 		if ( CFIX_E_TEST_ROUTINE_FAILED == Hr )
 		{
@@ -619,7 +629,8 @@ static HRESULT CfixsRunSetupTestModule(
 
 static HRESULT CfixsRunTeardownTestModule(
 	__in PCFIX_FIXTURE Fixture,
-	__in PCFIX_EXECUTION_CONTEXT Context
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG Flags
 	)
 {
 	if ( ! Fixture || 
@@ -636,7 +647,8 @@ static HRESULT CfixsRunTeardownTestModule(
 	{
 		HRESULT Hr = CfixsRunTestRoutine( 
 			( CFIX_PE_TESTCASE_ROUTINE ) Fixture->TeardownRoutine,
-			Context );
+			Context,
+			Flags );
 
 		if ( CFIX_E_TEST_ROUTINE_FAILED == Hr )
 		{
@@ -655,7 +667,8 @@ static HRESULT CfixsRunTeardownTestModule(
 
 static HRESULT CfixsRunBeforeTestModule(
 	__in PCFIX_FIXTURE Fixture,
-	__in PCFIX_EXECUTION_CONTEXT Context
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG Flags
 	)
 {
 	if ( ! Fixture || 
@@ -672,7 +685,8 @@ static HRESULT CfixsRunBeforeTestModule(
 	{
 		HRESULT Hr = CfixsRunTestRoutine( 
 			( CFIX_PE_TESTCASE_ROUTINE ) Fixture->BeforeRoutine,
-			Context );
+			Context,
+			Flags );
 
 		if ( CFIX_E_TEST_ROUTINE_FAILED == Hr )
 		{
@@ -691,7 +705,8 @@ static HRESULT CfixsRunBeforeTestModule(
 
 static HRESULT CfixsRunAfterTestModule(
 	__in PCFIX_FIXTURE Fixture,
-	__in PCFIX_EXECUTION_CONTEXT Context
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG Flags
 	)
 {
 	HRESULT Hr;
@@ -710,7 +725,8 @@ static HRESULT CfixsRunAfterTestModule(
 	{
 		Hr = CfixsRunTestRoutine( 
 			( CFIX_PE_TESTCASE_ROUTINE ) Fixture->AfterRoutine,
-			Context );
+			Context,
+			Flags );
 
 		if ( CFIX_E_TEST_ROUTINE_FAILED == Hr )
 		{

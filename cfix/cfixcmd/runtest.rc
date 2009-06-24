@@ -53,7 +53,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1, 4, 0, 3458
+ FILEVERSION 1, 4, 0, 3462
  PRODUCTVERSION 1,1,0,1
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -71,7 +71,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Johannes Passing"
             VALUE "FileDescription", "Cfix"
-            VALUE "FileVersion", "1, 4, 0, 3458\0"
+            VALUE "FileVersion", "1, 4, 0, 3462\0"
             VALUE "InternalName", "Cfix"
             VALUE "LegalCopyright", "Copyright (C) 2008 Johannes Passing"
             VALUE "OriginalFilename", "Cfix"
@@ -108,6 +108,15 @@ IDI_ICON1               ICON                    "icon.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
+
+
+
+
+
+
+
+
 
 
 

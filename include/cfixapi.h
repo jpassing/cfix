@@ -281,6 +281,11 @@ typedef struct _CFIX_EXECUTION_CONTEXT
  *
  */
 
+//
+// Capture stack backtraces for failed reports.
+//
+#define CFIX_TEST_FLAG_CAPTURE_STACK_TRACES 1
+
 /*++
 	Description:
 		Prototype of setup, teardown and testcase routines.
@@ -288,6 +293,7 @@ typedef struct _CFIX_EXECUTION_CONTEXT
 	Parameters:
 		Module		Module fixture belongs to.
 		TestCase	Testcase to run.
+		Flags		CFIX_TEST_FLAG_*.
 
 	Return Values:
 		CFIX_E_TEST_ROUTINE_FAILED	- Failed, but run shall continue.
@@ -296,7 +302,8 @@ typedef struct _CFIX_EXECUTION_CONTEXT
 --*/
 typedef HRESULT ( CFIXCALLTYPE * CFIX_TESTCASE_ROUTINE ) (
 	__in struct _CFIX_TEST_CASE *TestCase,
-	__in PCFIX_EXECUTION_CONTEXT Context
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG Flags
 	);
 
 /*++
@@ -306,6 +313,7 @@ typedef HRESULT ( CFIXCALLTYPE * CFIX_TESTCASE_ROUTINE ) (
 	Parameters:
 		Module		Module fixture belongs to.
 		Fixture		Fixture to setup/teardown.
+		Flags		CFIX_TEST_FLAG_*.
 
 	Return Values:
 		CFIX_E_SETUP_ROUTINE_FAILED,		
@@ -315,7 +323,8 @@ typedef HRESULT ( CFIXCALLTYPE * CFIX_TESTCASE_ROUTINE ) (
 --*/
 typedef HRESULT ( CFIXCALLTYPE * CFIX_SETUPTEARDOWN_ROUTINE ) (
 	__in struct _CFIX_FIXTURE *Fixture,
-	__in PCFIX_EXECUTION_CONTEXT Context
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG Flags
 	);
 
 /*++
@@ -506,7 +515,7 @@ CFIXAPI HRESULT CFIXCALLTYPE CfixklCreateTestModuleFromDriver(
 // N.B. Should not be used in isolation, use 
 // CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_RUN_ON_FAILURE instead.
 //
-#define CFIX_FIXTURE_EXECUTION_ESCALATE_FIXTURE_FAILUES			4
+#define CFIX_FIXTURE_EXECUTION_ESCALATE_FIXTURE_FAILUES				4
 
 //
 // If one routine fails, prematurely abort run.
@@ -517,6 +526,11 @@ CFIXAPI HRESULT CFIXCALLTYPE CfixklCreateTestModuleFromDriver(
 	( CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_FIXTURE_ON_FAILURE |		\
 	  CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_RUN_ON_SETUP_FAILURE |	\
 	  CFIX_FIXTURE_EXECUTION_ESCALATE_FIXTURE_FAILUES )
+
+//
+// Capture stack backtraces for failed reports.
+//
+#define CFIX_FIXTURE_EXECUTION_CAPTURE_STACK_TRACES					256
 
 /*++
 	Routine Description:

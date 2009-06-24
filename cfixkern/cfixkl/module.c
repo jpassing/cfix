@@ -570,7 +570,8 @@ static VOID CfixklsDereferenceModule(
 
 static HRESULT CfixklsRunSetupRoutine(
 	__in PCFIX_FIXTURE Fixture,
-	__in PCFIX_EXECUTION_CONTEXT Context
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG Flags
 	)
 {
 	PCFIXKLP_TEST_MODULE Module;
@@ -582,6 +583,8 @@ static HRESULT CfixklsRunSetupRoutine(
 	{
 		return E_INVALIDARG;
 	}
+
+	UNREFERENCED_PARAMETER( Flags );
 
 	Module = CONTAINING_RECORD(
 		Fixture->Module,
@@ -657,7 +660,8 @@ static HRESULT CfixklsRunSetupRoutine(
 
 static HRESULT CfixklsRunTeardownRoutine(
 	__in PCFIX_FIXTURE Fixture,
-	__in PCFIX_EXECUTION_CONTEXT Context
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG Flags
 	)
 {
 	PCFIXKLP_TEST_MODULE Module;
@@ -670,6 +674,8 @@ static HRESULT CfixklsRunTeardownRoutine(
 	{
 		return E_INVALIDARG;
 	}
+
+	UNREFERENCED_PARAMETER( Flags );
 
 	Module = CONTAINING_RECORD(
 		Fixture->Module,
@@ -802,7 +808,8 @@ static HRESULT CfixklsRunBeforeOrAfterRoutine(
 
 static HRESULT CfixklsRunBeforeRoutine(
 	__in PCFIX_FIXTURE Fixture,
-	__in PCFIX_EXECUTION_CONTEXT Context
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG Flags
 	)
 {
 	if ( ! Fixture || 
@@ -811,6 +818,8 @@ static HRESULT CfixklsRunBeforeRoutine(
 	{
 		return E_INVALIDARG;
 	}
+
+	UNREFERENCED_PARAMETER( Flags );
 
 	return CfixklsRunBeforeOrAfterRoutine(
 		Fixture,
@@ -822,7 +831,8 @@ static HRESULT CfixklsRunBeforeRoutine(
 
 static HRESULT CfixklsRunAfterRoutine(
 	__in PCFIX_FIXTURE Fixture,
-	__in PCFIX_EXECUTION_CONTEXT Context
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG Flags
 	)
 {
 	if ( ! Fixture || 
@@ -831,6 +841,8 @@ static HRESULT CfixklsRunAfterRoutine(
 	{
 		return E_INVALIDARG;
 	}
+
+	UNREFERENCED_PARAMETER( Flags );
 
 	return CfixklsRunBeforeOrAfterRoutine(
 		Fixture,
@@ -843,7 +855,8 @@ static HRESULT CfixklsRunAfterRoutine(
 
 static HRESULT CfixklsRunTestCaseRoutine(
 	__in PCFIX_TEST_CASE TestCase,
-	__in PCFIX_EXECUTION_CONTEXT Context
+	__in PCFIX_EXECUTION_CONTEXT Context,
+	__in ULONG Flags
 	)
 {
 	HRESULT Hr;
@@ -859,6 +872,8 @@ static HRESULT CfixklsRunTestCaseRoutine(
 	{
 		return E_INVALIDARG;
 	}
+
+	UNREFERENCED_PARAMETER( Flags );
 
 	Module = CONTAINING_RECORD(
 		TestCase->Fixture->Module,

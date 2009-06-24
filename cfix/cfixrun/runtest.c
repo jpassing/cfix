@@ -62,7 +62,7 @@ static HRESULT CfixrunsCreateTsExecAction(
 
 	ASSERT( State != NULL );
 
-	ExecutionFlags = 0;
+	ExecutionFlags = CFIX_FIXTURE_EXECUTION_CAPTURE_STACK_TRACES;
 	if ( State->Options->ShortCircuitFixtureOnFailure )
 	{
 		ExecutionFlags |= CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_FIXTURE_ON_FAILURE;

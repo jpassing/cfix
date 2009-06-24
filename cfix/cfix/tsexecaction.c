@@ -60,6 +60,22 @@ typedef struct _TSEXEC_ACTION
 	ULONG TestCaseIndex;
 } TSEXEC_ACTION, *PTSEXEC_ACTION;
 
+static ULONG CfixsGetTestFlagsFixtureExecutionAction( 
+	__in PTSEXEC_ACTION Action 
+	)
+{
+	ULONG Flags = 0;
+
+	if ( CfixpFlagOn(
+		Action->Flags,
+		CFIX_FIXTURE_EXECUTION_CAPTURE_STACK_TRACES ) )
+	{
+		Flags |= CFIX_TEST_FLAG_CAPTURE_STACK_TRACES;
+	}
+
+	return Flags;
+}
+
 /*----------------------------------------------------------------------
  *
  * Methods.
@@ -118,7 +134,8 @@ static HRESULT CfixsRunTestCaseFixtureExecutionAction(
 	//
 	Hr = Action->Module->Routines.Before(
 		Action->Fixture,
-		Context );
+		Context,
+		CfixsGetTestFlagsFixtureExecutionAction( Action ) );
 
 	ASSERT( S_OK == Hr ||
 			CFIX_E_TESTRUN_ABORTED == Hr ||
@@ -134,7 +151,8 @@ static HRESULT CfixsRunTestCaseFixtureExecutionAction(
 	//
 	HrTestCase = Action->Module->Routines.RunTestCase(
 		TestCase,
-		Context );
+		Context,
+		CfixsGetTestFlagsFixtureExecutionAction( Action ) );
 
 	ASSERT( S_OK == Hr ||
 			CFIX_E_TEST_ROUTINE_FAILED == Hr ||
@@ -146,7 +164,8 @@ static HRESULT CfixsRunTestCaseFixtureExecutionAction(
 	//
 	Hr = Action->Module->Routines.After(
 		Action->Fixture,
-		Context );
+		Context,
+		CfixsGetTestFlagsFixtureExecutionAction( Action ) );
 
 	ASSERT( S_OK == Hr ||
 			CFIX_E_TESTRUN_ABORTED == Hr ||
@@ -214,7 +233,8 @@ static HRESULT CfixsRunFixtureExecutionAction(
 
 	Hr = Action->Module->Routines.Setup( 
 		Action->Fixture,
-		Context );
+		Context,
+		CfixsGetTestFlagsFixtureExecutionAction( Action ) );
 
 	ASSERT( S_OK == Hr ||
 			CFIX_E_SETUP_ROUTINE_FAILED == Hr ||
@@ -364,7 +384,9 @@ static HRESULT CfixsRunFixtureExecutionAction(
 		//
 		TeardownHr = Action->Module->Routines.Teardown( 
 			Action->Fixture,
-			Context );
+			Context,
+			CfixsGetTestFlagsFixtureExecutionAction( Action ) );
+
 		if ( FAILED( TeardownHr ) )
 		{
 			FixtureRanToCompletion = FALSE;
@@ -422,6 +444,19 @@ CFIXAPI HRESULT CFIXCALLTYPE CfixCreateFixtureExecutionAction(
 	{
 		Hr = E_OUTOFMEMORY;
 		goto Cleanup;
+	}
+
+	if ( IsDebuggerPresent() )
+	{
+		//
+		// Using dbghelp to create stack traces can lead to deadlocks
+		// when the current process is being debugged and a certain
+		// combination of VS and IE is installed.
+		//
+		// To play it safe, do not capture stack traces whenever
+		// a debugger is attached.
+		//
+		Flags &= ~CFIX_FIXTURE_EXECUTION_CAPTURE_STACK_TRACES;
 	}
 
 	NewAction->Signature		= TSEXEC_ACTION_SIGNATURE;
