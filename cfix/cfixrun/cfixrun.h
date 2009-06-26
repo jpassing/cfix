@@ -87,6 +87,7 @@ typedef struct _CFIXRUN_OPTIONS
 	PCWSTR ProgressOutputTargetName;
 	PCWSTR LogOutputTargetName;
 	BOOL NoLogo;
+	BOOL DisableStackTraces;
 	BOOL OmitSourceInfoInStackTrace;
 	
 	CFIXRUN_OUTPUT_TARGET ProgressOutputTarget;

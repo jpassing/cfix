@@ -224,6 +224,11 @@ BOOL CfixrunParseCommandLine(
 				Options->OmitSourceInfoInStackTrace = TRUE;
 				State = StateExpectAny;
 			}
+			else if ( 0 == wcscmp( FlagName, L"td" ) )
+			{
+				Options->DisableStackTraces = TRUE;
+				State = StateExpectAny;
+			}
 			else
 			{
 				Options->PrintConsole( L"Unknown flag '%s'\n", Argv[ ArgIndex ] );

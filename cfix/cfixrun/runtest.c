@@ -57,20 +57,26 @@ static HRESULT CfixrunsCreateTsExecAction(
 	__out PCFIX_ACTION *Action
 	)
 {
-	ULONG ExecutionFlags;
+	ULONG ExecutionFlags = 0;
 	PCFIXRUN_STATE State = ( PCFIXRUN_STATE ) Context;
 
 	ASSERT( State != NULL );
 
-	ExecutionFlags = CFIX_FIXTURE_EXECUTION_CAPTURE_STACK_TRACES;
+	if ( ! State->Options->DisableStackTraces )
+	{
+		ExecutionFlags = CFIX_FIXTURE_EXECUTION_CAPTURE_STACK_TRACES;
+	}
+
 	if ( State->Options->ShortCircuitFixtureOnFailure )
 	{
 		ExecutionFlags |= CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_FIXTURE_ON_FAILURE;
 	}
+
 	if ( State->Options->ShortCircuitRunOnFailure )
 	{
 		ExecutionFlags |= CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_RUN_ON_FAILURE;
 	}
+
 	if ( State->Options->ShortCircuitRunOnSetupFailure )
 	{
 		ExecutionFlags |= CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_RUN_ON_SETUP_FAILURE;

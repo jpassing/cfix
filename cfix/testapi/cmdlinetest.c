@@ -65,16 +65,18 @@ void TestCmdLineParser()
 	TEST( Options.Summary );
 	TEST( Options.PauseAtEnd );
 	TEST( Options.NoLogo );
+	TEST( ! Options.DisableStackTraces );
 
 	TEST( DefOutputProgress == Options.ProgressOutputTarget );
 	TEST( CfixrunTargetNone == Options.LogOutputTarget );
 
-	TEST( ParseCommandLine( L"runtest -out debug -log \"console\" foo.dll", &Options ) );
+	TEST( ParseCommandLine( L"runtest -out debug /td -log \"console\" foo.dll", &Options ) );
 	TEST( CfixrunInputDllOrDirectory == Options.InputFileType );
 	TEST( 0 == wcscmp( Options.InputFile, L"foo.dll" ) );
 	TEST( 0 == wcscmp( Options.ProgressOutputTargetName, L"debug" ) );
 	TEST( 0 == wcscmp( Options.LogOutputTargetName, L"console" ) );
 	TEST( ! Options.EnableKernelFeatures );
+	TEST( Options.DisableStackTraces );
 
 	TEST( ParseCommandLine( L"runtest -kern -fsr -fss -out debug -out b foo.dll", &Options ) );
 	TEST( CfixrunInputDllOrDirectory == Options.InputFileType );
