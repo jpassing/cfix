@@ -22,11 +22,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with cfix.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <cfixapi.h>
 #include <cfixrun.h>
 #include <cdiag.h>
+
+#pragma warning( push )
+#pragma warning( disable: 6011; disable: 6387 )
+#include <strsafe.h>
+#pragma warning( pop )
 
 static VOID CfixcmdsPrintBanner()
 {
@@ -120,6 +126,26 @@ static VOID CfixcmdsPrintUsage(
 		CFIXRUN_EXIT_FAILURE );
 }
 
+int CfixcmdsPrintConsoleAndDebug(
+	__in_z __format_string PCWSTR Format, 
+	... 
+	)
+{
+	WCHAR Buffer[ 256 ];
+
+	va_list lst;
+	va_start( lst, Format );
+	( VOID ) StringCchVPrintfW(
+		Buffer, 
+		_countof( Buffer ),
+		Format,
+		lst );
+	va_end( lst );
+	
+	OutputDebugString( Buffer );
+
+	return wprintf( L"%s", Buffer );;
+}
 
 int __cdecl wmain(
 	__in UINT Argc,
@@ -130,7 +156,15 @@ int __cdecl wmain(
 	DWORD ExitCode;
 
 	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
-	Options.PrintConsole = wprintf;
+
+	if ( IsDebuggerPresent() )
+	{
+		Options.PrintConsole = CfixcmdsPrintConsoleAndDebug;
+	}
+	else
+	{
+		Options.PrintConsole = wprintf;
+	}
 
 	if ( Argc == 0 )
 	{

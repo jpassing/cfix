@@ -129,6 +129,14 @@ static VOID CfixrunsOutputConsole(
 	wprintf( L"%s", Text );
 }
 
+static VOID CfixrunsOutputConsoleAndDebug(
+	__in PCWSTR Text 
+	)
+{
+	wprintf( L"%s", Text );
+	OutputDebugString( Text );
+}
+
 static HRESULT CfixrunsCreateOutputHandler(
 	__in CDIAG_SESSION_HANDLE Session,
 	__in CFIXRUN_OUTPUT_TARGET Target,
@@ -142,7 +150,7 @@ static HRESULT CfixrunsCreateOutputHandler(
 		CDIAG_OUTPUT_ROUTINE Routine;
 		if ( Target == CfixrunTargetDebug )
 		{
-			Routine = OutputDebugString;
+			Routine = CfixrunsOutputConsoleAndDebug;
 		}
 		else
 		{
