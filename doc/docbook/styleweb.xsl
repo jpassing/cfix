@@ -79,7 +79,7 @@
 
 	<body>
 		<div id='tab'>
-			<div class='tab_passive'><a href='xxxxxxx'>Xxxxxxxxxxxx</a></div>
+			<div class='tab_passive'><a href='http://www.cfix-studio.com/'>cfix studio &#x2013; C/C++ unit testing for Visual Studio</a></div>
 			<div class='tab_passive2active'><img src='../assets/img/tab_passive2active.png' alt=''/></div>
 			<div class='tab_active'><a href='../index.html'>cfix &#x2013;  C/C++ Unit Testing for Win32 and NT</a></div>
 			<div class='tab_activeend'><img src='../assets/img/tab_activeend.png' alt=''/></div>
@@ -102,12 +102,13 @@
 	    </div>
 	    <div id='main'>
 	        <div id='main_sidebar'>
+			<!--
 				<div class='download'>
 				    <div style='text-align: center' class='submenu_content'>
 						<a href='http://sourceforge.net/project/showfiles.php?group_id=218233&amp;package_id=263204'><img src='../assets/img/download.png' alt='Download cfix'/></a>
 				    </div> 
 			    </div>
-				
+			-->
 	            <div class='submenu'>
 				    <div class='submenu_box'>
 					    Documentation				
