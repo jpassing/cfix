@@ -197,6 +197,8 @@ typedef struct _CFIX_EXECUTION_CONTEXT
 			relate the new thread to its 'parent' 
 
 			This routine is called on the existing ('parent') thread.
+
+			N.B. For kernel mode tests, this callback is never invoked.
 	--*/
 	HRESULT ( CFIXCALLTYPE * CreateChildThread ) (
 		__in struct _CFIX_EXECUTION_CONTEXT *This,
@@ -210,6 +212,8 @@ typedef struct _CFIX_EXECUTION_CONTEXT
 			user code.
 
 			This routine is called on the child thread.
+
+			N.B. For kernel mode tests, this callback is never invoked.
 	--*/
 	VOID ( CFIXCALLTYPE * BeforeChildThreadStart ) (
 		__in struct _CFIX_EXECUTION_CONTEXT *This,

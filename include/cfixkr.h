@@ -67,8 +67,20 @@
 DEFINE_GUID(GUID_CFIXKR_REPORT_SINK, 
 	0x118f0a99, 0xc318, 0x45da, 0xb5, 0x5c, 0x6e, 0x19, 0xa4, 0xe1, 0x24, 0xc);
 
+//
+// Initial version (1.1).
+//
 #define CFIXKR_REPORT_SINK_VERSION_1 0x1000
+
+//
+// Extended version (1.2).
+//
 #define CFIXKR_REPORT_SINK_VERSION_2 0x2000
+
+//
+// Extended version (1.5).
+//
+#define CFIXKR_REPORT_SINK_VERSION_3 0x3000
 
 /*++
 	Routine Description:
@@ -190,6 +202,22 @@ typedef VOID ( CFIXCALLTYPE * CFIXKR_SET_VALUE_ROUTINE )(
 	);
 
 /*++
+	Routine Description:
+		Create system thread.
+--*/
+typedef NTSTATUS ( CFIXCALLTYPE * CFIXKR_CREATESYSTEMTHREAD )(
+    __in PVOID Context,
+	__out PHANDLE ThreadHandle,
+    __in ULONG DesiredAccess,
+    __in_opt POBJECT_ATTRIBUTES ObjectAttributes,
+    __in_opt HANDLE ProcessHandle,
+    __out_opt PCLIENT_ID ClientId,
+    __in PKSTART_ROUTINE StartRoutine,
+    __in PVOID StartContext,
+	__in ULONG Flags
+    );
+
+/*++
 	Structure Description:
 		See CFIXKR_REPORT_SINK_INTERFACE.
 --*/
@@ -213,6 +241,19 @@ typedef struct _CFIXKR_REPORT_SINK_METHODS_2
 	CFIXKR_SET_VALUE_ROUTINE SetValue;
 } CFIXKR_REPORT_SINK_METHODS_2, *PCFIXKR_REPORT_SINK_METHODS_2;
 
+typedef struct _CFIXKR_REPORT_SINK_METHODS_3
+{
+	CFIXKR_REPORT_FAILED_ASSERTION_ROUTINE ReportFailedAssertion;
+	CFIXKR_ASSERT_EQUALS_ULONG_ROUTINE AssertEqualsUlong;
+	CFIXKR_REPORT_INCONCLUSIVENESS_ROUTINE ReportInconclusiveness;
+	CFIXKR_REPORT_LOG_ROUTINE ReportLog;
+	CFIXKR_REPORT_FAILED_ASSERTION_FORMAT_ROUTINE ReportFailedAssertionFormat;
+	CFIXKR_FAIL_ROUTINE Fail;
+	CFIXKR_GET_VALUE_ROUTINE GetValue;
+	CFIXKR_SET_VALUE_ROUTINE SetValue;
+	CFIXKR_CREATESYSTEMTHREAD CreateSystemThread;
+} CFIXKR_REPORT_SINK_METHODS_3, *PCFIXKR_REPORT_SINK_METHODS_3;
+
 /*++
 	Structure Description:
 		Interface between test driver and cfixkr.
@@ -228,3 +269,9 @@ typedef struct _CFIXKR_REPORT_SINK_INTERFACE_2
 	INTERFACE Base;
 	CFIXKR_REPORT_SINK_METHODS_2 Methods;
 } CFIXKR_REPORT_SINK_INTERFACE_2, *PCFIXKR_REPORT_SINK_INTERFACE_2;
+
+typedef struct _CFIXKR_REPORT_SINK_INTERFACE_3
+{
+	INTERFACE Base;
+	CFIXKR_REPORT_SINK_METHODS_3 Methods;
+} CFIXKR_REPORT_SINK_INTERFACE_3, *PCFIXKR_REPORT_SINK_INTERFACE_3;

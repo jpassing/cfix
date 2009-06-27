@@ -155,6 +155,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\cfixkr\thread.c"
+					>
+				</File>
+				<File
 					RelativePath=".\cfixkr\util.c"
 					>
 				</File>

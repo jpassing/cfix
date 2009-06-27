@@ -338,25 +338,11 @@ CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread2(
 
 #else  // CFIX_KERNELMODE
 
-//
-// Let the new thread run as part of the system context. If this flag
-// is not specified, the thread is run in the context of the cfix
-// process.
-//
-// Note for Windows 2000:
-//   This flag is always implied.
-//
-
-#define CFIX_SYSTEM_THREAD_FLAG_SYSTEM_CONTEXT	1
-
 /*++
 	Routine Description:
 		Creates a system thread like PsCreateSystemThread does, but 
 		registers the thread appropriately s.t. assertions, unhandled 
 		exceptions etc. can be properly handled by the framework.
-
-		If the thread is aborted due to an unhandled exception, assertion
-		etc, the thread's exit code is CFIX_E_THREAD_ABORTED.
 
 		Note that no more than CFIX_MAX_THREADS threads may be
 		created within a single test case.
@@ -364,11 +350,18 @@ CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread2(
 		May be called at IRQL == PASSIVE_LEVEL.
 
 	Parameters:
-		Flags		See CFIX_SYSTEM_THREAD_FLAG_*.
-		See MSDN.
+		Flags		
+					0: create in current context.
+					CFIX_SYSTEM_THREAD_FLAG_SYSTEM_CONTEXT:
+						Let the new thread run as part of the system 
+						context. 
+
+					Note for Windows 2000: This flag is always implied.
+
+		See MSDN for remaining parameters.
 --*/
 
-CFIXAPI NTSTATUS CFIXCALLTYPE CfixCreateSystemThread(
+NTSTATUS CFIXCALLTYPE CfixCreateSystemThread(
     __out PHANDLE ThreadHandle,
     __in ULONG DesiredAccess,
     __in_opt POBJECT_ATTRIBUTES ObjectAttributes,

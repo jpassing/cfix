@@ -32,7 +32,7 @@
 // as we use its interface.
 //
 static PDEVICE_OBJECT CfixkDrvCfixkrDevice = NULL;
-static CFIXKR_REPORT_SINK_INTERFACE_2 CfixkDrvReportSink;
+static CFIXKR_REPORT_SINK_INTERFACE_3 CfixkDrvReportSink;
 
 static NTSTATUS CfixkDrvNotImplemented(
 	__in PDEVICE_OBJECT DeviceObject,
@@ -109,8 +109,8 @@ static NTSTATUS CfixkDrvQueryReporter(
 	//
 	Stack->MinorFunction							= IRP_MN_QUERY_INTERFACE;
 	Stack->Parameters.QueryInterface.InterfaceType	= &GUID_CFIXKR_REPORT_SINK;
-	Stack->Parameters.QueryInterface.Size			= sizeof( CFIXKR_REPORT_SINK_INTERFACE ) ;
-	Stack->Parameters.QueryInterface.Version		= CFIXKR_REPORT_SINK_VERSION_2;
+	Stack->Parameters.QueryInterface.Size			= sizeof( CFIXKR_REPORT_SINK_INTERFACE_3 ) ;
+	Stack->Parameters.QueryInterface.Version		= CFIXKR_REPORT_SINK_VERSION_3;
 	Stack->Parameters.QueryInterface.Interface		= ( PINTERFACE ) &CfixkDrvReportSink;
 	Stack->Parameters.QueryInterface.InterfaceSpecificData = ( PVOID ) AddressWithinCurrentModule;
 
@@ -122,7 +122,8 @@ static NTSTATUS CfixkDrvQueryReporter(
 	}
 
 	ASSERT( NT_SUCCESS( Status ) == ( CfixkDrvReportSink.Base.Context != NULL ) );
-
+	ASSERT( NT_SUCCESS( Status ) == 
+		( CfixkDrvReportSink.Base.Version == CFIXKR_REPORT_SINK_VERSION_3 ) );
 	return Status;
 }
 
@@ -343,4 +344,33 @@ VOID CfixPeSetValue(
 			Tag,
 			Value );
 	}
+}
+
+NTSTATUS CFIXCALLTYPE CfixCreateSystemThread(
+    __out PHANDLE ThreadHandle,
+    __in ULONG DesiredAccess,
+    __in_opt POBJECT_ATTRIBUTES ObjectAttributes,
+    __in_opt HANDLE ProcessHandle,
+    __out_opt PCLIENT_ID ClientId,
+    __in PKSTART_ROUTINE StartRoutine,
+    __in PVOID StartContext,
+	__in ULONG Flags
+    )
+{
+	ASSERT( CfixkDrvReportSink.Base.Context != NULL );
+	if ( CfixkDrvReportSink.Base.Context == NULL )
+	{
+		return STATUS_UNSUCCESSFUL;
+	}
+
+	return CfixkDrvReportSink.Methods.CreateSystemThread(
+		CfixkDrvReportSink.Base.Context,
+		ThreadHandle,
+		DesiredAccess,
+		ObjectAttributes,
+		ProcessHandle,
+		ClientId,
+		StartRoutine,
+		StartContext,
+		Flags );
 }

@@ -440,7 +440,7 @@ NTSTATUS CfixkrpDispatchPnp(
 		if ( InlineIsEqualGUID( 
 				StackLocation->Parameters.QueryInterface.InterfaceType, 
 				&GUID_CFIXKR_REPORT_SINK ) &&
-			 StackLocation->Parameters.QueryInterface.Size == sizeof( CFIXKR_REPORT_SINK_INTERFACE ) &&
+			 StackLocation->Parameters.QueryInterface.Size >= sizeof( CFIXKR_REPORT_SINK_INTERFACE ) &&
 			 StackLocation->Parameters.QueryInterface.Interface != NULL &&
 			 StackLocation->Parameters.QueryInterface.InterfaceSpecificData != NULL )
 		{
@@ -492,6 +492,13 @@ NTSTATUS CfixkrpDispatchPnp(
 					CfixkrpQuerySinkInterfaceDriverConnection2( 
 						Reporter, 
 						( PCFIXKR_REPORT_SINK_INTERFACE_2 )
+							StackLocation->Parameters.QueryInterface.Interface );
+					break;
+
+				case CFIXKR_REPORT_SINK_VERSION_3:
+					CfixkrpQuerySinkInterfaceDriverConnection3( 
+						Reporter, 
+						( PCFIXKR_REPORT_SINK_INTERFACE_3 )
 							StackLocation->Parameters.QueryInterface.Interface );
 					break;
 

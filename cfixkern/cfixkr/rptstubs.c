@@ -377,7 +377,8 @@ static VOID CFIXCALLTYPE CfixkrsFailStub(
 
 	ASSERT( Conn );
 
-	Filament = CfixkrpGetCurrentFilamentFromConnection( Conn );
+	Filament = CfixkrpGetCurrentFilament( 
+		CfixkrpGetFilamentRegistryFromConnection( Conn ) );
 	if ( Filament != NULL )
 	{
 		CfixkrsAbortCurrentTestCase( 
@@ -407,7 +408,8 @@ static CFIX_REPORT_DISPOSITION CfixkrsReportFailedAssertionStub(
 
 	ASSERT( Conn );
 
-	Filament = CfixkrpGetCurrentFilamentFromConnection( Conn );
+	Filament = CfixkrpGetCurrentFilament( 
+		CfixkrpGetFilamentRegistryFromConnection( Conn ) );
 	if ( Filament != NULL )
 	{
 		CFIX_REPORT_DISPOSITION Disp;
@@ -580,7 +582,8 @@ static VOID CfixkrsReportInconclusivenessStub(
 	PCFIXKRP_DRIVER_CONNECTION Conn = ( PCFIXKRP_DRIVER_CONNECTION ) Context;
 	PCFIXKRP_FILAMENT Filament;
 
-	Filament = CfixkrpGetCurrentFilamentFromConnection( Conn );
+	Filament = CfixkrpGetCurrentFilament( 
+		CfixkrpGetFilamentRegistryFromConnection( Conn ) );
 	if ( Filament != NULL )
 	{
 		CfixkrsQueueEvent(
@@ -620,7 +623,8 @@ static VOID CfixkrsReportLogStub(
 	PCFIXKRP_DRIVER_CONNECTION Conn = ( PCFIXKRP_DRIVER_CONNECTION ) Context;
 	PCFIXKRP_FILAMENT Filament;
 
-	Filament = CfixkrpGetCurrentFilamentFromConnection( Conn );
+	Filament = CfixkrpGetCurrentFilament( 
+		CfixkrpGetFilamentRegistryFromConnection( Conn ) );
 	if ( Filament != NULL )
 	{
 		WCHAR Buffer[ 200 ] = { 0 };
@@ -703,6 +707,51 @@ CFIX_REPORT_DISPOSITION CfixkrpReportUnhandledException(
 	}
 }
 
+EXCEPTION_DISPOSITION CfixkrpExceptionFilter(
+	__in PEXCEPTION_POINTERS ExcpPointers,
+	__in PCFIXKRP_REPORT_CHANNEL Channel,
+	__out BOOLEAN *AbortRun
+	)
+{
+	ULONG ExcpCode = ExcpPointers->ExceptionRecord->ExceptionCode;
+
+	if ( EXCEPTION_TESTCASE_INCONCLUSIVE == ExcpCode ||
+		 EXCEPTION_TESTCASE_FAILED == ExcpCode )
+	{
+		//
+		// Testcase failed/turned out to be inconclusive.
+		//
+		*AbortRun = FALSE;
+		return EXCEPTION_EXECUTE_HANDLER;
+	}
+	else if ( EXCEPTION_TESTCASE_FAILED_ABORT == ExcpCode )
+	{
+		//
+		// Testcase failed and is to be aborted.
+		//
+		*AbortRun = TRUE;
+		return EXCEPTION_EXECUTE_HANDLER;
+	}
+	else
+	{
+		CFIX_REPORT_DISPOSITION Disp;
+
+		Disp = CfixkrpReportUnhandledException( 
+			Channel, 
+			ExcpPointers );
+		
+		*AbortRun = ( BOOLEAN ) ( Disp == CfixAbort );
+		if ( Disp == CfixBreak )
+		{
+			return EXCEPTION_CONTINUE_SEARCH;
+		}
+		else
+		{
+			return EXCEPTION_EXECUTE_HANDLER;
+		}
+	}
+}
+
 static PVOID CFIXCALLTYPE CfixkrsGetValueStub(
 	__in PVOID Context,
 	__in ULONG Tag
@@ -718,7 +767,8 @@ static PVOID CFIXCALLTYPE CfixkrsGetValueStub(
 		return NULL;
 	}
 
-	Filament = CfixkrpGetCurrentFilamentFromConnection( Conn );
+	Filament = CfixkrpGetCurrentFilament( 
+		CfixkrpGetFilamentRegistryFromConnection( Conn ) );
 	if ( Filament != NULL && Tag == 0 )
 	{
 		return Filament->Channel->TlsValue;
@@ -748,7 +798,8 @@ static VOID CFIXCALLTYPE CfixkrsSetValueStub(
 		return;
 	}
 
-	Filament = CfixkrpGetCurrentFilamentFromConnection( Conn );
+	Filament = CfixkrpGetCurrentFilament( 
+		CfixkrpGetFilamentRegistryFromConnection( Conn ) );
 	if ( Filament != NULL && Tag == 0  )
 	{
 		Filament->Channel->TlsValue = Value;
@@ -759,6 +810,30 @@ static VOID CFIXCALLTYPE CfixkrsSetValueStub(
 		// No Channel/invalid tag.
 		//
 	}
+}
+
+static NTSTATUS CFIXCALLTYPE CfixkrsCreateSystemThread(
+    __in PVOID Context,
+	__out PHANDLE ThreadHandle,
+    __in ULONG DesiredAccess,
+    __in_opt POBJECT_ATTRIBUTES ObjectAttributes,
+    __in_opt HANDLE ProcessHandle,
+    __out_opt PCLIENT_ID ClientId,
+    __in PKSTART_ROUTINE StartRoutine,
+    __in PVOID StartContext,
+	__in ULONG Flags
+    )
+{
+	return CfixkrpCreateSystemThread(
+		ThreadHandle,
+		DesiredAccess,
+		ObjectAttributes,
+		ProcessHandle,
+		ClientId,
+		StartRoutine,
+		StartContext,
+		Flags,
+		( PCFIXKRP_DRIVER_CONNECTION ) Context );
 }
 
 VOID CfixkrpGetReportSinkStubs(
@@ -787,4 +862,21 @@ VOID CfixkrpGetReportSinkStubs2(
 	Stubs->Fail							= CfixkrsFailStub;
 	Stubs->GetValue						= CfixkrsGetValueStub;
 	Stubs->SetValue						= CfixkrsSetValueStub;
+}
+
+VOID CfixkrpGetReportSinkStubs3(
+	__out PCFIXKR_REPORT_SINK_METHODS_3 Stubs
+	)
+{
+	ASSERT( Stubs );
+
+	Stubs->ReportFailedAssertion		= CfixkrsReportFailedAssertionStub;
+	Stubs->AssertEqualsUlong			= CfixkrsAssertEqualsUlongStub;	
+	Stubs->ReportInconclusiveness		= CfixkrsReportInconclusivenessStub;
+	Stubs->ReportLog					= CfixkrsReportLogStub;	
+	Stubs->ReportFailedAssertionFormat	= CfixkrsReportFailedAssertionFormatStub;
+	Stubs->Fail							= CfixkrsFailStub;
+	Stubs->GetValue						= CfixkrsGetValueStub;
+	Stubs->SetValue						= CfixkrsSetValueStub;
+	Stubs->CreateSystemThread			= CfixkrsCreateSystemThread;
 }

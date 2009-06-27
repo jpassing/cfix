@@ -205,56 +205,6 @@ static VOID CfixkrsExternalDereferenceConnection(
 
 /*----------------------------------------------------------------------
  *
- * Exception Filters.
- *
- */
-static EXCEPTION_DISPOSITION CfixkrsExceptionFilter(
-	__in PEXCEPTION_POINTERS ExcpPointers,
-	__in PCFIXKRP_REPORT_CHANNEL Channel,
-	__out BOOLEAN *AbortRun
-	)
-{
-	ULONG ExcpCode = ExcpPointers->ExceptionRecord->ExceptionCode;
-
-	if ( EXCEPTION_TESTCASE_INCONCLUSIVE == ExcpCode ||
-		 EXCEPTION_TESTCASE_FAILED == ExcpCode )
-	{
-		//
-		// Testcase failed/turned out to be inconclusive.
-		//
-		*AbortRun = FALSE;
-		return EXCEPTION_EXECUTE_HANDLER;
-	}
-	else if ( EXCEPTION_TESTCASE_FAILED_ABORT == ExcpCode )
-	{
-		//
-		// Testcase failed and is to be aborted.
-		//
-		*AbortRun = TRUE;
-		return EXCEPTION_EXECUTE_HANDLER;
-	}
-	else
-	{
-		CFIX_REPORT_DISPOSITION Disp;
-
-		Disp = CfixkrpReportUnhandledException( 
-			Channel, 
-			ExcpPointers );
-		
-		*AbortRun = ( BOOLEAN ) ( Disp == CfixAbort );
-		if ( Disp == CfixBreak )
-		{
-			return EXCEPTION_CONTINUE_SEARCH;
-		}
-		else
-		{
-			return EXCEPTION_EXECUTE_HANDLER;
-		}
-	}
-}
-
-/*----------------------------------------------------------------------
- *
  * Internals.
  *
  */
@@ -397,6 +347,25 @@ VOID CfixkrpQuerySinkInterfaceDriverConnection2(
 	CfixkrpGetReportSinkStubs2( &Interface->Methods );
 }
 
+VOID CfixkrpQuerySinkInterfaceDriverConnection3(
+	__in PCFIXKRP_DRIVER_CONNECTION Connection,
+	__out PCFIXKR_REPORT_SINK_INTERFACE_3 Interface
+	)
+{
+	ASSERT( KeGetCurrentIrql() < DISPATCH_LEVEL );
+	ASSERT( Connection );
+	ASSERT( Connection->Signature == CFIXKRP_DRIVER_CONNECTION_SIGNATURE );
+	ASSERT( Interface );
+
+	Interface->Base.Size						= sizeof( CFIXKR_REPORT_SINK_INTERFACE_3 );
+	Interface->Base.Version 					= CFIXKR_REPORT_SINK_VERSION_3;
+	Interface->Base.Context 					= Connection;
+	Interface->Base.InterfaceReference			= CfixkrsExternalReferenceConnection;
+	Interface->Base.InterfaceDereference		= CfixkrsExternalDereferenceConnection;
+
+	CfixkrpGetReportSinkStubs3( &Interface->Methods );
+}
+
 NTSTATUS CfixkrpQueryModuleDriverConnection(
 	__in PCFIXKRP_DRIVER_CONNECTION Connection,
 	__in ULONG MaximumBufferSize,
@@ -497,7 +466,7 @@ NTSTATUS CfixkrpCallRoutineDriverConnection(
 			*RoutineRanToCompletion = TRUE;
 			*AbortRun = FALSE;
 		}
-		__except ( CfixkrsExceptionFilter(
+		__except ( CfixkrpExceptionFilter(
 			GetExceptionInformation(),
 			Channel,
 			AbortRun ) )
@@ -527,6 +496,13 @@ NTSTATUS CfixkrpCallRoutineDriverConnection(
 		CfixkrsReleaseDriverUnloadProtection( Connection );
 
 		//
+		// Wait (infinitely) for all child threads to complete.
+		//
+		CfixkrpJoinChildThreadsFilament(
+			&Filament,
+			NULL );
+
+		//
 		// Disassociate filament from current thread.
 		//
 		CfixkrpResetCurrentFilament( &Connection->FilamentRegistry );
@@ -535,9 +511,9 @@ NTSTATUS CfixkrpCallRoutineDriverConnection(
 	return STATUS_SUCCESS;
 }
 
-PCFIXKRP_FILAMENT CfixkrpGetCurrentFilamentFromConnection(
+PCFIXKRP_FILAMENT_REGISTRY CfixkrpGetFilamentRegistryFromConnection(
 	__in PCFIXKRP_DRIVER_CONNECTION Connection
 	)
 {
-	return CfixkrpGetCurrentFilament( &Connection->FilamentRegistry );
+	return &Connection->FilamentRegistry;
 }

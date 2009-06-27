@@ -193,6 +193,8 @@ VOID CfixkrpInitializeFilament(
 
 	Filament->Channel		= Channel;
 	Filament->MainThreadId	= MainThreadId;
+
+	ExInitializeFastMutex( &Filament->ChildThreads.Lock );
 }
 
 VOID CfixkrpDeleteFilament(
@@ -339,7 +341,7 @@ PCFIXKRP_FILAMENT CfixkrpGetCurrentFilament(
 
 NTSTATUS CfixkrpJoinChildThreadsFilament(
 	__in PCFIXKRP_FILAMENT Filament,
-	__in PLARGE_INTEGER Timeout
+	__in_opt PLARGE_INTEGER Timeout
 	)
 {
 	NTSTATUS Status;

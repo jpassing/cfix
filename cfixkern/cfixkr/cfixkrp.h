@@ -35,6 +35,8 @@
  *
  */
 
+#define NOP ( ( VOID ) 0 )
+
 ULONG CfixkrGetCurrentThreadId();
 
 /*++
@@ -69,6 +71,16 @@ NTSTATUS CfixkrpGetModuleBaseAddress(
 	__in ULONG_PTR AddressWithinModule,
 	__out ULONG_PTR *BaseAddress
 	);
+
+__inline VOID CfixkrpInitializeThreadId( 
+	__in PCFIX_THREAD_ID ThreadId, 
+	__in ULONG MainOsThreadId, 
+	__in ULONG OsThreadId 
+	)
+{
+	ThreadId->MainThreadId	= MainOsThreadId;
+	ThreadId->ThreadId		= OsThreadId;
+}
 
 /*----------------------------------------------------------------------
  *
@@ -197,6 +209,10 @@ VOID CfixkrpQuerySinkInterfaceDriverConnection2(
 	__out PCFIXKR_REPORT_SINK_INTERFACE_2 Interface
 	);
 
+VOID CfixkrpQuerySinkInterfaceDriverConnection3(
+	__in PCFIXKRP_DRIVER_CONNECTION Connection,
+	__out PCFIXKR_REPORT_SINK_INTERFACE_3 Interface
+	);
 
 /*++
 	Routine Description:
@@ -271,6 +287,10 @@ VOID CfixkrpGetReportSinkStubs(
 
 VOID CfixkrpGetReportSinkStubs2(
 	__out PCFIXKR_REPORT_SINK_METHODS_2 Stubs
+	);
+
+VOID CfixkrpGetReportSinkStubs3(
+	__out PCFIXKR_REPORT_SINK_METHODS_3 Stubs
 	);
 
 /*----------------------------------------------------------------------
@@ -555,15 +575,11 @@ PCFIXKRP_FILAMENT CfixkrpGetCurrentFilament(
 
 /*++
 	Routine Description:
-		Obtain the filament associated with the current thread.
-
-		Returns NULL if no association exists.
-
-		See CfixkrpGetCurrentFilament.
+		Obtain the filament registry associated with a connection.
 
 		Callable at any IRQL.
 --*/
-PCFIXKRP_FILAMENT CfixkrpGetCurrentFilamentFromConnection(
+PCFIXKRP_FILAMENT_REGISTRY CfixkrpGetFilamentRegistryFromConnection(
 	__in PCFIXKRP_DRIVER_CONNECTION Connection
 	);
 
@@ -575,7 +591,7 @@ PCFIXKRP_FILAMENT CfixkrpGetCurrentFilamentFromConnection(
 --*/
 NTSTATUS CfixkrpJoinChildThreadsFilament(
 	__in PCFIXKRP_FILAMENT Filament,
-	__in PLARGE_INTEGER Timeout
+	__in_opt PLARGE_INTEGER Timeout
 	);
 
 /*----------------------------------------------------------------------
@@ -601,3 +617,31 @@ NTSTATUS CfixkrpCaptureStackTrace(
 	__in PCFIX_STACKTRACE StackTrace,
 	__in ULONG MaxFrames 
 	);
+
+/*++
+	Routine Description:
+		Exception filter used for wrapping test code.
+--*/
+EXCEPTION_DISPOSITION CfixkrpExceptionFilter(
+	__in PEXCEPTION_POINTERS ExcpPointers,
+	__in PCFIXKRP_REPORT_CHANNEL Channel,
+	__out BOOLEAN *AbortRun
+	);
+
+/*----------------------------------------------------------------------
+ *
+ * Threading.
+ *
+ */
+
+NTSTATUS CfixkrpCreateSystemThread(
+    __out PHANDLE ThreadHandle,
+    __in ULONG DesiredAccess,
+    __in_opt POBJECT_ATTRIBUTES ObjectAttributes,
+    __in_opt HANDLE ProcessHandle,
+    __out_opt PCLIENT_ID ClientId,
+    __in PKSTART_ROUTINE StartRoutine,
+    __in PVOID StartContext,
+	__in ULONG Flags,
+	__in PCFIXKRP_DRIVER_CONNECTION Connection
+    );

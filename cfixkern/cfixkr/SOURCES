@@ -38,6 +38,7 @@ TARGETPATH=..\..\bin\$(DDKBUILDENV)
 TARGETTYPE=DRIVER
 
 SOURCES=\
+	thread.c \
 	filament.c \
 	main.c \
 	drvconn.c \
