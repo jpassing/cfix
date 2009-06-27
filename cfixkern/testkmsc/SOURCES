@@ -34,6 +34,7 @@ TARGETNAME=testkmsc
 TARGETPATH=..\..\bin\$(DDKBUILDENV)
 TARGETTYPE=DRIVER
 SOURCES=\
+	filamentjoin.c \
 	suite.c \
 	beforeafter.c \
 	tls.c

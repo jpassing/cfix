@@ -423,6 +423,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\testkmsc\filamentjoin.c"
+					>
+				</File>
+				<File
 					RelativePath=".\testkmsc\SOURCES"
 					>
 				</File>

@@ -44,7 +44,8 @@ static VOID CfixkrsQueueEvent(
 	__in_opt PCWSTR Routine,
 	__in_opt ULONG Line,
 	__in_opt PCWSTR Expression,
-	__in_opt PCWSTR Message
+	__in_opt PCWSTR Message,
+	__in PCFIXKRP_FILAMENT Filament
 	)
 {
 	PCFIXKR_EXECUTION_EVENT Event;
@@ -205,11 +206,11 @@ static VOID CfixkrsQueueEvent(
 		goto Cleanup;
 	}
 
-	Event->Type = Type;
-	Event->Size = ( USHORT ) StructureTotalSize;
+	Event->Type					 = Type;
+	Event->Size					 = ( USHORT ) StructureTotalSize;
 
-	Event->ThreadId.MainThreadId =
-		Event->ThreadId.ThreadId = CfixkrGetCurrentThreadId();
+	Event->ThreadId.MainThreadId = Filament->MainThreadId;
+	Event->ThreadId.ThreadId	 = CfixkrGetCurrentThreadId();
 
 	//
 	// Write Info.
@@ -328,7 +329,8 @@ Cleanup:
 
 static VOID CfixkrsAbortCurrentTestCase(
 	__in PCFIXKRP_REPORT_CHANNEL Channel,
-	__in NTSTATUS Status
+	__in NTSTATUS Status,
+	__in PCFIXKRP_FILAMENT Filament
 	)
 {
 	//
@@ -361,7 +363,8 @@ static VOID CfixkrsAbortCurrentTestCase(
 				NULL,
 				L"Testcase aborted at elevated IRQL. IRQL  "
 				L"will be forced back to PASSIVE_LEVEL. Machine state might "
-				L"become corrupted" );
+				L"become corrupted",
+				Filament );
 		KeLowerIrql( PASSIVE_LEVEL );
 	}
 
@@ -383,7 +386,8 @@ static VOID CFIXCALLTYPE CfixkrsFailStub(
 	{
 		CfixkrsAbortCurrentTestCase( 
 			Filament->Channel, 
-			EXCEPTION_TESTCASE_FAILED );
+			EXCEPTION_TESTCASE_FAILED,
+			Filament );
 	}
 	else
 	{
@@ -423,7 +427,8 @@ static CFIX_REPORT_DISPOSITION CfixkrsReportFailedAssertionStub(
 			Routine,
 			Line,
 			Expression,
-			NULL );
+			NULL,
+			Filament );
 
 		Disp = Filament->Channel->Dispositions.FailedAssertion;
 
@@ -442,8 +447,8 @@ static CFIX_REPORT_DISPOSITION CfixkrsReportFailedAssertionStub(
 			//
 			CfixkrsAbortCurrentTestCase( 
 				Filament->Channel, 
-				EXCEPTION_TESTCASE_FAILED_ABORT );
-			
+				EXCEPTION_TESTCASE_FAILED_ABORT,
+				Filament );
 		}
 		else if ( Disp == CfixContinue )
 		{
@@ -459,7 +464,8 @@ static CFIX_REPORT_DISPOSITION CfixkrsReportFailedAssertionStub(
 			{
 				CfixkrsAbortCurrentTestCase( 
 					Filament->Channel, 
-					EXCEPTION_TESTCASE_FAILED );
+					EXCEPTION_TESTCASE_FAILED,
+					Filament );
 			}
 		}
 	}
@@ -597,12 +603,13 @@ static VOID CfixkrsReportInconclusivenessStub(
 			NULL,
 			Message != NULL
 				? Message
-				: L"" );
+				: L"",
+			Filament );
 
 		CfixkrsAbortCurrentTestCase( 
 			Filament->Channel, 
-			EXCEPTION_TESTCASE_INCONCLUSIVE );
-
+			EXCEPTION_TESTCASE_INCONCLUSIVE,
+			Filament );
 	}
 	else
 	{
@@ -664,7 +671,8 @@ static VOID CfixkrsReportLogStub(
 			NULL,
 			0,
 			NULL,
-			Message );
+			Message,
+			Filament );
 	}
 	else
 	{
@@ -677,14 +685,14 @@ static VOID CfixkrsReportLogStub(
 }
 
 CFIX_REPORT_DISPOSITION CfixkrpReportUnhandledException(
-	__in PCFIXKRP_REPORT_CHANNEL Channel,
+	__in PCFIXKRP_FILAMENT Filament,
 	__in PEXCEPTION_POINTERS ExceptionPointers
 	)
 {
-	if ( Channel != NULL )
+	if ( Filament != NULL && Filament->Channel != NULL )
 	{
 		CfixkrsQueueEvent(
-			Channel,
+			Filament->Channel,
 			ExceptionPointers->ContextRecord,
 			CfixEventUncaughtException,
 			ExceptionPointers->ExceptionRecord,
@@ -692,9 +700,10 @@ CFIX_REPORT_DISPOSITION CfixkrpReportUnhandledException(
 			NULL,
 			0,
 			NULL,
-			NULL );
+			NULL,
+			Filament );
 	
-		return Channel->Dispositions.UnhandledException;
+		return Filament->Channel->Dispositions.UnhandledException;
 	}
 	else
 	{
@@ -709,7 +718,7 @@ CFIX_REPORT_DISPOSITION CfixkrpReportUnhandledException(
 
 EXCEPTION_DISPOSITION CfixkrpExceptionFilter(
 	__in PEXCEPTION_POINTERS ExcpPointers,
-	__in PCFIXKRP_REPORT_CHANNEL Channel,
+	__in PCFIXKRP_FILAMENT Filament,
 	__out BOOLEAN *AbortRun
 	)
 {
@@ -737,7 +746,7 @@ EXCEPTION_DISPOSITION CfixkrpExceptionFilter(
 		CFIX_REPORT_DISPOSITION Disp;
 
 		Disp = CfixkrpReportUnhandledException( 
-			Channel, 
+			Filament, 
 			ExcpPointers );
 		
 		*AbortRun = ( BOOLEAN ) ( Disp == CfixAbort );

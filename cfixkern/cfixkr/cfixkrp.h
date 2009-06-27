@@ -90,7 +90,11 @@ __inline VOID CfixkrpInitializeThreadId(
 
 struct _CFIXKRP_DRIVER_CONNECTION;
 typedef struct _CFIXKRP_DRIVER_CONNECTION 
-CFIXKRP_DRIVER_CONNECTION, *PCFIXKRP_DRIVER_CONNECTION;
+	CFIXKRP_DRIVER_CONNECTION, *PCFIXKRP_DRIVER_CONNECTION;
+
+struct _CFIXKRP_FILAMENT;
+typedef struct _CFIXKRP_FILAMENT
+	CFIXKRP_FILAMENT, *PCFIXKRP_FILAMENT;
 
 #define CFIXKRP_REPORT_CHANNEL_SIGNATURE 'nnhC'
 
@@ -273,7 +277,7 @@ VOID CfixkrpDereferenceConnection(
 		Callable at any IRQL.
 --*/
 CFIX_REPORT_DISPOSITION CfixkrpReportUnhandledException(
-	__in PCFIXKRP_REPORT_CHANNEL Channel,
+	__in PCFIXKRP_FILAMENT Filament,
 	__in PEXCEPTION_POINTERS ExceptionPointers
 	);
 
@@ -624,7 +628,7 @@ NTSTATUS CfixkrpCaptureStackTrace(
 --*/
 EXCEPTION_DISPOSITION CfixkrpExceptionFilter(
 	__in PEXCEPTION_POINTERS ExcpPointers,
-	__in PCFIXKRP_REPORT_CHANNEL Channel,
+	__in PCFIXKRP_FILAMENT Filament,
 	__out BOOLEAN *AbortRun
 	);
 

@@ -22,64 +22,119 @@
  */
 
 #include <cfix.h>
-#include <cfixmsg.h>
 
-static DWORD CALLBACK ThreadProc( PVOID Pv )
+static VOID ThreadProc( PVOID Pv )
 {
+	LARGE_INTEGER Interval;
+
 	UNREFERENCED_PARAMETER( Pv );
 
-	Sleep( 1000 );
+	Interval.QuadPart = - 10 * 1000 * 1000;
 
-	return 0;
+	CFIX_LOG( L"Test" );
+
+	CFIX_ASSERT( NT_SUCCESS( KeDelayExecutionThread(
+		KernelMode,
+		FALSE,
+		&Interval ) ) );
 }
 
 static void SpawnAndJoinPolitely()
 {
-	HANDLE Thread = CfixCreateThread2(
+	OBJECT_ATTRIBUTES ObjectAttributes;
+	PETHREAD Thread;
+	HANDLE ThreadHandle;
+
+	InitializeObjectAttributes(
+		&ObjectAttributes, 
+		NULL, 
+		OBJ_KERNEL_HANDLE, 
+		NULL, 
+		NULL );
+
+	CFIX_ASSERT( STATUS_SUCCESS == CfixCreateSystemThread(
+		&ThreadHandle,
+		THREAD_ALL_ACCESS,
+		&ObjectAttributes,
 		NULL,
-		0,
+		NULL,
 		ThreadProc,
 		NULL,
-		0,
-		NULL,
-		CFIX_THREAD_FLAG_CRT );
+		0 ) );
+
+	CFIX_ASSERT( NT_SUCCESS( ObReferenceObjectByHandle(
+		ThreadHandle,
+		THREAD_ALL_ACCESS,
+		*PsThreadType,
+		KernelMode,
+		&Thread,
+		NULL ) ) );
+
 	CFIX_ASSERT( Thread );
 
-	CFIX_ASSERT( WAIT_OBJECT_0 == WaitForSingleObject( Thread, INFINITE ) );
+	CFIX_ASSERT( STATUS_SUCCESS == KeWaitForSingleObject( 
+		Thread, 
+		Executive,
+		KernelMode,
+		FALSE,
+		NULL ) );
 
-	CFIX_ASSERT( CloseHandle( Thread ) );
+	ObDereferenceObject( Thread );
+	CFIX_ASSERT( NT_SUCCESS( ZwClose( ThreadHandle ) ) );
 }
 
 static void SpawnAndAutoJoin()
 {
-	CFIX_ASSERT( CloseHandle( CfixCreateThread2(
+	OBJECT_ATTRIBUTES ObjectAttributes;
+	HANDLE Thread;
+
+	InitializeObjectAttributes(
+		&ObjectAttributes, 
+		NULL, 
+		OBJ_KERNEL_HANDLE, 
+		NULL, 
+		NULL );
+
+	CFIX_ASSERT( STATUS_SUCCESS == CfixCreateSystemThread(
+		&Thread,
+		THREAD_ALL_ACCESS,
+		&ObjectAttributes,
 		NULL,
-		0,
+		NULL,
 		ThreadProc,
 		NULL,
-		0,
-		NULL,
-		CFIX_THREAD_FLAG_CRT ) ) );
+		0 ) );
+	CFIX_ASSERT( Thread );
+	CFIX_ASSERT( NT_SUCCESS( ZwClose( Thread ) ) );
 }
 
 static void SpawnAndAutoJoinLotsOfThreads()
 {
 	ULONG Index;
-
+	OBJECT_ATTRIBUTES ObjectAttributes;
+	HANDLE Thread;
+	
 	for ( Index = 0; Index < CFIX_MAX_THREADS; Index++ )
 	{
 		SpawnAndAutoJoin();
 	}
 
-	CFIX_ASSERT( ! CfixCreateThread2(
-			NULL,
-			0,
-			ThreadProc,
-			NULL,
-			0,
-			NULL,
-			CFIX_THREAD_FLAG_CRT ) );
-	CFIX_ASSERT( GetLastError() == ( DWORD ) CFIX_E_TOO_MANY_CHILD_THREADS );
+	InitializeObjectAttributes(
+		&ObjectAttributes, 
+		NULL, 
+		OBJ_KERNEL_HANDLE, 
+		NULL, 
+		NULL );
+
+	CFIX_ASSERT( STATUS_ALLOTTED_SPACE_EXCEEDED == CfixCreateSystemThread(
+		&Thread,
+		THREAD_ALL_ACCESS,
+		&ObjectAttributes,
+		NULL,
+		NULL,
+		ThreadProc,
+		NULL,
+		0 ) );
 }
 
 CFIX_BEGIN_FIXTURE( FilamentJoin )

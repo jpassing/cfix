@@ -226,6 +226,8 @@ typedef struct _CFIX_EXECUTION_CONTEXT
 			Called before the new child thread ends.
 
 			This routine is called on the child thread.
+
+			N.B. For kernel mode tests, this callback is never invoked.
 	--*/
 	VOID ( CFIXCALLTYPE * AfterChildThreadFinish ) (
 		__in struct _CFIX_EXECUTION_CONTEXT *This,

@@ -46,6 +46,7 @@ static VOID CfixkrsThreadStart(
 	)
 {
 	BOOLEAN Dummy;
+	NTSTATUS Status;
 	CFIX_THREAD_ID ThreadId;
 
 	PCFIXKRP_FILAMENT_REGISTRY FilamentRegistry = 
@@ -70,36 +71,37 @@ static VOID CfixkrsThreadStart(
 	//
 	// This may fail when there are too many child threads already.
 	//
-	Parameters->InitializationStatus = CfixkrpSetCurrentFilament( 
+	Status = CfixkrpSetCurrentFilament( 
 		FilamentRegistry,
 		Filament );
-	if ( ! NT_SUCCESS( Parameters->InitializationStatus ) )
-	{
-		( VOID ) KeSetEvent( 
-			&Parameters->InitializationCompleted,
-			0,
-			FALSE );
-		return;
-	}
 
-	//
-	// N.B. From now on, Parameters may not be touched any more; use
-	// CopyOfParameters instead.
-	//
+	Parameters->InitializationStatus = Status;
+	( VOID ) KeSetEvent( 
+		&Parameters->InitializationCompleted,
+		0,
+		FALSE );
 
-	__try
+	if ( NT_SUCCESS( Status ) )
 	{
-		( StartAddress )( UserParaneter );
-	}
-	__except ( CfixkrpExceptionFilter( 
-		GetExceptionInformation(), 
-		Filament->Channel,
-		&Dummy ) )
-	{
-		NOP;
-	}
+		//
+		// N.B. From now on, Parameters may not be touched any more; use
+		// CopyOfParameters instead.
+		//
 
-	CfixkrpResetCurrentFilament( FilamentRegistry );
+		__try
+		{
+			( StartAddress )( UserParaneter );
+		}
+		__except ( CfixkrpExceptionFilter( 
+			GetExceptionInformation(), 
+			Filament,
+			&Dummy ) )
+		{
+			NOP;
+		}
+
+		CfixkrpResetCurrentFilament( FilamentRegistry );
+	}
 }
 
 NTSTATUS CfixkrpCreateSystemThread(
@@ -153,6 +155,10 @@ NTSTATUS CfixkrpCreateSystemThread(
 	//
 	Filament = CfixkrpGetCurrentFilament( 
 		CfixkrpGetFilamentRegistryFromConnection( Connection ) );
+	if ( Filament == NULL )
+	{
+		return STATUS_UNSUCCESSFUL;
+	}
 
 	Parameters.Connection		= Connection;
 	Parameters.StartAddress		= StartRoutine;
@@ -188,16 +194,17 @@ NTSTATUS CfixkrpCreateSystemThread(
 		// a chance to begin its initialization -> race.
 		//
 
-		( VOID ) KeWaitForSingleObject( 
+		Status = KeWaitForSingleObject( 
 			&Parameters.InitializationCompleted,
 			Executive,
 			KernelMode,
 			FALSE,
 			NULL );
-
-		if ( ! NT_SUCCESS( Parameters.InitializationStatus ) )
+		if ( NT_SUCCESS( Status ) &&
+			 ! NT_SUCCESS( Parameters.InitializationStatus ) )
 		{
-			ZwClose( ThreadHandle );
+			ZwClose( *ThreadHandle );
+			ThreadHandle = NULL;
 			Status = Parameters.InitializationStatus;
 		}
 	}

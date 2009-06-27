@@ -398,7 +398,8 @@ static VOID CheckEventsForLogAndFailPassiveLevel(
 }
 
 static VOID CheckEventsForLogAndFailAtDirql(
-	__in PCFIXKR_IOCTL_CALL_ROUTINE_RESPONSE Res
+	__in PCFIXKR_IOCTL_CALL_ROUTINE_RESPONSE Res,
+	__in BOOL SameThread
 	)
 {
 	ULONG Coverage = 0;
@@ -410,8 +411,17 @@ static VOID CheckEventsForLogAndFailAtDirql(
 	for ( Index = 0; Index < Res->Events.Count; Index++ )
 	{
 		CFIX_ASSERT( Event->Size >= sizeof( CFIXKR_EXECUTION_EVENT ) );
-		CFIX_ASSERT( Event->ThreadId.MainThreadId == GetCurrentThreadId() );
-		CFIX_ASSERT( Event->ThreadId.MainThreadId == Event->ThreadId.ThreadId );
+
+		CFIX_ASSERT_EQUALS_DWORD( GetCurrentThreadId(), Event->ThreadId.MainThreadId );
+		
+		if ( SameThread )
+		{
+			CFIX_ASSERT_EQUALS_DWORD( Event->ThreadId.MainThreadId, Event->ThreadId.ThreadId );
+		}
+		else
+		{
+			CFIX_ASSERT( Event->ThreadId.MainThreadId != Event->ThreadId.ThreadId );
+		}
 		
 		if ( Index == 0 )
 		{
@@ -536,7 +546,7 @@ static void TestEventReporting()
 			//  LogThreeMessagesAtDirql
 			//
 			Req.FixtureKey = 0;
-			for ( Routine = 0; Routine <= 6; Routine++ )
+			for ( Routine = 0; Routine <= 7; Routine++ )
 			{
 				Req.RoutineKey = Routine;
 				Success = DeviceIoControl( 
@@ -617,7 +627,18 @@ static void TestEventReporting()
 					CFIX_ASSERT( ! Res->RoutineRanToCompletion );
 					CFIX_ASSERT( Res->AbortRun );
 
-					CheckEventsForLogAndFailAtDirql( Res );
+					CheckEventsForLogAndFailAtDirql( Res, TRUE );
+					break;
+					
+				case 7:
+					//
+					// N.B. Although the child thread failed, the main
+					// thread ran to completion - thus, no abort here.
+					//
+					CFIX_ASSERT( Res->RoutineRanToCompletion );
+					CFIX_ASSERT( ! Res->AbortRun );
+
+					CheckEventsForLogAndFailAtDirql( Res, FALSE );
 					break;
 					
 				default:

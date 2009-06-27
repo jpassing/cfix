@@ -8,7 +8,7 @@ WIXBINPATH=D:\prog\wix\wix-2.0.5805.0-binaries
 !ENDIF
 !INCLUDE __buildnum.inc
 
-VERSION = 1.4.0.$(BUILDNUMBER)
+VERSION = 1.5.0.$(BUILDNUMBER)
 
 #----------------------------------------------------------------------
 #

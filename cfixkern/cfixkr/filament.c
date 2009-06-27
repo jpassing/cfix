@@ -269,7 +269,7 @@ NTSTATUS CfixkrpSetCurrentFilament(
 	//
 	ASSERT( OldEntry == NULL );
 
-	return TRUE;
+	return STATUS_SUCCESS;
 }
 
 VOID CfixkrpResetCurrentFilament(

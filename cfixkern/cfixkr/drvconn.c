@@ -468,7 +468,7 @@ NTSTATUS CfixkrpCallRoutineDriverConnection(
 		}
 		__except ( CfixkrpExceptionFilter(
 			GetExceptionInformation(),
-			Channel,
+			&Filament,
 			AbortRun ) )
 		{
 			*RoutineRanToCompletion = FALSE;

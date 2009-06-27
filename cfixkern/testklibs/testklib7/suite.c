@@ -101,6 +101,37 @@ static VOID LogAndFailAtDirqlAndAbort()
 	ASSERT( !"Should not make it here!" );
 }
 
+static VOID LogAndFailAtPassiveLevelOnChildThreadAndAbortThreadProc( __in PVOID Pv )
+{
+	UNREFERENCED_PARAMETER( Pv );
+	LogAndFailAtDirqlAndAbort();
+}
+
+static void LogAndFailAtPassiveLevelOnChildThreadAndAbort()
+{
+	OBJECT_ATTRIBUTES ObjectAttributes;
+	HANDLE Thread;
+
+	InitializeObjectAttributes(
+		&ObjectAttributes, 
+		NULL, 
+		OBJ_KERNEL_HANDLE, 
+		NULL, 
+		NULL );
+
+	CFIX_ASSERT( STATUS_SUCCESS == CfixCreateSystemThread(
+		&Thread,
+		THREAD_ALL_ACCESS,
+		&ObjectAttributes,
+		NULL,
+		NULL,
+		LogAndFailAtPassiveLevelOnChildThreadAndAbortThreadProc,
+		NULL,
+		0 ) );
+	CFIX_ASSERT( Thread );
+	CFIX_ASSERT( NT_SUCCESS( ZwClose( Thread ) ) );
+}
+
 CFIX_BEGIN_FIXTURE( ReportTests )
 	CFIX_FIXTURE_ENTRY(LogThreeMessagesAtPassiveLevel)
 	CFIX_FIXTURE_ENTRY(LogThreeMessagesAtDirql)
@@ -109,4 +140,5 @@ CFIX_BEGIN_FIXTURE( ReportTests )
 	CFIX_FIXTURE_ENTRY(ThrowAtPassiveLevel)
 	CFIX_FIXTURE_ENTRY(LogAndFailAtPassiveLevelAndAbort)
 	CFIX_FIXTURE_ENTRY(LogAndFailAtDirqlAndAbort)
+	CFIX_FIXTURE_ENTRY(LogAndFailAtPassiveLevelOnChildThreadAndAbort)
 CFIX_END_FIXTURE()
