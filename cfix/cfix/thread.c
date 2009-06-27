@@ -50,6 +50,7 @@ static DWORD CfixsThreadStart(
 {
 	BOOL Dummy;
 	DWORD ExitCode;
+	CFIX_THREAD_ID ThreadId;
 
 	PVOID ParentContext;
 	PCFIXP_FILAMENT Filament;
@@ -64,6 +65,11 @@ static DWORD CfixsThreadStart(
 	Filament		= Parameters->Filament;
 	StartAddress	= Parameters->StartAddress;
 	UserParaneter	= Parameters->UserParaneter;
+
+	CfixpInitializeThreadId( 
+		&ThreadId,
+		Parameters->Filament->MainThreadId,
+		GetCurrentThreadId() );
 
 	//
 	// Set current filament s.t. it is accessible by callees
@@ -85,7 +91,7 @@ static DWORD CfixsThreadStart(
 	//
 	Parameters->Filament->ExecutionContext->BeforeChildThreadStart(
 		Parameters->Filament->ExecutionContext,
-		Parameters->Filament->MainThreadId,
+		&ThreadId,
 		Parameters->ParentContext );
 
 	( VOID ) SetEvent( Parameters->InitializationCompleted );
@@ -109,7 +115,7 @@ static DWORD CfixsThreadStart(
 
 	Filament->ExecutionContext->AfterChildThreadFinish(
 		Filament->ExecutionContext,
-		Filament->MainThreadId,
+		&ThreadId,
 		ParentContext );
 
 	VERIFY( S_OK == CfixpSetCurrentFilament( 
@@ -125,7 +131,7 @@ HANDLE CfixCreateThread2(
 	__in PTHREAD_START_ROUTINE StartAddress,
 	__in PVOID UserParameter,
 	__in DWORD CreationFlags,
-	__out_opt PDWORD ThreadId,
+	__out_opt PDWORD ChildThreadId,
 	__in ULONG Flags
 	)
 {
@@ -133,6 +139,7 @@ HANDLE CfixCreateThread2(
 	HRESULT Hr;
 	THREAD_START_PARAMETERS Parameters;
 	HANDLE Thread;
+	CFIX_THREAD_ID ThreadId;
 
 	if ( Flags > CFIX_THREAD_FLAG_CRT )
 	{
@@ -150,8 +157,13 @@ HANDLE CfixCreateThread2(
 		return NULL;
 	}
 
+	CfixpInitializeThreadId( 
+		&ThreadId,
+		Filament->MainThreadId,
+		GetCurrentThreadId() );
+
 	Parameters.StartAddress		= StartAddress;
-	Parameters.UserParaneter		= UserParameter;
+	Parameters.UserParaneter	= UserParameter;
 	Parameters.Filament			= Filament;
 
 	Parameters.InitializationCompleted = CreateEvent( NULL, FALSE, FALSE, NULL );
@@ -168,7 +180,7 @@ HANDLE CfixCreateThread2(
 	//
 	Hr = Filament->ExecutionContext->CreateChildThread(
 		Filament->ExecutionContext,
-		Filament->MainThreadId,
+		&ThreadId,
 		&Parameters.ParentContext );
 	if ( FAILED( Hr ) )
 	{
@@ -189,7 +201,7 @@ HANDLE CfixCreateThread2(
 			( unsigned ( * )( void * ) ) CfixsThreadStart,
 			&Parameters,
 			CreationFlags,
-			( unsigned * ) ThreadId );
+			( unsigned * ) ChildThreadId );
 	}
 	else
 	{
@@ -199,7 +211,7 @@ HANDLE CfixCreateThread2(
 			CfixsThreadStart,
 			&Parameters,
 			CreationFlags,
-			ThreadId );
+			ChildThreadId );
 	}
 
 	if ( Thread != NULL )

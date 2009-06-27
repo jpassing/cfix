@@ -132,7 +132,7 @@ typedef struct _CFIX_EXECUTION_CONTEXT
 	--*/
 	CFIX_REPORT_DISPOSITION ( CFIXCALLTYPE * ReportEvent ) (
 		__in struct _CFIX_EXECUTION_CONTEXT *This,
-		__in ULONG MainThreadId,
+		__in PCFIX_THREAD_ID Thread,
 		__in PCFIX_TESTCASE_EXECUTION_EVENT Event
 	);
 
@@ -155,32 +155,31 @@ typedef struct _CFIX_EXECUTION_CONTEXT
 	--*/
 	CFIX_REPORT_DISPOSITION ( CFIXCALLTYPE * QueryDefaultDisposition ) (
 		__in struct _CFIX_EXECUTION_CONTEXT *This,
-		__in ULONG MainThreadId,
 		__in CFIX_EVENT_TYPE EventType
 	);
 
 	HRESULT ( CFIXCALLTYPE * BeforeFixtureStart ) (
 		__in struct _CFIX_EXECUTION_CONTEXT *This,
-		__in ULONG MainThreadId,
+		__in PCFIX_THREAD_ID Thread,
 		__in struct _CFIX_FIXTURE *Fixture
 		);
 
 	VOID ( CFIXCALLTYPE * AfterFixtureFinish ) (
 		__in struct _CFIX_EXECUTION_CONTEXT *This,
-		__in ULONG MainThreadId,
+		__in PCFIX_THREAD_ID Thread,
 		__in struct _CFIX_FIXTURE *Fixture,
 		__in BOOL RanToCompletion
 		);
 
 	HRESULT ( CFIXCALLTYPE * BeforeTestCaseStart ) (
 		__in struct _CFIX_EXECUTION_CONTEXT *This,
-		__in ULONG MainThreadId,
+		__in PCFIX_THREAD_ID Thread,
 		__in struct _CFIX_TEST_CASE *TestCase
 		);
 
 	VOID ( CFIXCALLTYPE * AfterTestCaseFinish ) (
 		__in struct _CFIX_EXECUTION_CONTEXT *This,
-		__in ULONG MainThreadId,
+		__in PCFIX_THREAD_ID Thread,
 		__in struct _CFIX_TEST_CASE *TestCase,
 		__in BOOL RanToCompletion
 		);
@@ -201,7 +200,7 @@ typedef struct _CFIX_EXECUTION_CONTEXT
 	--*/
 	HRESULT ( CFIXCALLTYPE * CreateChildThread ) (
 		__in struct _CFIX_EXECUTION_CONTEXT *This,
-		__in ULONG MainThreadId,
+		__in PCFIX_THREAD_ID Thread,
 		__out PVOID *Context
 		);
 
@@ -214,7 +213,7 @@ typedef struct _CFIX_EXECUTION_CONTEXT
 	--*/
 	VOID ( CFIXCALLTYPE * BeforeChildThreadStart ) (
 		__in struct _CFIX_EXECUTION_CONTEXT *This,
-		__in ULONG MainThreadId,
+		__in PCFIX_THREAD_ID Thread,
 		__in_opt PVOID Context
 		);
 
@@ -226,7 +225,7 @@ typedef struct _CFIX_EXECUTION_CONTEXT
 	--*/
 	VOID ( CFIXCALLTYPE * AfterChildThreadFinish ) (
 		__in struct _CFIX_EXECUTION_CONTEXT *This,
-		__in ULONG MainThreadId,
+		__in PCFIX_THREAD_ID Thread,
 		__in_opt PVOID Context
 		);
 
@@ -238,7 +237,7 @@ typedef struct _CFIX_EXECUTION_CONTEXT
 	--*/
 	VOID ( CFIXCALLTYPE * OnUnhandledException ) (
 		__in struct _CFIX_EXECUTION_CONTEXT *This,
-		__in ULONG MainThreadId,
+		__in PCFIX_THREAD_ID Thread,
 		__in PEXCEPTION_POINTERS ExcpPointers
 		);
 

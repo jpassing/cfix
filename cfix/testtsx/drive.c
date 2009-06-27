@@ -178,13 +178,10 @@ static ULONG CtxRefCount = 0;
  */
 static CFIX_REPORT_DISPOSITION CtxQueryDefaultDisposition(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
 	__in CFIX_EVENT_TYPE EventType
 	)
 {
 	UNREFERENCED_PARAMETER( This );
-	_ASSERTE( ExpectedMainThreadId == MainThreadId );
-	UNREFERENCED_PARAMETER( MainThreadId );
 	UNREFERENCED_PARAMETER( EventType );
 
 	CFIX_ASSERT( !"Do not call me" );
@@ -193,13 +190,13 @@ static CFIX_REPORT_DISPOSITION CtxQueryDefaultDisposition(
 
 static CFIX_REPORT_DISPOSITION CtxReportEvent(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in PCFIX_TESTCASE_EXECUTION_EVENT Event
 	)
 {
 	UNREFERENCED_PARAMETER( This );
-	_ASSERTE( ExpectedMainThreadId == MainThreadId );
-	UNREFERENCED_PARAMETER( MainThreadId );
+	_ASSERTE( ExpectedMainThreadId == ThreadId->MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	
 	switch ( Event->Type )
 	{
@@ -228,13 +225,13 @@ static CFIX_REPORT_DISPOSITION CtxReportEvent(
 
 static HRESULT CtxBeforeFixtureStart(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in PCFIX_FIXTURE Fixture
 	)
 {
 	UNREFERENCED_PARAMETER( This );
-	_ASSERTE( ExpectedMainThreadId == MainThreadId );
-	UNREFERENCED_PARAMETER( MainThreadId );
+	_ASSERTE( ExpectedMainThreadId == ThreadId->MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( Fixture );
 
 	ActualBeforeFixtureCalls++;
@@ -243,14 +240,14 @@ static HRESULT CtxBeforeFixtureStart(
 
 static VOID CtxAfterFixtureFinish(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in PCFIX_FIXTURE Fixture,
 	__in BOOL RanToCompletion
 	)
 {
 	UNREFERENCED_PARAMETER( This );
-	_ASSERTE( ExpectedMainThreadId == MainThreadId );
-	UNREFERENCED_PARAMETER( MainThreadId );
+	_ASSERTE( ExpectedMainThreadId == ThreadId->MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( Fixture );
 	UNREFERENCED_PARAMETER( RanToCompletion );
 
@@ -264,13 +261,13 @@ static VOID CtxAfterFixtureFinish(
 
 static HRESULT CtxBeforeTestCaseStart(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in PCFIX_TEST_CASE TestCase
 	)
 {
 	UNREFERENCED_PARAMETER( This );
-	_ASSERTE( ExpectedMainThreadId == MainThreadId );
-	UNREFERENCED_PARAMETER( MainThreadId );
+	_ASSERTE( ExpectedMainThreadId == ThreadId->MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( TestCase );
 	
 	ActualBeforeTestCalls++;	
@@ -279,14 +276,14 @@ static HRESULT CtxBeforeTestCaseStart(
 
 static VOID CtxAfterTestCaseFinish(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in PCFIX_TEST_CASE TestCase,
 	__in BOOL RanToCompletion
 	)
 {
 	UNREFERENCED_PARAMETER( This );
-	_ASSERTE( ExpectedMainThreadId == MainThreadId );
-	UNREFERENCED_PARAMETER( MainThreadId );
+	_ASSERTE( ExpectedMainThreadId == ThreadId->MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( TestCase );
 	UNREFERENCED_PARAMETER( RanToCompletion );
 
@@ -300,50 +297,50 @@ static VOID CtxAfterTestCaseFinish(
 
 static HRESULT CtxCreateChildThread(
 	__in struct _CFIX_EXECUTION_CONTEXT *This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__out PVOID *Context
 	)
 {
 	UNREFERENCED_PARAMETER( This );
-	_ASSERTE( ExpectedMainThreadId == MainThreadId );
-	UNREFERENCED_PARAMETER( MainThreadId );
+	_ASSERTE( ExpectedMainThreadId == ThreadId->MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( Context );
 	return S_OK;
 }
 
 static VOID CtxBeforeChildThreadStart(
 	__in struct _CFIX_EXECUTION_CONTEXT *This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__out PVOID *Context
 	)
 {
 	UNREFERENCED_PARAMETER( This );
-	_ASSERTE( ExpectedMainThreadId == MainThreadId );
-	UNREFERENCED_PARAMETER( MainThreadId );
+	_ASSERTE( ExpectedMainThreadId == ThreadId->MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( Context );
 }
 
 static VOID CtxAfterChildThreadFinish(
 	__in struct _CFIX_EXECUTION_CONTEXT *This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__out PVOID *Context
 	)
 {
 	UNREFERENCED_PARAMETER( This );
-	_ASSERTE( ExpectedMainThreadId == MainThreadId );
-	UNREFERENCED_PARAMETER( MainThreadId );
+	_ASSERTE( ExpectedMainThreadId == ThreadId->MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( Context );
 }
 
 static VOID CtxOnUnhandledException(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in PEXCEPTION_POINTERS ExcpPointers
 	)
 {
 	UNREFERENCED_PARAMETER( This );
-	_ASSERTE( ExpectedMainThreadId == MainThreadId );
-	UNREFERENCED_PARAMETER( MainThreadId );
+	_ASSERTE( ExpectedMainThreadId == ThreadId->MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( ExcpPointers );
 	CFIX_ASSERT( !"Unexpedted" );
 }

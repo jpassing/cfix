@@ -73,6 +73,16 @@ BOOL CfixpIsFixtureExport32(
 
 #define CfixpFlagOn( Flags, FlagToTest ) ( ( Flags ) & ( FlagToTest ) )
 
+__inline VOID CfixpInitializeThreadId( 
+	__in PCFIX_THREAD_ID ThreadId, 
+	__in ULONG MainOsThreadId, 
+	__in ULONG OsThreadId 
+	)
+{
+	ThreadId->MainThreadId	= MainOsThreadId;
+	ThreadId->ThreadId		= OsThreadId;
+}
+
 /*----------------------------------------------------------------------
  *
  * Stack trace handling.

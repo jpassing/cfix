@@ -39,6 +39,12 @@ DWORD CfixpExceptionFilter(
 	)
 {
 	DWORD ExcpCode = ExcpPointers->ExceptionRecord->ExceptionCode;
+	CFIX_THREAD_ID ThreadId;
+
+	CfixpInitializeThreadId( 
+		&ThreadId,
+		Filament->MainThreadId,
+		GetCurrentThreadId() );
 
 	if ( EXCEPTION_TESTCASE_INCONCLUSIVE == ExcpCode ||
 		 EXCEPTION_TESTCASE_FAILED == ExcpCode )
@@ -83,7 +89,7 @@ DWORD CfixpExceptionFilter(
 		//
 		Filament->ExecutionContext->OnUnhandledException(
 			Filament->ExecutionContext,
-			Filament->MainThreadId,
+			&ThreadId,
 			ExcpPointers );
 
 		//
@@ -109,7 +115,7 @@ DWORD CfixpExceptionFilter(
 
 		Disp = Filament->ExecutionContext->ReportEvent(
 			Filament->ExecutionContext,
-			Filament->MainThreadId,
+			&ThreadId,
 			&Event.Base );
 
 		*AbortRun = ( Disp == CfixAbort );
@@ -151,9 +157,10 @@ CFIXAPI CFIX_REPORT_DISPOSITION CFIXCALLTYPE CfixPeReportFailedAssertion(
 	CFIXP_EVENT_WITH_STACKTRACE Event;
 	PCFIXP_FILAMENT Filament;
 	HRESULT Hr;
+	CFIX_THREAD_ID ThreadId;
 
 	DWORD LastError = GetLastError();
-	
+
 	//
 	// Filament should be in TLS as this routine should only be called
 	// from within a test routine.
@@ -176,6 +183,11 @@ CFIXAPI CFIX_REPORT_DISPOSITION CFIXCALLTYPE CfixPeReportFailedAssertion(
 		ExitThread( CFIX_EXIT_THREAD_ABORTED );
 	}
 
+	CfixpInitializeThreadId( 
+		&ThreadId,
+		Filament->MainThreadId,
+		GetCurrentThreadId() );
+	
 	Event.Base.Type								= CfixEventFailedAssertion;
 	Event.Base.Info.FailedAssertion.File		= File;
 	Event.Base.Info.FailedAssertion.Routine		= Routine;
@@ -197,7 +209,7 @@ CFIXAPI CFIX_REPORT_DISPOSITION CFIXCALLTYPE CfixPeReportFailedAssertion(
 
 	Disp = Filament->ExecutionContext->ReportEvent(
 		Filament->ExecutionContext,
-		Filament->MainThreadId,
+		&ThreadId,
 		&Event.Base );
 
 	if ( Disp == CfixBreakAlways )
@@ -367,6 +379,7 @@ CFIXAPI VOID CFIXCALLTYPE CfixPeReportInconclusiveness(
 	CFIXP_EVENT_WITH_STACKTRACE Event;
 	PCFIXP_FILAMENT Filament;
 	HRESULT Hr;
+	CFIX_THREAD_ID ThreadId;
 
 	//
 	// Filament should be in TLS as this routine should only be called
@@ -390,6 +403,11 @@ CFIXAPI VOID CFIXCALLTYPE CfixPeReportInconclusiveness(
 		ExitThread( CFIX_EXIT_THREAD_ABORTED );
 	}
 
+	CfixpInitializeThreadId( 
+		&ThreadId,
+		Filament->MainThreadId,
+		GetCurrentThreadId() );
+
 	//
 	// Capture stacktrace.
 	//
@@ -410,7 +428,7 @@ CFIXAPI VOID CFIXCALLTYPE CfixPeReportInconclusiveness(
 
 	( VOID ) Filament->ExecutionContext->ReportEvent(
 		Filament->ExecutionContext,
-		Filament->MainThreadId,
+		&ThreadId,
 		&Event.Base );
 
 	//
@@ -459,9 +477,10 @@ static CFIXAPI VOID CfixsPeReportLog(
 	__in PCWSTR Message
 	)
 {
+	CFIX_TESTCASE_EXECUTION_EVENT Event;
 	PCFIXP_FILAMENT Filament;
 	HRESULT Hr;
-	CFIX_TESTCASE_EXECUTION_EVENT Event;
+	CFIX_THREAD_ID ThreadId;
 
 	//
 	// Filament should be in TLS as this routine should only be called
@@ -485,6 +504,11 @@ static CFIXAPI VOID CfixsPeReportLog(
 		ExitThread( CFIX_EXIT_THREAD_ABORTED );
 	}
 
+	CfixpInitializeThreadId( 
+		&ThreadId,
+		Filament->MainThreadId,
+		GetCurrentThreadId() );
+
 	//
 	// Logs do not need a stacktrace.
 	//
@@ -498,7 +522,7 @@ static CFIXAPI VOID CfixsPeReportLog(
 
 	( VOID ) Filament->ExecutionContext->ReportEvent(
 		Filament->ExecutionContext,
-		Filament->MainThreadId,
+		&ThreadId,
 		&Event );
 }
 

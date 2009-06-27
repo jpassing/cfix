@@ -230,6 +230,11 @@ typedef struct _CFIXKR_EXECUTION_EVENT
 	USHORT Size;
 
 	//
+	// Thread which caused this event.
+	//
+	CFIX_THREAD_ID ThreadId;
+
+	//
 	// N.B. Offsets are relative to the beginning of *this*
 	// structure. All strings are Unicode and not null-terminated.
 	//
@@ -382,17 +387,23 @@ typedef struct _CFIXKR_IOCTL_CALL_ROUTINE_RESPONSE
 	Output:
 		None.
 
-	N.B. The request/response layout has changed in cfix 1.1, therefore
-	the IOCTL code has been changed as well.
+	N.B. The request/response layout has changed in cfix 1.1 and
+	cfix 1.5 (ThreadId), therefore the IOCTL code has been changed as well.
 --*/
-#define _OLD_CFIXKR_IOCTL_CALL_ROUTINE	CTL_CODE(	\
+#define _CFIX10_CFIXKR_IOCTL_CALL_ROUTINE	CTL_CODE(	\
 	CFIXKR_TYPE,									\
 	CFIXKR_IOCTL_BASE + 3,							\
 	METHOD_BUFFERED,								\
 	FILE_WRITE_DATA )
 
-#define CFIXKR_IOCTL_CALL_ROUTINE	CTL_CODE(		\
+#define _CFIX14_CFIXKR_IOCTL_CALL_ROUTINE	CTL_CODE(	\
 	CFIXKR_TYPE,									\
 	CFIXKR_IOCTL_BASE + 4,							\
+	METHOD_BUFFERED,								\
+	FILE_WRITE_DATA )
+
+#define CFIXKR_IOCTL_CALL_ROUTINE	CTL_CODE(		\
+	CFIXKR_TYPE,									\
+	CFIXKR_IOCTL_BASE + 5,							\
 	METHOD_BUFFERED,								\
 	FILE_WRITE_DATA )

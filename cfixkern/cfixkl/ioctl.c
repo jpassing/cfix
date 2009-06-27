@@ -429,7 +429,7 @@ static HRESULT CfixklsReportEventToExecutionContext(
 	//
 	( VOID ) Context->ReportEvent(
 		Context,
-		GetCurrentThreadId(),
+		&Event->ThreadId,
 		EventTranslated );
 
 	Hr = S_OK;
@@ -571,11 +571,9 @@ HRESULT CfixklpCallRoutine(
 
 	Request.Dispositions.FailedAssertion = Context->QueryDefaultDisposition(
 		Context, 
-		GetCurrentThreadId(),
 		CfixEventFailedAssertion );
 	Request.Dispositions.UnhandledException = Context->QueryDefaultDisposition(
 		Context, 
-		GetCurrentThreadId(),
 		CfixEventUncaughtException );
 
 	//
@@ -632,13 +630,20 @@ HRESULT CfixklpCallRoutine(
 	if ( Response->Events.Flags & CFIXKR_CALL_ROUTINE_FLAG_EVENTS_TRUNCATED )
 	{
 		CFIX_TESTCASE_EXECUTION_EVENT Note;
+		CFIX_THREAD_ID ThreadId;
+
+		//
+		// This is a fake event, so the thread does not matter.
+		//
+		ThreadId.MainThreadId = ThreadId.ThreadId = GetCurrentThreadId();
+
 		Note.Type = CfixEventLog;
 		Note.StackTrace.FrameCount = 0;
 		Note.Info.Log.Message = L"Note: At least one event has been dropped";
 
 		( VOID ) Context->ReportEvent( 
 			Context, 
-			GetCurrentThreadId(),
+			&ThreadId,
 			&Note );
 	}
 

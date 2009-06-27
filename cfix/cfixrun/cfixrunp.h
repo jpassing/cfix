@@ -158,6 +158,7 @@ HRESULT CfixrunpOutputTestEvent(
 	__in PCWSTR SourceFile,
 	__in UINT SourceLine,
 	__in DWORD LastError,
+	__in PCFIX_THREAD_ID ThreadId,
 	__in_opt PCFIX_STACKTRACE StackTrace,
 	__in_opt CFIX_GET_INFORMATION_STACKFRAME_ROUTINE GetInfoStackFrameRoutine
 	);

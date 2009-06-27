@@ -23,7 +23,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with cfix.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <wdm.h>
+#include <ntddk.h>
 #include "cfixkrp.h"
 
 #pragma warning( push )
@@ -207,6 +207,9 @@ static VOID CfixkrsQueueEvent(
 
 	Event->Type = Type;
 	Event->Size = ( USHORT ) StructureTotalSize;
+
+	Event->ThreadId.MainThreadId =
+		Event->ThreadId.ThreadId = ( ULONG ) ( ULONG_PTR ) PsGetCurrentThreadId();
 
 	//
 	// Write Info.

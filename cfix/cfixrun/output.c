@@ -93,6 +93,7 @@ HRESULT CfixrunpOutputTestEvent(
 	__in PCWSTR SourceFile,
 	__in UINT SourceLine,
 	__in DWORD LastError,
+	__in PCFIX_THREAD_ID ThreadId,
 	__in_opt PCFIX_STACKTRACE StackTrace,
 	__in_opt CFIX_GET_INFORMATION_STACKFRAME_ROUTINE GetInfoStackFrameRoutine
 	)
@@ -134,7 +135,7 @@ HRESULT CfixrunpOutputTestEvent(
 	Packet->Base.Severity			= CdiagInfoSeverity;
 	Packet->Base.ProcessorMode		= CdiagUserMode;
 	Packet->Base.ProcessId			= GetCurrentProcessId();
-	Packet->Base.ThreadId			= GetCurrentThreadId();
+	Packet->Base.ThreadId			= ThreadId->ThreadId;
 	Packet->Base.DebugInfoOffset		= 
 		FIELD_OFFSET( CFIXRUN_TEST_EVENT_PACKET, DebugInfo );
 	

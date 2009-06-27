@@ -105,3 +105,22 @@ typedef struct _CFIX_STACKTRACE
 	//
 	ULONGLONG Frames[ ANYSIZE_ARRAY ];
 } CFIX_STACKTRACE, *PCFIX_STACKTRACE;
+
+/*++
+	Structure Description:
+		Identifies the thread and its association to a filament/main
+		thread.
+--*/
+typedef struct _CFIX_THREAD_ID
+{
+	//
+	// Windows Thread ID.
+	//
+	ULONG ThreadId;
+
+	//
+	// ID of the filament/main thread, i.e. the initial thread of
+	// the individual test case execution.
+	//
+	ULONG MainThreadId;
+} CFIX_THREAD_ID, *PCFIX_THREAD_ID;

@@ -166,13 +166,10 @@ static VOID CfixrunsExecCtxDereference(
 
 static CFIX_REPORT_DISPOSITION CfixrunsExecCtxQueryDefaultDisposition(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
 	__in CFIX_EVENT_TYPE EventType
 	)
 {
 	PEXEC_CONTEXT Context = ( PEXEC_CONTEXT ) This;
-
-	UNREFERENCED_PARAMETER( MainThreadId );
 
 	switch ( EventType )
 	{
@@ -222,7 +219,7 @@ static CFIX_REPORT_DISPOSITION CfixrunsExecCtxQueryDefaultDisposition(
 
 static CFIX_REPORT_DISPOSITION CfixrunsExecCtxReportEvent(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in PCFIX_TESTCASE_EXECUTION_EVENT Event
 	)
 {
@@ -234,6 +231,8 @@ static CFIX_REPORT_DISPOSITION CfixrunsExecCtxReportEvent(
 	PCWSTR TestCaseName;
 
 	WCHAR Buffer[ 256 ] = { 0 };
+
+	UNREFERENCED_PARAMETER( ThreadId );
 
 	ASSERT( CurrentState );
 	if ( ! CurrentState )
@@ -296,6 +295,7 @@ static CFIX_REPORT_DISPOSITION CfixrunsExecCtxReportEvent(
 			Event->Info.FailedAssertion.File,
 			Event->Info.FailedAssertion.Line,
 			Event->Info.FailedAssertion.LastError,
+			ThreadId,
 			&Event->StackTrace,
 			CurrentState->CurrentFixture
 				? CurrentState->CurrentFixture->Module->Routines.GetInformationStackFrame 
@@ -325,6 +325,7 @@ static CFIX_REPORT_DISPOSITION CfixrunsExecCtxReportEvent(
 			NULL,
 			0,
 			0,
+			ThreadId,
 			&Event->StackTrace,
 			CurrentState->CurrentFixture
 				? CurrentState->CurrentFixture->Module->Routines.GetInformationStackFrame 
@@ -343,6 +344,7 @@ static CFIX_REPORT_DISPOSITION CfixrunsExecCtxReportEvent(
 			NULL,
 			0,
 			0,
+			ThreadId,
 			&Event->StackTrace,
 			CurrentState->CurrentFixture
 				? CurrentState->CurrentFixture->Module->Routines.GetInformationStackFrame 
@@ -363,6 +365,7 @@ static CFIX_REPORT_DISPOSITION CfixrunsExecCtxReportEvent(
 			NULL,
 			0,
 			0,
+			ThreadId,
 			&Event->StackTrace,
 			CurrentState->CurrentFixture
 				? CurrentState->CurrentFixture->Module->Routines.GetInformationStackFrame 
@@ -372,7 +375,6 @@ static CFIX_REPORT_DISPOSITION CfixrunsExecCtxReportEvent(
 
 	return CfixrunsExecCtxQueryDefaultDisposition(
 		This,
-		MainThreadId,
 		Event->Type );
 }
 
@@ -381,14 +383,14 @@ static CFIX_REPORT_DISPOSITION CfixrunsExecCtxReportEvent(
 //
 static HRESULT CfixrunsExecCtxBeforeFixtureStart(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in PCFIX_FIXTURE Fixture
 	)
 {
 	PEXEC_CONTEXT Context = ( PEXEC_CONTEXT ) This;
 	PEXEC_THREAD_STATE CurrentState = CfixrunsGetCurrentExecutionState( TRUE );
 
-	UNREFERENCED_PARAMETER( MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 
 	ASSERT( CurrentState );
 	if ( ! CurrentState )
@@ -406,14 +408,14 @@ static HRESULT CfixrunsExecCtxBeforeFixtureStart(
 
 static HRESULT CfixrunsExecCtxBeforeTestCaseStart(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in PCFIX_TEST_CASE TestCase
 	)
 {
 	PEXEC_CONTEXT Context = ( PEXEC_CONTEXT ) This;
 	PEXEC_THREAD_STATE CurrentState = CfixrunsGetCurrentExecutionState( FALSE );
 
-	UNREFERENCED_PARAMETER( MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 
 	ASSERT( CurrentState );
 	if ( ! CurrentState )
@@ -436,7 +438,7 @@ static HRESULT CfixrunsExecCtxBeforeTestCaseStart(
 //
 static VOID CfixrunsExecCtxAfterFixtureFinish(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in PCFIX_FIXTURE Fixture,
 	__in BOOL RanToCompletion
 	)
@@ -444,7 +446,7 @@ static VOID CfixrunsExecCtxAfterFixtureFinish(
 	PEXEC_CONTEXT Context = ( PEXEC_CONTEXT ) This;
 	PEXEC_THREAD_STATE CurrentState = CfixrunsGetCurrentExecutionState( FALSE );
 
-	UNREFERENCED_PARAMETER( MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( Fixture );
 	UNREFERENCED_PARAMETER( RanToCompletion );
 	ASSERT( CurrentState );
@@ -466,7 +468,7 @@ static VOID CfixrunsExecCtxAfterFixtureFinish(
 
 static VOID CfixrunsExecCtxAfterTestCaseFinish(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in PCFIX_TEST_CASE TestCase,
 	__in BOOL RanToCompletion
 	)
@@ -474,7 +476,7 @@ static VOID CfixrunsExecCtxAfterTestCaseFinish(
 	PEXEC_CONTEXT Context = ( PEXEC_CONTEXT ) This;
 	PEXEC_THREAD_STATE CurrentState = CfixrunsGetCurrentExecutionState( FALSE );
 
-	UNREFERENCED_PARAMETER( MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( TestCase );
 	UNREFERENCED_PARAMETER( RanToCompletion );
 	ASSERT( CurrentState );
@@ -487,7 +489,6 @@ static VOID CfixrunsExecCtxAfterTestCaseFinish(
 			L"Unable to obtain current execution context state." );
 		return;
 	}
-
 
 	//
 	// Was is a success or failure?
@@ -508,6 +509,7 @@ static VOID CfixrunsExecCtxAfterTestCaseFinish(
 			NULL,
 			0,
 			0,
+			ThreadId,
 			NULL,
 			NULL );
 
@@ -537,13 +539,13 @@ static VOID CfixrunsExecCtxAfterTestCaseFinish(
 
 VOID CfixrunsExecCtxBeforeChildThreadStart(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in_opt PVOID Context
 	)
 {
 	PEXEC_THREAD_STATE ParentState = ( PEXEC_THREAD_STATE ) Context;
 
-	UNREFERENCED_PARAMETER( MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( This );
 	ASSERT( CfixIsValidContext( This ) );
 	
@@ -560,11 +562,11 @@ VOID CfixrunsExecCtxBeforeChildThreadStart(
 
 VOID CfixrunsExecCtxAfterChildThreadFinish(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in_opt PVOID Context
 	)
 {
-	UNREFERENCED_PARAMETER( MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( This );
 	UNREFERENCED_PARAMETER( Context );
 
@@ -573,14 +575,14 @@ VOID CfixrunsExecCtxAfterChildThreadFinish(
 
 static HRESULT CfixrunsExecCtxCreateChildThread(
 	__in struct _CFIX_EXECUTION_CONTEXT *This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__out PVOID *ContextForChild
 	)
 {
 	PEXEC_CONTEXT Context = ( PEXEC_CONTEXT ) This;
 	PEXEC_THREAD_STATE CurrentState = CfixrunsGetCurrentExecutionState( FALSE );
 
-	UNREFERENCED_PARAMETER( MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	ASSERT( ContextForChild );
 	ASSERT( CurrentState && CurrentState->CurrentFixture );
 	if ( ! CurrentState || ! CurrentState->CurrentFixture )
@@ -598,12 +600,12 @@ static HRESULT CfixrunsExecCtxCreateChildThread(
 
 static VOID CfixrunsExecCtxOnUnhandledException(
 	__in PCFIX_EXECUTION_CONTEXT This,
-	__in ULONG MainThreadId,
+	__in PCFIX_THREAD_ID ThreadId, 
 	__in PEXCEPTION_POINTERS ExcpPointers
 	)
 {
 	UNREFERENCED_PARAMETER( This );
-	UNREFERENCED_PARAMETER( MainThreadId );
+	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( ExcpPointers );
 }
 

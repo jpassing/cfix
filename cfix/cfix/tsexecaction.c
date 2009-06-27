@@ -213,12 +213,15 @@ static HRESULT CfixsRunFixtureExecutionAction(
 	HRESULT Hr;
 	UINT Index;
 	BOOL FixtureRanToCompletion = TRUE;
-	ULONG MainThreadId;
+	CFIX_THREAD_ID ThreadId;
 
 	//
 	// The calling thread is always the MainThread.
 	//
-	MainThreadId = GetCurrentThreadId();
+	CfixpInitializeThreadId( 
+		&ThreadId,
+		GetCurrentThreadId(),
+		GetCurrentThreadId() );
 
 	ASSERT( CfixIsValidAction( This ) );
 	ASSERT( CfixIsValidContext( Context ) );
@@ -232,7 +235,7 @@ static HRESULT CfixsRunFixtureExecutionAction(
 
 	Hr = Context->BeforeFixtureStart(
 		Context,
-		MainThreadId,
+		&ThreadId,
 		Action->Fixture );
 	if ( FAILED( Hr ) )
 	{
@@ -310,7 +313,7 @@ static HRESULT CfixsRunFixtureExecutionAction(
 
 			Hr = Context->BeforeTestCaseStart(
 				Context,
-				MainThreadId,
+				&ThreadId,
 				&Action->Fixture->TestCases[ Index ] );
 			if ( FAILED( Hr ) )
 			{
@@ -381,7 +384,7 @@ static HRESULT CfixsRunFixtureExecutionAction(
 
 			Context->AfterTestCaseFinish(
 				Context,
-				MainThreadId,
+				&ThreadId,
 				&Action->Fixture->TestCases[ Index ],
 				TestCaseRanToCompletion );
 		}
@@ -419,7 +422,7 @@ static HRESULT CfixsRunFixtureExecutionAction(
 
 	Context->AfterFixtureFinish(
 		Context,
-		MainThreadId,
+		&ThreadId,
 		Action->Fixture,
 		FixtureRanToCompletion );
 

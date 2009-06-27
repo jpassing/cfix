@@ -49,6 +49,8 @@ static VOID CheckEventsForLog(
 	for ( Index = 0; Index < Res->Events.Count; Index++ )
 	{
 		CFIX_ASSERT( Event->Type == CfixEventLog );
+		CFIX_ASSERT( Event->ThreadId.MainThreadId == GetCurrentThreadId() );
+		CFIX_ASSERT( Event->ThreadId.MainThreadId == Event->ThreadId.ThreadId );
 		CFIX_ASSERT( Event->Size >= sizeof( CFIXKR_EXECUTION_EVENT ) );
 
 		CFIX_ASSERT( Event->Info.Log.MessageOffset + 
@@ -102,7 +104,9 @@ static VOID CheckEventsForInconclusivenessPassiveLevel(
 	for ( Index = 0; Index < Res->Events.Count; Index++ )
 	{
 		CFIX_ASSERT( Event->Size >= sizeof( CFIXKR_EXECUTION_EVENT ) );
-
+		CFIX_ASSERT( Event->ThreadId.MainThreadId == GetCurrentThreadId() );
+		CFIX_ASSERT( Event->ThreadId.MainThreadId == Event->ThreadId.ThreadId );
+		
 		if ( Index == 0 )
 		{
 			CFIX_ASSERT( Event->Type == CfixEventLog );
@@ -179,7 +183,9 @@ static VOID CheckEventsForInconclusivenessDirql(
 	for ( Index = 0; Index < Res->Events.Count; Index++ )
 	{
 		CFIX_ASSERT( Event->Size >= sizeof( CFIXKR_EXECUTION_EVENT ) );
-
+		CFIX_ASSERT( Event->ThreadId.MainThreadId == GetCurrentThreadId() );
+		CFIX_ASSERT( Event->ThreadId.MainThreadId == Event->ThreadId.ThreadId );
+		
 		if ( Index == 0 )
 		{
 			CFIX_ASSERT( Event->Type == CfixEventLog );
@@ -264,7 +270,9 @@ static void CheckEventsForException(
 	for ( Index = 0; Index < Res->Events.Count; Index++ )
 	{
 		CFIX_ASSERT( Event->Size >= sizeof( CFIXKR_EXECUTION_EVENT ) );
-
+		CFIX_ASSERT( Event->ThreadId.MainThreadId == GetCurrentThreadId() );
+		CFIX_ASSERT( Event->ThreadId.MainThreadId == Event->ThreadId.ThreadId );
+		
 		if ( Index < 2 )
 		{
 			CFIX_ASSERT( Event->Type == CfixEventLog );
@@ -328,7 +336,9 @@ static VOID CheckEventsForLogAndFailPassiveLevel(
 	for ( Index = 0; Index < Res->Events.Count; Index++ )
 	{
 		CFIX_ASSERT( Event->Size >= sizeof( CFIXKR_EXECUTION_EVENT ) );
-
+		CFIX_ASSERT( Event->ThreadId.MainThreadId == GetCurrentThreadId() );
+		CFIX_ASSERT( Event->ThreadId.MainThreadId == Event->ThreadId.ThreadId );
+		
 		if ( Index <= 1 )
 		{
 			CFIX_ASSERT( Event->Type == CfixEventLog );
@@ -400,7 +410,9 @@ static VOID CheckEventsForLogAndFailAtDirql(
 	for ( Index = 0; Index < Res->Events.Count; Index++ )
 	{
 		CFIX_ASSERT( Event->Size >= sizeof( CFIXKR_EXECUTION_EVENT ) );
-
+		CFIX_ASSERT( Event->ThreadId.MainThreadId == GetCurrentThreadId() );
+		CFIX_ASSERT( Event->ThreadId.MainThreadId == Event->ThreadId.ThreadId );
+		
 		if ( Index == 0 )
 		{
 			CFIX_ASSERT( Event->Type == CfixEventLog );
