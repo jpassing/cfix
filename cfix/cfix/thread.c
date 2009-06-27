@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <process.h> 
 
-typedef struct _THREAD_START_PARAMETERS
+typedef struct _CFIXP_THREAD_START_PARAMETERS
 {
 	PTHREAD_START_ROUTINE StartAddress;
 	PVOID UserParaneter;
@@ -42,29 +42,25 @@ typedef struct _THREAD_START_PARAMETERS
 	//
 	HANDLE InitializationCompleted;
 	HRESULT InitializationResult;
-} THREAD_START_PARAMETERS, *PTHREAD_START_PARAMETERS;
+} CFIXP_THREAD_START_PARAMETERS, *PCFIXP_THREAD_START_PARAMETERS;
 
 static DWORD CfixsThreadStart(
-	__in PTHREAD_START_PARAMETERS Parameters
+	__in PCFIXP_THREAD_START_PARAMETERS Parameters
 	)
 {
+	CFIXP_THREAD_START_PARAMETERS CopyOfParameters;
 	BOOL Dummy;
 	DWORD ExitCode;
 	CFIX_THREAD_ID ThreadId;
-
-	PVOID ParentContext;
-	PCFIXP_FILAMENT Filament;
-	PTHREAD_START_ROUTINE StartAddress;
-	PVOID UserParaneter;
 
 	ASSERT( Parameters->StartAddress );
 	ASSERT( Parameters->Filament );
 	__assume( Parameters->Filament );
 
-	ParentContext	= Parameters->ParentContext;
-	Filament		= Parameters->Filament;
-	StartAddress	= Parameters->StartAddress;
-	UserParaneter	= Parameters->UserParaneter;
+	CopyMemory( 
+		&CopyOfParameters, 
+		Parameters, 
+		sizeof( CFIXP_THREAD_START_PARAMETERS ) );
 
 	CfixpInitializeThreadId( 
 		&ThreadId,
@@ -97,26 +93,28 @@ static DWORD CfixsThreadStart(
 	( VOID ) SetEvent( Parameters->InitializationCompleted );
 
 	//
-	// N.B. From now on, Parameters may not be touched any more.
+	// N.B. From now on, Parameters may not be touched any more; use
+	// CopyOfParameters instead.
 	//
 
 	__try
 	{
-		ExitCode = ( StartAddress )( UserParaneter );
+		ExitCode = ( CopyOfParameters.StartAddress )( 
+			CopyOfParameters.UserParaneter );
 	}
 	__except ( CfixpExceptionFilter( 
 		GetExceptionInformation(), 
-		Filament,
+		CopyOfParameters.Filament,
 		&Dummy ) )
 	{
 		NOP;
 		ExitCode = ( DWORD ) CFIX_EXIT_THREAD_ABORTED;
 	}
 
-	Filament->ExecutionContext->AfterChildThreadFinish(
-		Filament->ExecutionContext,
+	CopyOfParameters.Filament->ExecutionContext->AfterChildThreadFinish(
+		CopyOfParameters.Filament->ExecutionContext,
 		&ThreadId,
-		ParentContext );
+		CopyOfParameters.ParentContext );
 
 	VERIFY( S_OK == CfixpSetCurrentFilament( 
 		NULL, 
@@ -137,7 +135,7 @@ HANDLE CfixCreateThread2(
 {
 	PCFIXP_FILAMENT Filament;
 	HRESULT Hr;
-	THREAD_START_PARAMETERS Parameters;
+	CFIXP_THREAD_START_PARAMETERS Parameters;
 	HANDLE Thread;
 	CFIX_THREAD_ID ThreadId;
 
