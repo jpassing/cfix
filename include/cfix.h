@@ -295,6 +295,9 @@ CFIXREPORTAPI VOID __cdecl CfixPeReportLogA(
 		If the thread is aborted due to an unhandled exception, assertion
 		etc, the thread's exit code is CFIX_E_THREAD_ABORTED.
 
+		Note that no more than CFIX_MAX_THREADS threads may be
+		created within a single test case.
+
 	Parameters:
 		See MSDN.
 --*/
@@ -333,4 +336,46 @@ CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread2(
 	__in ULONG Flags
 	);
 
+#else  // CFIX_KERNELMODE
+
+//
+// Let the new thread run as part of the system context. If this flag
+// is not specified, the thread is run in the context of the cfix
+// process.
+//
+// Note for Windows 2000:
+//   This flag is always implied.
+//
+
+#define CFIX_SYSTEM_THREAD_FLAG_SYSTEM_CONTEXT	1
+
+/*++
+	Routine Description:
+		Creates a system thread like PsCreateSystemThread does, but 
+		registers the thread appropriately s.t. assertions, unhandled 
+		exceptions etc. can be properly handled by the framework.
+
+		If the thread is aborted due to an unhandled exception, assertion
+		etc, the thread's exit code is CFIX_E_THREAD_ABORTED.
+
+		Note that no more than CFIX_MAX_THREADS threads may be
+		created within a single test case.
+
+		May be called at IRQL == PASSIVE_LEVEL.
+
+	Parameters:
+		Flags		See CFIX_SYSTEM_THREAD_FLAG_*.
+		See MSDN.
+--*/
+
+CFIXAPI NTSTATUS CFIXCALLTYPE CfixCreateSystemThread(
+    __out PHANDLE ThreadHandle,
+    __in ULONG DesiredAccess,
+    __in_opt POBJECT_ATTRIBUTES ObjectAttributes,
+    __in_opt HANDLE ProcessHandle,
+    __out_opt PCLIENT_ID ClientId,
+    __in PKSTART_ROUTINE StartRoutine,
+    __in PVOID StartContext,
+	__in ULONG Flags
+    );
 #endif // CFIX_KERNELMODE

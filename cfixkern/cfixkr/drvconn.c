@@ -443,7 +443,7 @@ NTSTATUS CfixkrpCallRoutineDriverConnection(
 	//
 	CfixkrpInitializeFilament(
 		Channel,
-		( ULONG ) ( ULONG_PTR ) PsGetCurrentThreadId(),
+		CfixkrGetCurrentThreadId(),
 		&Filament );
 
 	//

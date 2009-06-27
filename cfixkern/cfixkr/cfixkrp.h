@@ -35,6 +35,8 @@
  *
  */
 
+ULONG CfixkrGetCurrentThreadId();
+
 /*++
 	Routine Description:
 		Helper routine calling IoCompleteRequest.
@@ -462,6 +464,21 @@ typedef struct _CFIXKRP_FILAMENT
 {
 	PCFIXKRP_REPORT_CHANNEL Channel;
 	ULONG MainThreadId;
+
+	struct
+	{
+		//
+		// Lock guarding this sub-struct.
+		//
+		FAST_MUTEX Lock;
+
+		ULONG ThreadCount;
+
+		//
+		// Handles of child threads.
+		//
+		HANDLE Threads[ CFIX_MAX_THREADS ];
+	} ChildThreads;
 } CFIXKRP_FILAMENT, *PCFIXKRP_FILAMENT;
 
 typedef struct _CFIXKRP_FILAMENT_REGISTRY
@@ -506,7 +523,7 @@ VOID CfixkrpDeleteFilament(
 	Routine Description:
 		Associate the current thread with the given filament.
 
-		Callable at IRQL <= DISPATCH_LEVEL
+		Callable at PASSIVE_LEVEL.
 --*/
 NTSTATUS CfixkrpSetCurrentFilament(
 	__in PCFIXKRP_FILAMENT_REGISTRY Registry,
@@ -548,6 +565,17 @@ PCFIXKRP_FILAMENT CfixkrpGetCurrentFilament(
 --*/
 PCFIXKRP_FILAMENT CfixkrpGetCurrentFilamentFromConnection(
 	__in PCFIXKRP_DRIVER_CONNECTION Connection
+	);
+
+/*++
+	Routine Description:
+		Wait for all child threads to finish.
+
+		Callable at PASSIVE_LEVEL.
+--*/
+NTSTATUS CfixkrpJoinChildThreadsFilament(
+	__in PCFIXKRP_FILAMENT Filament,
+	__in PLARGE_INTEGER Timeout
 	);
 
 /*----------------------------------------------------------------------

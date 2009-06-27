@@ -209,7 +209,7 @@ static VOID CfixkrsQueueEvent(
 	Event->Size = ( USHORT ) StructureTotalSize;
 
 	Event->ThreadId.MainThreadId =
-		Event->ThreadId.ThreadId = ( ULONG ) ( ULONG_PTR ) PsGetCurrentThreadId();
+		Event->ThreadId.ThreadId = CfixkrGetCurrentThreadId();
 
 	//
 	// Write Info.

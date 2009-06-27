@@ -176,6 +176,12 @@ HRESULT CfixpSetCurrentFilament(
 		}
 	}
 
+	//
+	// N.B. Resetting the filament does not impact the child handle
+	// list in the filament - the listz is maintained until the filament
+	// is destroyed.
+	//
+
 	if ( NewFilament != NULL )
 	{
 		NewFilament->ExecutionContext->Reference( NewFilament->ExecutionContext );

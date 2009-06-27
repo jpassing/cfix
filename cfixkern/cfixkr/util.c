@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with cfix.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <wdm.h>
+#include <ntddk.h>
 #include <aux_klib.h>
 
 #include "cfixkrp.h"
@@ -150,4 +150,9 @@ NTSTATUS CfixkrpGetModuleBaseAddress(
 	KdPrint( ( "CFIXDRV: Own module base address is %p.\n", *BaseAddress ) );
 
 	return Status;
+}
+
+ULONG CfixkrGetCurrentThreadId()
+{
+	return ( ULONG ) ( ULONG_PTR ) PsGetCurrentThreadId();
 }

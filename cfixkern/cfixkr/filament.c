@@ -24,6 +24,7 @@
 #include <wdm.h>
 #include <hashtable.h>
 #include "cfixkrp.h"
+#include <stdlib.h>
 
 //
 // Not defined in wdm.h, but holds for i386 and amd64.
@@ -91,10 +92,51 @@ static VOID CfixkrsReleaseLockFilamentRegistry(
 	KeLowerIrql( OldIrql );
 }
 
+/*----------------------------------------------------------------------
+ *
+ * Helper routines.
+ *
+ */
+
+#pragma warning( push )
+#pragma warning( disable: 6386 )	// False buffer overflow warning.
+
+static NTSTATUS CfixkrsRegisterChildThreadFilament(
+	__in PCFIXKRP_FILAMENT Filament,
+	__in HANDLE Thread
+	)
+{
+	NTSTATUS Status;
+
+	ASSERT( Filament );
+	ASSERT( Thread );
+	ASSERT( KeGetCurrentIrql() == PASSIVE_LEVEL );
+
+	ExAcquireFastMutex( &Filament->ChildThreads.Lock );
+	
+	if ( Filament->ChildThreads.ThreadCount ==
+		_countof( Filament->ChildThreads.Threads ) )
+	{
+		Status = STATUS_ALLOTTED_SPACE_EXCEEDED;
+		goto Cleanup;
+	}
+
+	Filament->ChildThreads.Threads[ 
+		Filament->ChildThreads.ThreadCount++ ] = Thread;
+
+	Status = STATUS_SUCCESS;
+
+Cleanup:
+	ExReleaseFastMutex( &Filament->ChildThreads.Lock );
+
+	return Status;
+}
+
+#pragma warning( pop )
 
 /*----------------------------------------------------------------------
  *
- * Internal.
+ * Registry.
  *
  */
 
@@ -135,6 +177,12 @@ VOID CfixkrpDeleteFilamentRegistry(
 	JphtDeleteHashtable( &Registry->Table );
 }
 
+/*----------------------------------------------------------------------
+ *
+ * Filaments.
+ *
+ */
+
 VOID CfixkrpInitializeFilament(
 	__in PCFIXKRP_REPORT_CHANNEL Channel,
 	__in ULONG MainThreadId,
@@ -151,7 +199,15 @@ VOID CfixkrpDeleteFilament(
 	__in PCFIXKRP_FILAMENT Filament
 	)
 {
-	UNREFERENCED_PARAMETER( Filament );
+	ULONG Index;
+
+	//
+	// Close all handles to child threads.
+	//
+	for ( Index = 0; Index < Filament->ChildThreads.ThreadCount; Index++ )
+	{
+		ZwClose( Filament->ChildThreads.Threads[ Index ] );
+	}
 }
 
 NTSTATUS CfixkrpSetCurrentFilament(
@@ -165,11 +221,8 @@ NTSTATUS CfixkrpSetCurrentFilament(
 
 	ASSERT( Registry );
 	ASSERT( Filament );
-	ASSERT( KeGetCurrentIrql() <= DISPATCH_LEVEL );
+	ASSERT( KeGetCurrentIrql() == PASSIVE_LEVEL );
 
-	//
-	// Add a new entry to the hashtable.
-	//
 	Entry = ExAllocatePoolWithTag( 
 		NonPagedPool, 
 		sizeof( CFIXKRP_FILAMENT_ENTRY ), 
@@ -178,6 +231,25 @@ NTSTATUS CfixkrpSetCurrentFilament(
 	{
 		return STATUS_NO_MEMORY;
 	}
+
+	if ( CfixkrGetCurrentThreadId() != Filament->MainThreadId )
+	{
+		//
+		// This is not the main thread - so register as child thread.
+		//
+		NTSTATUS Status = CfixkrsRegisterChildThreadFilament( 
+			Filament, 
+			PsGetCurrentThread() );
+		if ( ! NT_SUCCESS( Status ) )
+		{
+			ExFreePoolWithTag( Entry, CFIXKR_POOL_TAG );
+			return Status;
+		}
+	}
+
+	//
+	// Assign the filament to the current thread.
+	//
 
 	Entry->Key.Thread	= KeGetCurrentThread();
 	Entry->Filament		= Filament;
@@ -224,6 +296,12 @@ VOID CfixkrpResetCurrentFilament(
 		Key.HashtableEntry );
 
 	ExFreePoolWithTag( FilamentEntry, CFIXKR_POOL_TAG );
+
+	//
+	// N.B. Resetting the filament does not impact the child handle
+	// list in the filament - the list is maintained until the filament
+	// is destroyed.
+	//
 }
 
 PCFIXKRP_FILAMENT CfixkrpGetCurrentFilament(
@@ -257,4 +335,39 @@ PCFIXKRP_FILAMENT CfixkrpGetCurrentFilament(
 	{
 		return NULL;
 	}
+}
+
+NTSTATUS CfixkrpJoinChildThreadsFilament(
+	__in PCFIXKRP_FILAMENT Filament,
+	__in PLARGE_INTEGER Timeout
+	)
+{
+	NTSTATUS Status;
+
+	ASSERT( KeGetCurrentIrql() == PASSIVE_LEVEL );
+
+	ExAcquireFastMutex( &Filament->ChildThreads.Lock );
+	
+	if ( Filament->ChildThreads.ThreadCount > 0 )
+	{
+		KWAIT_BLOCK WaitBlocks[ CFIX_MAX_THREADS ];
+
+		Status = KeWaitForMultipleObjects(
+			Filament->ChildThreads.ThreadCount,
+			Filament->ChildThreads.Threads,
+			WaitAll,
+			Executive,
+			KernelMode,
+			FALSE,
+			Timeout,
+			WaitBlocks );
+	}
+	else
+	{
+		Status = STATUS_SUCCESS;
+	}
+
+	ExReleaseFastMutex( &Filament->ChildThreads.Lock );
+
+	return Status;
 }
