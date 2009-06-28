@@ -41,6 +41,30 @@ typedef struct _CFIXKRP_THREAD_START_PARAMETERS
 	NTSTATUS InitializationStatus;
 } CFIXKRP_THREAD_START_PARAMETERS, *PCFIXKRP_THREAD_START_PARAMETERS;
 
+typedef struct _CFIXKRP_WORK_ITEM_CONTEXT
+{
+	struct
+	{
+		//
+		// Out.
+		//
+		PHANDLE ThreadHandle;
+		PCLIENT_ID ClientId;
+	    
+		//
+		// In.
+		//
+		ULONG DesiredAccess;
+		POBJECT_ATTRIBUTES ObjectAttributes;
+		HANDLE ProcessHandle;
+		PCFIXKRP_THREAD_START_PARAMETERS Parameters;
+	} Parameters;
+
+	NTSTATUS Status;
+	WORK_QUEUE_ITEM WorkItem;
+	KEVENT WorkItemCompleted;
+} CFIXKRP_WORK_ITEM_CONTEXT, *PCFIXKRP_WORK_ITEM_CONTEXT;
+
 static VOID CfixkrsThreadStart(
 	__in PCFIXKRP_THREAD_START_PARAMETERS Parameters
 	)
@@ -103,6 +127,96 @@ static VOID CfixkrsThreadStart(
 		CfixkrpResetCurrentFilament( FilamentRegistry );
 	}
 }
+
+static VOID CfixkrsCreateSystemThreadWorkItemRoutine(
+	__in PCFIXKRP_WORK_ITEM_CONTEXT WorkItem
+    )
+{
+	ASSERT( WorkItem );
+
+	WorkItem->Status = PsCreateSystemThread(
+		WorkItem->Parameters.ThreadHandle,
+		WorkItem->Parameters.DesiredAccess,
+		WorkItem->Parameters.ObjectAttributes,
+		WorkItem->Parameters.ProcessHandle,
+		WorkItem->Parameters.ClientId,
+		CfixkrsThreadStart,
+		WorkItem->Parameters.Parameters );
+
+	KeSetEvent( &WorkItem->WorkItemCompleted, 0, FALSE );
+}
+
+#pragma warning( push )
+#pragma warning( disable: 4995 )	// Ex work item routines deprecated.
+#pragma warning( disable: 4996 )	// Ex work item routines deprecated.
+
+static NTSTATUS CfixkrsCreateSystemThreadInSystemContext(
+    __out PHANDLE ThreadHandle,
+    __in ULONG DesiredAccess,
+    __in_opt POBJECT_ATTRIBUTES ObjectAttributes,
+    __in_opt HANDLE ProcessHandle,
+    __out_opt PCLIENT_ID ClientId,
+    __in PCFIXKRP_THREAD_START_PARAMETERS Parameters
+    )
+{
+	CFIXKRP_WORK_ITEM_CONTEXT WorkItem;
+	NTSTATUS Status;
+
+	WorkItem.Status							= STATUS_UNSUCCESSFUL;
+
+	WorkItem.Parameters.ThreadHandle		= ThreadHandle;
+	WorkItem.Parameters.ClientId			= ClientId;
+
+	WorkItem.Parameters.DesiredAccess		= DesiredAccess;
+	WorkItem.Parameters.ObjectAttributes	= ObjectAttributes;
+	WorkItem.Parameters.ProcessHandle		= ProcessHandle;
+	WorkItem.Parameters.Parameters			= Parameters;
+
+	//
+	// Use a work item to have PsCreateSystemThread be executed in 
+	// system context.
+	//
+	// N.B. Due to the usage of the InitializationCompleted event,
+	// a situation where the driver is unloaded while the work item
+	// routine is running or has not even started running cannot occur.
+	//
+	// Therefore, it is safe to use the Ex rather than the Io work
+	// item API.
+	//
+
+	ExInitializeWorkItem(
+		&WorkItem.WorkItem,
+		CfixkrsCreateSystemThreadWorkItemRoutine,
+		&WorkItem );
+
+	KeInitializeEvent(
+		&WorkItem.WorkItemCompleted,
+		SynchronizationEvent,
+		FALSE );
+
+	ExQueueWorkItem( &WorkItem.WorkItem, DelayedWorkQueue );
+
+	//
+	// Wait for work item to complete.
+	//
+	Status = KeWaitForSingleObject( 
+		&WorkItem.WorkItemCompleted,
+		Executive,
+		KernelMode,
+		FALSE,
+		NULL );
+	
+	//
+	// We cannot properly handle a situation where this wait fails.
+	//
+	ASSERT( NT_SUCCESS( Status ) );
+
+	Status = WorkItem.Status;
+
+	return Status;
+}
+
+#pragma warning( pop )
 
 NTSTATUS CfixkrpCreateSystemThread(
     __out PHANDLE ThreadHandle,
@@ -173,14 +287,27 @@ NTSTATUS CfixkrpCreateSystemThread(
 	//
 	// Spawn thread using proxy ThreadStart routine.
 	//
-	Status = PsCreateSystemThread(
-		ThreadHandle,
-		DesiredAccess,
-		ObjectAttributes,
-		ProcessHandle,
-		ClientId,
-		CfixkrsThreadStart,
-		&Parameters );
+	if ( Flags & CFIX_SYSTEM_THREAD_FLAG_SYSTEM_CONTEXT )
+	{
+		Status = CfixkrsCreateSystemThreadInSystemContext(
+			ThreadHandle,
+			DesiredAccess,
+			ObjectAttributes,
+			ProcessHandle,
+			ClientId,
+			&Parameters );
+	}
+	else
+	{
+		Status = PsCreateSystemThread(
+			ThreadHandle,
+			DesiredAccess,
+			ObjectAttributes,
+			ProcessHandle,
+			ClientId,
+			CfixkrsThreadStart,
+			&Parameters );
+	}
 
 	if ( NT_SUCCESS( Status ) )
 	{

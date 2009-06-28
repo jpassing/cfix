@@ -137,10 +137,58 @@ static void SpawnAndAutoJoinLotsOfThreads()
 		0 ) );
 }
 
+static void SpawnAndAutoJoinLotsOfThreadsUsingSystemContext()
+{
+	ULONG Index;
+	OBJECT_ATTRIBUTES ObjectAttributes;
+	HANDLE Thread;
+	
+	for ( Index = 0; Index < CFIX_MAX_THREADS; Index++ )
+	{
+		InitializeObjectAttributes(
+			&ObjectAttributes, 
+			NULL, 
+			OBJ_KERNEL_HANDLE, 
+			NULL, 
+			NULL );
+
+		CFIX_ASSERT( STATUS_SUCCESS == CfixCreateSystemThread(
+			&Thread,
+			THREAD_ALL_ACCESS,
+			&ObjectAttributes,
+			NULL,
+			NULL,
+			ThreadProc,
+			NULL,
+			CFIX_SYSTEM_THREAD_FLAG_SYSTEM_CONTEXT ) );
+		CFIX_ASSERT( Thread );
+		CFIX_ASSERT( NT_SUCCESS( ZwClose( Thread ) ) );
+	}
+
+	InitializeObjectAttributes(
+		&ObjectAttributes, 
+		NULL, 
+		OBJ_KERNEL_HANDLE, 
+		NULL, 
+		NULL );
+
+	CFIX_ASSERT( STATUS_ALLOTTED_SPACE_EXCEEDED == CfixCreateSystemThread(
+		&Thread,
+		THREAD_ALL_ACCESS,
+		&ObjectAttributes,
+		NULL,
+		NULL,
+		ThreadProc,
+		NULL,
+		CFIX_SYSTEM_THREAD_FLAG_SYSTEM_CONTEXT ) );
+}
+
+
 CFIX_BEGIN_FIXTURE( FilamentJoin )
 	CFIX_FIXTURE_ENTRY( SpawnAndJoinPolitely )
 	CFIX_FIXTURE_ENTRY( SpawnAndAutoJoin )
 	CFIX_FIXTURE_ENTRY( SpawnAndAutoJoinLotsOfThreads )
+	CFIX_FIXTURE_ENTRY( SpawnAndAutoJoinLotsOfThreadsUsingSystemContext )
 
 	//
 	// Threads have to work in all these situations, too.
