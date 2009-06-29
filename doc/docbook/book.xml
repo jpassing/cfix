@@ -1631,6 +1631,15 @@ f9fc50fe cc              int     3
 			</itemizedlist>	
 		</para>
 		</simplesect>
+
+		<simplesect>
+		<title>What's new in cfix 1.5</title>
+		<para>
+			<itemizedlist>
+				<listitem>Additional overloads for <link linkend="CFIX_LOG">CFIX_LOG</link></listitem>
+			</itemizedlist>	
+		</para>
+		</simplesect>
 	</section>
 	
 	<section id="TestAPI">

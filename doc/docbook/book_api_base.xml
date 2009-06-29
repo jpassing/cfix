@@ -575,6 +575,10 @@ CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread(
 				CreateThread/_beginthreadex with the added functionality that the thread is registered so that
 				cfix can properly relate any assertions etc. raised on this thread to the current test case.
 				</para>
+				<note>
+				For kernel mode tests, use <link linkend='CfixCreateSystemThread'>CfixCreateSystemThread</link> rather 
+				than CfixCreateThread2.
+				</note>
 			</simplesect>
 			
 			<simplesect>
@@ -644,6 +648,94 @@ CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread2(
 			</simplesect>
 		</section>
 		
+		<section id="CfixCreateSystemThread">
+			<title>CfixCreateSystemThread</title>
+			<indexterm><primary>CfixCreateSystemThread</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Use CfixCreateSystemThread whenever you need to create a thread from within a kernel mode test case and
+				intend to call cfix APIs (i.e. CFIX_ASSERT etc) on this thread. CfixCreateSystemThread is a wrapper for
+				PsCreateSystemThread with the added functionality that the thread is registered so that
+				cfix can properly relate any assertions etc. raised on this thread to the current test case.
+				</para>
+				<note>
+				For user mode tests, use <link linkend='CfixCreateThread2'>CfixCreateThread2</link> rather 
+				than CfixCreateThread2.
+				</note>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+NTSTATUS CFIXCALLTYPE CfixCreateSystemThread(
+    __out PHANDLE ThreadHandle,
+    __in ULONG DesiredAccess,
+    __in_opt POBJECT_ATTRIBUTES ObjectAttributes,
+    __in_opt HANDLE ProcessHandle,
+    __out_opt PCLIENT_ID ClientId,
+    __in PKSTART_ROUTINE StartRoutine,
+    __in PVOID StartContext,
+    __in ULONG Flags
+    );
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+				[in] <emphasis>Flags</emphasis>: If set to 0, PsCreateSystemThread is called from
+				the current context (i.e. the process context of cfix). If set to 
+				CFIX_SYSTEM_THREAD_FLAG_SYSTEM_CONTEXT, PsCreateSystemThread is called from system
+				context.
+				</para>
+				<para>
+				Invoking PsCreateSystemThread from non-system context is not supported on Windows 2000.
+				Therefore, CFIX_SYSTEM_THREAD_FLAG_SYSTEM_CONTEXT is implied when running on Windows 2000.
+				</para>
+				<para>
+				See WDK for a discussion of remaining parameters.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Requirements</title>
 		
+				<table frame="all" tocentry="0">
+					<tgroup cols="3" align="left" colsep="1" rowsep="1">
+						<thead>
+							<row>
+							  <entry></entry>
+							  <entry>User Mode</entry>
+							  <entry>Kernel Mode</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row>
+							  <entry>Available since</entry>
+							  <entry>Not supported</entry>
+							  <entry>1.5</entry>
+							</row>
+							<row>
+							  <entry>Header</entry>
+							  <entry>Not supported</entry>
+							  <entry>Declared in cfix.h</entry>
+							</row>
+							<row>
+							  <entry>Library</entry>
+							  <entry>Not supported</entry>
+							  <entry>Link to cfixkdrv.lib</entry>
+							</row>
+							<row>
+							  <entry>IRQL</entry>
+							  <entry>N/A</entry>
+							  <entry>Callable at PASSIVE_LEVEL</entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</table>
+			</simplesect>
+		</section>
 </section>
 	
