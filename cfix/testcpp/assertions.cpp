@@ -293,3 +293,24 @@ void ExpectFailure()
 			Exception,													\
 			Routine > >
 
+
+static void TestLog()
+{
+	CFIXCC_LOG( L"log unicode" );
+	CFIXCC_LOG( L"%s", L"log unicode %s%s%s%p%p%p" );
+	
+	CFIXCC_LOG( "log ansi" );
+	CFIXCC_LOG( "%s", "log ansi %s%s%s%p%p%p" );
+
+	CFIXCC_LOG( std::wstring( L"log unicode stl %s%s%s%p%p%p" ) );
+	CFIXCC_LOG( std::string( "log ansi stl %s%s%s%p%p%p" ) );
+
+	CFIX_LOG( L"log unicode" );
+	CFIX_LOG( L"%s", L"log unicode %s%s%s%p%p%p" );
+	
+	CFIX_LOG( "log ansi" );
+	CFIX_LOG( "%s", "log ansi %s%s%s%p%p%p" );
+
+	CFIX_LOG( std::wstring( L"log unicode stl %s%s%s%p%p%p" ) );
+	CFIX_LOG( std::string( "log ansi stl %s%s%s%p%p%p" ) );
+}

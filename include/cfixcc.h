@@ -521,6 +521,22 @@ namespace cfixcc
 			va_end( Lst );
 		}
 
+		FormattedMessage( 
+			__in __format_string PCWSTR Format,
+			__in va_list Lst
+			)
+		{
+			Initialize( Format, Lst );
+		}
+
+		FormattedMessage( 
+			__in __format_string PCSTR Format,
+			__in va_list Lst
+			)
+		{
+			Initialize( Format, Lst );
+		}
+
 		virtual PCWSTR GetMessage() const
 		{
 			return MessageString;
@@ -892,6 +908,82 @@ namespace cfixcc
 	__CFIXCC_ASSERT_RELATION( cfixcc::GreaterOrEqual, Expected, Actual,			\
 		cfixcc::StaticMessage( Message ) )
 #endif
+
+/*----------------------------------------------------------------------
+ *
+ * Logging helpers.
+ *
+ */
+
+#ifndef CFIXCC_NO_LOG_CONVERSION
+
+inline void CfixPeReportLogA(
+	 __in const std::string& Message 
+	 )
+{
+	CfixPeReportLogA( "%s", Message.c_str() );
+}
+
+inline void CfixPeReportLogA(
+	 __in const std::wstring& Message 
+	 )
+{
+	CfixPeReportLog( L"%s", Message.c_str() );
+}
+
+inline void CfixPeReportLog(
+	 __in const std::string& Message 
+	 )
+{
+	CfixPeReportLogA( "%s", Message.c_str() );
+}
+
+inline void CfixPeReportLog(
+	 __in const std::wstring& Message 
+	 )
+{
+	CfixPeReportLog( L"%s", Message.c_str() );
+}
+
+inline void CfixPeReportLogA(
+	 __in int Numeric
+	 )
+{
+	//
+	// This is a CFIX_LOG( NULL ).
+	//
+	UNREFERENCED_PARAMETER( Numeric );
+}
+
+inline void CfixPeReportLog(
+	 __in int Numeric
+	 )
+{
+	//
+	// This is a CFIX_LOG( NULL ).
+	//
+	UNREFERENCED_PARAMETER( Numeric );
+}
+
+#ifdef UNICODE
+inline void CfixPeReportLog(
+	 __in __format_string PCSTR Format,
+	 ...
+	 )
+#else  // UNICODE
+inline void CfixPeReportLogA(
+	 __in __format_string PCWSTR Format,
+	 ...
+	 )
+#endif // UNICODE
+{
+	va_list Lst;
+	va_start( Lst, Format );
+	CfixPeReportLog( L"%s", cfixcc::FormattedMessage( Format, Lst ).GetMessage() );
+	va_end( Lst );
+}
+
+#endif // CFIXCC_NO_LOG_CONVERSION
 
 //
 // Convenience.

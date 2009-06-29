@@ -293,6 +293,13 @@ CFIX_INCONCLUSIVE( L"This test case requires admin privileges" );
 				<programlisting>
 void CFIX_LOG( __in PCTSTR Format, ... );
 				</programlisting>
+				
+				In C++, it is valid to pass a PCSTR even though UNICODE is defined and PCWSTR if UNICODE is
+				not defined. Additionally, the following overloads exist:
+				<programlisting>
+void CFIX_LOG( __in std::string Message );
+void CFIX_LOG( __in std::wstring Message );
+				</programlisting>
 			</simplesect>
 			
 			<simplesect>

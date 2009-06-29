@@ -61,3 +61,7 @@ CFIX_BEGIN_FIXTURE( FailedAssertions )
 	CFIX_FIXTURE_ENTRY( ExpectFailure< FailingEqualsString > )
 	CFIX_FIXTURE_ENTRY( EXPECT_MISSING_EXCEPTION( ThrowNoException, TestException ) )
 CFIX_END_FIXTURE()
+
+CFIX_BEGIN_FIXTURE( Log )
+	CFIX_FIXTURE_ENTRY( TestLog )
+CFIX_END_FIXTURE()
