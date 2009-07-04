@@ -183,3 +183,32 @@ PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##name()		\
 #define CFIX_FIXTURE_EXPORT_PREFIX_MANGLED		CFIX_FIXTURE_EXPORT_PREFIX_MANGLED32
 #define CFIX_FIXTURE_EXPORT_PREFIX_MANGLED_CCH	CFIX_FIXTURE_EXPORT_PREFIX_MANGLED_CCH32
 #endif
+
+/*----------------------------------------------------------------------
+ *
+ * Embedding.
+ *
+ */
+
+#if ! defined( CFIX_KERNELMODE ) && ! defined( CFIX_NO_EMBEDDING )
+
+typedef void ( __cdecl * CFIXP_CRT_INIT_ROUTINE )();
+
+#include <stdio.h>
+__inline void __cdecl CfixpCrtInit2()
+{
+	printf( "CfixpCrtInit2()\n" );
+}
+
+//
+// Register as CRT initializer that runs after all C++ constructors
+// (.CRT$XCU).
+//
+#pragma section( ".CRT$XCX", read )
+
+__declspec( allocate( ".CRT$XCX" ) )
+__declspec( selectany )
+extern
+CFIXP_CRT_INIT_ROUTINE CfixpCrtInitRegistration2 = CfixpCrtInit2;
+
+#endif
