@@ -88,7 +88,7 @@ typedef void ( __cdecl * CFIX_CRT_INIT_ROUTINE )();
 		If the routine returns CFIX_S_EXIT_PROCESS, the process
 		will be terminated so that main is not called.
 --*/
-typedef HRESULT ( CFIXCALLTYPE * CFIX_EMB_INIT_ROUTINE )();
+typedef HRESULT ( CFIXCALLTYPE * CFIX_EMBEDDING_ROUTINE )();
 
 /*++
 	Routine Description:
@@ -96,8 +96,9 @@ typedef HRESULT ( CFIXCALLTYPE * CFIX_EMB_INIT_ROUTINE )();
 		a routine to be specified via a environment variable that
 		will be called at the end of CRT initialization.
 
-		The routine has to conform to CFIX_EMB_INIT_ROUTINE.
+		The routine has to conform to CFIX_EMBEDDING_ROUTINE.
 --*/
+#include <stdio.h>
 EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
 {
 	PSTR Bang;
@@ -107,7 +108,7 @@ EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
 	PCSTR RoutineName;
 
 	HMODULE Module;
-	CFIX_EMB_INIT_ROUTINE Routine;
+	CFIX_EMBEDDING_ROUTINE Routine;
 
 	//
 	// N.B. No threadsafe initialization required.
@@ -125,8 +126,10 @@ EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
 		Initialized = TRUE;
 	}
 
+	printf( "CfixpCrtInitEmbedding()\n" );
+
 	if ( 0 == GetEnvironmentVariableA(
-		CFIX_EMB_INIT_ENVVAR_NAME,
+		CFIX_EMB_INIT_ENVVAR_NAMEA,
 		RoutineNameBuffer,
 		sizeof( RoutineNameBuffer ) / sizeof( *RoutineNameBuffer ) ) )
 	{
@@ -153,7 +156,7 @@ EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
 		return;
 	}
 
-	Routine = ( CFIX_EMB_INIT_ROUTINE ) 
+	Routine = ( CFIX_EMBEDDING_ROUTINE ) 
 		GetProcAddress( Module, RoutineName );
 
 	Hr = ( Routine )();
@@ -161,9 +164,13 @@ EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
 
 	if ( CFIX_S_EXIT_PROCESS == Hr )
 	{
-		ExitProcess( EXIT_SUCCESS );
+		ExitProcess( 0 );
 	}
 }
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //
 // Register as CRT initializer that runs after all C++ constructors
@@ -171,15 +178,27 @@ EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
 //
 #pragma section( ".CRT$XCX", read )
 __declspec( allocate( ".CRT$XCX" ) )
-EXTERN_C const CFIX_CRT_INIT_ROUTINE CfixpCrtInitRegistration;
+extern const CFIX_CRT_INIT_ROUTINE CfixpCrtInitEmbeddingRegistration;
 
 //
 // N.B. To avoid /OPT:REF-caused COMDAT elimination, this variable
-// must be referenced elsewhere. This is done by the test maps.
+// must be referenced elsewhere. This is done by having the test maps
+// call CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION(), which is effectively
+// a no-op.
 //
 __declspec( selectany )
-const CFIX_CRT_INIT_ROUTINE CfixpCrtInitRegistration = CfixpCrtInitEmbedding;
+const CFIX_CRT_INIT_ROUTINE CfixpCrtInitEmbeddingRegistration = CfixpCrtInitEmbedding;
 
+#define CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION() \
+	( CfixpCrtInitEmbeddingRegistration ) ()
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#else
+#define CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION() 
 #endif
 
 /*----------------------------------------------------------------------
@@ -272,7 +291,7 @@ PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##name()		\
 		CFIX_PE_API_VERSION,										\
 		Entries														\
 	};																\
-	( CfixpCrtInitRegistration )();									\
+	CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION();							\
 	return &Fixture;												\
 }			
 
