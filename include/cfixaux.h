@@ -56,6 +56,12 @@
 
 #define CFIX_SYSTEM_THREAD_FLAG_SYSTEM_CONTEXT	1
 
+//
+// Embedding-related constants.
+//
+#define CFIX_EMB_INIT_ENVVAR_NAME "CFIX_INIT_ROUTINE"
+#define CFIX_S_EXIT_PROCESS( ( ULONG ) 0x8004AFF0UL )
+
 typedef enum CFIX_REPORT_DISPOSITION
 {
 	//

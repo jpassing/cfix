@@ -79,10 +79,6 @@
 
 #if ! defined( CFIX_KERNELMODE ) && ! defined( CFIX_NO_EMBEDDING )
 
-#define CFIX_EMB_INIT_ENVVAR_NAME "CFIX_INIT_ROUTINE"
-
-#define CFIX_S_EXIT_PROCESS( ( ULONG ) 0x8004AFF0UL )
-
 typedef void ( __cdecl * CFIX_CRT_INIT_ROUTINE )();
 
 /*++
