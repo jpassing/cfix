@@ -98,7 +98,6 @@ typedef HRESULT ( CFIXCALLTYPE * CFIX_EMBEDDING_ROUTINE )();
 
 		The routine has to conform to CFIX_EMBEDDING_ROUTINE.
 --*/
-#include <stdio.h>
 EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
 {
 	PSTR Bang;
@@ -126,7 +125,7 @@ EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
 		Initialized = TRUE;
 	}
 
-	printf( "CfixpCrtInitEmbedding()\n" );
+	// printf( "CfixpCrtInitEmbedding()\n" );
 
 	if ( 0 == GetEnvironmentVariableA(
 		CFIX_EMB_INIT_ENVVAR_NAMEA,
@@ -165,6 +164,10 @@ EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
 	if ( CFIX_S_EXIT_PROCESS == Hr )
 	{
 		ExitProcess( 0 );
+	}
+	else if ( FAILED( Hr ) )
+	{
+		ExitProcess( ( UINT ) Hr );
 	}
 }
 
