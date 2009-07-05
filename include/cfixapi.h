@@ -475,6 +475,22 @@ typedef struct _CFIX_ACTION
 		based on the module's exports.
 
 	Parameters:
+		Module			Module handle. 
+		                Note: The refcount of the module will *not*
+						be incremented.
+		TestModule		Module - initial reference count is 1.
+--*/
+CFIXAPI HRESULT CFIXCALLTYPE CfixCreateTestModule(
+	__in HMODULE ModuleHandle,
+	__out PCFIX_TEST_MODULE *TestModule
+	);
+
+/*++
+	Routine Description:	
+		Loads a given module and creates a test module
+		based on the module's exports.
+
+	Parameters:
 		ModulePath		Path to DLL.
 		TestModule		Module - initial reference count is 1.
 --*/
@@ -492,7 +508,7 @@ CFIXAPI HRESULT CFIXCALLTYPE CfixCreateTestModuleFromPeImage(
 		DriverPath		Path to driver.
 		Installed		Indicates whether the driver had to be installed
 		Loaded			Indicates whether the driver had to be loaded first.
-		TestModule		Module -initial reference count is 1.
+		TestModule		Module - initial reference count is 1.
 --*/
 CFIXAPI HRESULT CFIXCALLTYPE CfixklCreateTestModuleFromDriver(
 	__in PCWSTR DriverPath,

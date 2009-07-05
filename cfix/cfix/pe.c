@@ -40,6 +40,7 @@ typedef struct _PE_TEST_MODULE
 	HMODULE Module;
 	WCHAR ModuleName[ 64 ];
 	volatile LONG ReferenceCount;
+	BOOL FreeImageOnDeletion;
 } PE_TEST_MODULE, *PPE_TEST_MODULE;
 
 //
@@ -429,10 +430,13 @@ static VOID CFIXCALLTYPE CfixsDeleteTestModule(
 	//
 	free( Module->Base.Fixtures );
 
-	//
-	// ...and the module itself.
-	//
-	VERIFY( FreeLibrary( Module->Module ) );
+	if ( Module->FreeImageOnDeletion )
+	{
+		//
+		// ...and the module itself.
+		//
+		VERIFY( FreeLibrary( Module->Module ) );
+	}
 
 	free( Module );
 }
@@ -786,37 +790,18 @@ BOOL CfixpIsFixtureExport64(
 				CFIX_FIXTURE_EXPORT_PREFIX_MANGLED_CCH64 ) );
 }
 
-/*----------------------------------------------------------------------
- * 
- * Exports.
- *
- */
-HRESULT CFIXCALLTYPE CfixCreateTestModuleFromPeImage(
-	__in PCWSTR ModulePath,
+static HRESULT CfixsCreateTestModule(
+	__in HMODULE ModuleHandle,
+	__in BOOL FreeImageOnDeletion,
 	__out PCFIX_TEST_MODULE *TestModule
 	)
 {
 	PPE_TEST_MODULE Module;
 	HRESULT Hr = E_UNEXPECTED;
-	WCHAR FullPathName[ MAX_PATH ];
-	PWSTR FilePart;
 
-	if ( ! ModulePath || ! TestModule )
+	if ( ! ModuleHandle || ! TestModule )
 	{
 		return E_INVALIDARG;
-	}
-
-	//
-	// Make the path absoluet s.t. we do not end up loading the
-	// wrong DLL due to the module load path logic.
-	//
-	if ( 0 == GetFullPathName(
-		ModulePath,
-		_countof( FullPathName ),
-		FullPathName,
-		&FilePart ) )
-	{
-		return HRESULT_FROM_WIN32( GetLastError() );
 	}
 
 	//
@@ -840,15 +825,8 @@ HRESULT CFIXCALLTYPE CfixCreateTestModuleFromPeImage(
 	Module->Base.Routines.Dereference	= CfixsDereferenceTestModule;
 	Module->Base.Routines.GetInformationStackFrame = CfixpGetInformationStackframe;
 	
-	//
-	// Load the module.
-	//
-	Module->Module = LoadLibrary( FullPathName );
-	if ( ! Module->Module )
-	{
-		Hr = HRESULT_FROM_WIN32( GetLastError() );
-		goto Cleanup;
-	}
+	Module->FreeImageOnDeletion			= FreeImageOnDeletion;
+	Module->Module						= ModuleHandle;
 
 	if ( 0 == GetModuleBaseName(
 		GetCurrentProcess(),
@@ -880,12 +858,78 @@ Cleanup:
 	{
 		if ( Module )
 		{
-			if ( Module->Module )
-			{
-				VERIFY( FreeLibrary( Module->Module ) );
-			}
-
 			free( Module );
+		}
+	}
+
+	return Hr;
+}
+
+/*----------------------------------------------------------------------
+ * 
+ * Exports.
+ *
+ */
+
+HRESULT CFIXCALLTYPE CfixCreateTestModule(
+	__in HMODULE ModuleHandle,
+	__out PCFIX_TEST_MODULE *TestModule
+	)
+{
+	if ( ! ModuleHandle || ! TestModule )
+	{
+		return E_INVALIDARG;
+	}
+
+	return CfixsCreateTestModule( ModuleHandle, FALSE, TestModule );
+}
+
+HRESULT CFIXCALLTYPE CfixCreateTestModuleFromPeImage(
+	__in PCWSTR ModulePath,
+	__out PCFIX_TEST_MODULE *TestModule
+	)
+{
+	HMODULE ModuleHandle = NULL;
+	HRESULT Hr = E_UNEXPECTED;
+	WCHAR FullPathName[ MAX_PATH ];
+	PWSTR FilePart;
+
+	if ( ! ModulePath || ! TestModule )
+	{
+		return E_INVALIDARG;
+	}
+
+	//
+	// Make the path absolute s.t. we do not end up loading the
+	// wrong DLL due to the module load path logic.
+	//
+	if ( 0 == GetFullPathName(
+		ModulePath,
+		_countof( FullPathName ),
+		FullPathName,
+		&FilePart ) )
+	{
+		return HRESULT_FROM_WIN32( GetLastError() );
+	}
+
+	//
+	// Load the module.
+	//
+	ModuleHandle = LoadLibrary( FullPathName );
+	if ( ! ModuleHandle )
+	{
+		Hr = HRESULT_FROM_WIN32( GetLastError() );
+		goto Cleanup;
+	}
+
+	Hr = CfixsCreateTestModule( ModuleHandle, TRUE, TestModule );
+
+Cleanup:
+	if ( FAILED( Hr ) )
+	{
+		if ( ModuleHandle )
+		{
+			VERIFY( FreeLibrary( ModuleHandle ) );
 		}
 	}
 

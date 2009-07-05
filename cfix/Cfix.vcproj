@@ -29,7 +29,7 @@
 				BuildCommandLine="ddkbuild -WNETW2K checked $(SolutionDir)"
 				ReBuildCommandLine="ddkbuild -WNETW2K checked $(SolutionDir) -cZ "
 				CleanCommandLine=""
-				Output="..\bin\chk\i386\testcpp.dll"
+				Output="..\bin\chk\i386\testapi.dll"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""

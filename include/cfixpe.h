@@ -158,6 +158,11 @@ EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
 	Routine = ( CFIX_EMBEDDING_ROUTINE ) 
 		GetProcAddress( Module, RoutineName );
 
+	if ( Routine == NULL )
+	{
+		return;
+	}
+
 	Hr = ( Routine )();
 	( VOID ) FreeLibrary( Module );
 
