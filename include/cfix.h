@@ -253,6 +253,10 @@ CFIXREPORTAPI VOID __cdecl CfixPeReportLogA(
 #define CFIX_ASSERT_OK( Expr ) CFIX_ASSERT_EQUALS_ULONG( S_OK, ( Expr ) )
 #define CFIX_ASSERT_SUCCEEDED( Expr ) CFIX_ASSERT( SUCCEEDED( ( Expr ) ) )
 #define CFIX_ASSERT_FAILED( Expr ) CFIX_ASSERT( FAILED( ( Expr ) ) )
+#define CFIX_ASSERT_HRESULT( Hr, Expr )									\
+	CFIX_ASSERT_EQUALS_ULONG(											\
+		( ( ULONG ) ( HRESULT ) ( Hr ) ),								\
+		( ( ULONG ) ( HRESULT ) ( Expr ) ) )
 
 #endif // CFIX_KERNELMODE
 

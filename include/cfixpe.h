@@ -152,6 +152,10 @@ EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
 	Module = LoadLibraryA( ModuleName );
 	if ( Module == NULL )
 	{
+		//
+		// Do not bail out here - the executable may have been started
+		// without the intent to run tests.
+		//
 		return;
 	}
 
