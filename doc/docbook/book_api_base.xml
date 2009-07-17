@@ -44,7 +44,7 @@ CFIX_ASSERT( !"This will always fail" );
 			<simplesect>
 				<title>Synopsis</title>
 				<para>
-				CFIX_ASSERT_OK may be used to check whether the expression equals S_OK. This macro is primarily 
+				CFIX_ASSERT_OK may be used to check whether an expression yields S_OK as result. This macro is primarily 
 				intended for COM development and is a shorthand for writing 
 				<link linkend='CFIX_ASSERT_EQUALS_ULONG'>CFIX_ASSERT_EQUALS_ULONG</link>( S_OK, <emphasis>Expression</emphasis> )
 				</para>
@@ -75,7 +75,7 @@ CFIX_ASSERT_OK( CoInitialize( NULL ) );
 			<simplesect>
 				<title>Synopsis</title>
 				<para>
-				CFIX_ASSERT_SUCCEEDED may be used to check whether the expression yields a success HRESULT.
+				CFIX_ASSERT_SUCCEEDED may be used to check whether an expression yields a success HRESULT.
 				This macro is primarily 
 				intended for COM development and is a shorthand for writing 
 				<link linkend='CFIX_ASSERT'>CFIX_ASSERT</link>( SUCCEEDED( <emphasis>Expression</emphasis> ) )
@@ -107,7 +107,7 @@ CFIX_ASSERT_SUCCEEDED( CoInitialize( NULL ) );
 			<simplesect>
 				<title>Synopsis</title>
 				<para>
-				CFIX_ASSERT_FAILED may be used to check whether the expression yields a failure HRESULT.
+				CFIX_ASSERT_FAILED may be used to check whether an expression yields a failure HRESULT.
 				This macro is primarily 
 				intended for COM development and is a shorthand for writing 
 				<link linkend='CFIX_ASSERT'>CFIX_ASSERT</link>( FAILED( <emphasis>Expression</emphasis> ) )
@@ -131,6 +131,81 @@ CFIX_ASSERT_FAILED(
 			</simplesect>
 			
 			&TestApiDefaultRequirements14_um;
+		</section>
+		
+		<section id="CFIX_ASSERT_HRESULT">
+			<title>CFIX_ASSERT_HRESULT</title>
+			<indexterm><primary>CFIX_ASSERT_HRESULT</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIX_ASSERT_HRESULT may be used to check whether an expression yields a specific HRESULT.
+				This macro is primarily intended for COM development.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+void CFIX_ASSERT_HRESULT( 
+  __in HRESULT ExpectedHResult, 
+  __in HRESULT Expression 
+  );
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+			
+				<programlisting>
+CFIX_ASSERT_HRESULT(
+  E_NOINTERFACE,
+  Obj->QueryInterface( IID_INonExisting, ( PVOID* ) &amp;Unk ) );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiDefaultRequirements15_um;
+		</section>
+		
+		<section id="CFIX_ASSERT_STATUS">
+			<title>CFIX_ASSERT_STATUS</title>
+			<indexterm><primary>CFIX_ASSERT_STATUS</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIX_ASSERT_STATUS may be used to check whether an expression yields a specific NTSTATUS.
+				This macro is intended for kernel mode development.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+void CFIX_ASSERT_STATUS( 
+  __in NTSTATUS ExpectedStatus, 
+  __in NTSTATUS Expression 
+  );
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+			
+				<programlisting>
+CFIX_ASSERT_STATUS( 
+  STATUS_SUCCESS, 
+  KeWaitForSingleObject( 
+    Thread, 
+    Executive,
+    KernelMode,
+    FALSE,
+    NULL ) );
+				</programlisting>
+			</simplesect>
+			
+			&TestApiDefaultRequirements15_km;
 		</section>
 
 		<section id="CFIX_ASSERT_MESSAGE">

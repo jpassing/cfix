@@ -3,6 +3,8 @@
 	<!ENTITY TestApiDefaultRequirements10 SYSTEM "book_api_req.xml">
 	<!ENTITY TestApiDefaultRequirements12 SYSTEM "book_api_req12.xml">
 	<!ENTITY TestApiDefaultRequirements14_um SYSTEM "book_api_req14_um.xml">
+	<!ENTITY TestApiDefaultRequirements15_um SYSTEM "book_api_req15_um.xml">
+	<!ENTITY TestApiDefaultRequirements15_km SYSTEM "book_api_req15_km.xml">
 	<!ENTITY TestApiCcDefaultRequirements12 SYSTEM "book_api_cc_req12.xml">
 	<!ENTITY TestApiWuDefaultRequirements13 SYSTEM "book_api_wu_req13.xml">
 	<!ENTITY TestDefDefaultRequirements SYSTEM "book_testdef_req.xml">
@@ -1636,7 +1638,11 @@ f9fc50fe cc              int     3
 		<title>What's new in cfix 1.5</title>
 		<para>
 			<itemizedlist>
+				<listitem><link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link></listitem>
 				<listitem>Additional overloads for <link linkend="CFIX_LOG">CFIX_LOG</link></listitem>
+				<listitem><link linkend="CFIX_ASSERT_HRESULT">CFIX_ASSERT_HRESULT</link></listitem>
+				<listitem><link linkend="CFIX_ASSERT_STATUS">CFIX_ASSERT_STATUS</link></listitem>
+				<listitem>Command line switche -td</listitem>
 			</itemizedlist>	
 		</para>
 		</simplesect>
