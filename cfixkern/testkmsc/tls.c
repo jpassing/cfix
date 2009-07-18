@@ -76,10 +76,52 @@ static void TestTls()
 	CfixPeSetValue( 1, &BeforeDummy1 );
 }
 
+static VOID ThreadProc( PVOID Pv )
+{
+	UNREFERENCED_PARAMETER( Pv );
+
+	//
+	// BABEFACE visible.
+	//
+	CFIX_ASSERT_EQUALS_DWORD( 
+		0xBABEFACE, 
+		( ULONG ) ( ULONG_PTR ) CfixPeGetValue( 0 ) );
+}
+
+static void TestTlsVisibleOnChildThread()
+{
+	OBJECT_ATTRIBUTES ObjectAttributes;
+	HANDLE ThreadHandle;
+
+	CfixPeSetValue( 0, ( PVOID ) ( ULONG_PTR ) 0xBABEFACE );
+
+	InitializeObjectAttributes(
+		&ObjectAttributes, 
+		NULL, 
+		OBJ_KERNEL_HANDLE, 
+		NULL, 
+		NULL );
+
+	CFIX_ASSERT_STATUS( STATUS_SUCCESS, CfixCreateSystemThread(
+		&ThreadHandle,
+		THREAD_ALL_ACCESS,
+		&ObjectAttributes,
+		NULL,
+		NULL,
+		ThreadProc,
+		NULL,
+		0 ) );
+
+	CFIX_ASSERT( NT_SUCCESS( ZwClose( ThreadHandle ) ) );
+
+	CfixPeSetValue( 0, &BeforeDummy1 );
+}
+
 CFIX_BEGIN_FIXTURE( Tls )
 	CFIX_FIXTURE_SETUP( Setup )
 	CFIX_FIXTURE_BEFORE( Before )
 	CFIX_FIXTURE_AFTER( After )
 	CFIX_FIXTURE_TEARDOWN( Setup )
 	CFIX_FIXTURE_ENTRY( TestTls )
+	CFIX_FIXTURE_ENTRY( TestTlsVisibleOnChildThread )
 CFIX_END_FIXTURE()

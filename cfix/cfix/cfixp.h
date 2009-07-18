@@ -44,11 +44,9 @@ extern HMODULE CfixpModule;
 	Routines to be called from DllMain.
 --*/
 BOOL CfixpSetupFilamentTls();
-BOOL CfixpSetupTestTls();
 BOOL CfixpSetupStackTraceCapturing();
 
 BOOL CfixpTeardownFilamentTls();
-BOOL CfixpTeardownTestTls();
 VOID CfixpTeardownStackTraceCapturing();
 
 /*----------------------------------------------------------------------
@@ -171,6 +169,15 @@ typedef struct _CFIXP_FILAMENT
 	#define CFIXP_FILAMENT_FLAG_CAPTURE_STACK_TRACES	1
 
 	ULONG Flags;
+
+	//
+	// Filament local storage.
+	//
+	struct
+	{
+		PVOID DefaultSlot;
+		PVOID CcSlot;
+	} Storage;
 } CFIXP_FILAMENT, *PCFIXP_FILAMENT;
 
 /*++
@@ -181,6 +188,7 @@ VOID CfixpInitializeFilament(
 	__in PCFIX_EXECUTION_CONTEXT ExecutionContext,
 	__in ULONG MainThreadId,
 	__in ULONG Flags,
+	__in BOOL RestoreStorage,
 	__out PCFIXP_FILAMENT Filament
 	);
 

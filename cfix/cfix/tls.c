@@ -26,47 +26,6 @@
 #include <cfix.h>
 #include "cfixp.h"
 
-static DWORD CfixsDefaultTlsSlot = TLS_OUT_OF_INDEXES;
-static DWORD CfixsReservedForCcTlsSlot = TLS_OUT_OF_INDEXES;
-
-/*----------------------------------------------------------------------
- * 
- * Privates.
- *
- */
-BOOL CfixpSetupTestTls()
-{
-	CfixsDefaultTlsSlot	= TlsAlloc();
-	if ( CfixsDefaultTlsSlot == TLS_OUT_OF_INDEXES )
-	{
-		return FALSE;
-	}
-
-	CfixsReservedForCcTlsSlot = TlsAlloc();
-	if ( CfixsReservedForCcTlsSlot == TLS_OUT_OF_INDEXES )
-	{
-		TlsFree( CfixsDefaultTlsSlot );
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-BOOL CfixpTeardownTestTls()
-{
-	if ( CfixsDefaultTlsSlot != TLS_OUT_OF_INDEXES )
-	{
-		TlsFree( CfixsDefaultTlsSlot );
-	}
-
-	if ( CfixsReservedForCcTlsSlot != TLS_OUT_OF_INDEXES )
-	{
-		TlsFree( CfixsReservedForCcTlsSlot );
-	}
-
-	return TRUE;
-}
-
 /*----------------------------------------------------------------------
  * 
  * Exports.
@@ -78,19 +37,30 @@ CFIXAPI VOID CfixPeSetValue(
 	__in PVOID Value
 	)
 {
-	if ( Tag == CFIX_TAG_RESERVED_FOR_CC )
+	PCFIXP_FILAMENT Filament;
+	HRESULT Hr;
+	
+	Hr = CfixpGetCurrentFilament( &Filament );
+	if ( SUCCEEDED( Hr ) )
 	{
-		TlsSetValue( CfixsReservedForCcTlsSlot, Value );
-	}
-	else if ( Tag == 0 )
-	{
-		TlsSetValue( CfixsDefaultTlsSlot, Value );
+		if ( Tag == CFIX_TAG_RESERVED_FOR_CC )
+		{
+			Filament->Storage.CcSlot = Value;
+		}
+		else if ( Tag == 0 )
+		{
+			Filament->Storage.DefaultSlot = Value;
+		}
+		else
+		{
+			//
+			// Invalid parameter.
+			//
+		}
 	}
 	else
 	{
-		//
-		// Invalid parameter.
-		//
+		ASSERT( !"No current filament available" );
 	}
 }
 
@@ -98,19 +68,28 @@ CFIXAPI PVOID CfixPeGetValue(
 	__in ULONG Tag
 	)
 {
-	if ( Tag == CFIX_TAG_RESERVED_FOR_CC )
+	PCFIXP_FILAMENT Filament;
+	HRESULT Hr;
+	
+	Hr = CfixpGetCurrentFilament( &Filament );
+	if ( SUCCEEDED( Hr ) )
 	{
-		return TlsGetValue( CfixsReservedForCcTlsSlot );
-	}
-	else if ( Tag == 0 )
-	{
-		return TlsGetValue( CfixsDefaultTlsSlot );
+		if ( Tag == CFIX_TAG_RESERVED_FOR_CC )
+		{
+			return Filament->Storage.CcSlot;
+		}
+		else if ( Tag == 0 )
+		{
+			return Filament->Storage.DefaultSlot;
+		}
 	}
 	else
 	{
-		//
-		// Invalid parameter.
-		//
-		return NULL;
+		ASSERT( !"No current filament available" );
 	}
+
+	//
+	// Invalid parameter.
+	//
+	return NULL;
 }

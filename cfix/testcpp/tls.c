@@ -93,25 +93,34 @@ static DWORD CALLBACK ThreadProc( PVOID Pv )
 	UNREFERENCED_PARAMETER( Pv );
 
 	//
-	// BABEFACE not visible.
+	// BABEFACE visible.
 	//
-	CFIX_ASSERT( CfixPeGetValue( 0 ) == NULL );
+	CFIX_ASSERT_EQUALS_DWORD( 
+		0xBABEFACE, 
+		( ULONG ) ( ULONG_PTR ) CfixPeGetValue( 0 ) );
 
 	return 0;
 }
 
-static void TestTlsNotVisibleOnChildThread()
+static void TestTlsVisibleOnChildThread()
 {
+	HANDLE Thread;
+
 	CfixPeSetValue( 0, ( PVOID ) ( ULONG_PTR ) 0xBABEFACE );
 
-	CFIX_ASSERT( CloseHandle( CfixCreateThread2(
+	Thread = CfixCreateThread2(
 		NULL,
 		0,
 		ThreadProc,
 		NULL,
 		0,
 		NULL,
-		CFIX_THREAD_FLAG_CRT ) ) );
+		CFIX_THREAD_FLAG_CRT );
+
+	CFIX_ASSERT( Thread );
+	CFIX_ASSERT( WAIT_OBJECT_0 == WaitForSingleObject( Thread, INFINITE ) );
+	CFIX_ASSERT( CloseHandle( Thread ) );
+
 	CfixPeSetValue( 0, &BeforeDummy1 );
 }
 
@@ -121,5 +130,5 @@ CFIX_BEGIN_FIXTURE( Tls )
 	CFIX_FIXTURE_AFTER( After )
 	CFIX_FIXTURE_TEARDOWN( Setup )
 	CFIX_FIXTURE_ENTRY( TestTls )
-	CFIX_FIXTURE_ENTRY( TestTlsNotVisibleOnChildThread )
+	CFIX_FIXTURE_ENTRY( TestTlsVisibleOnChildThread )
 CFIX_END_FIXTURE()

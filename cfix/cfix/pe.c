@@ -464,7 +464,8 @@ static VOID CfixsDereferenceTestModule(
 static HRESULT CfixsRunTestRoutine(
 	__in CFIX_PE_TESTCASE_ROUTINE Routine,
 	__in PCFIX_EXECUTION_CONTEXT Context,
-	__in ULONG Flags
+	__in ULONG Flags,
+	__in BOOL RestoreFilamentStorage
 	)
 {
 	BOOL AbortRun = FALSE;
@@ -500,6 +501,7 @@ static HRESULT CfixsRunTestRoutine(
 		Context, 
 		GetCurrentThreadId(),
 		FilamentFlags,
+		RestoreFilamentStorage,
 		&Filament );
 
 	Hr = CfixpSetCurrentFilament( 
@@ -537,6 +539,10 @@ static HRESULT CfixsRunTestRoutine(
 		&Filament,
 		INFINITE );
 
+	//
+	// Now, as all child threads have completed, we can teardown
+	// the filament.
+	//
 	VERIFY( S_OK == CfixpSetCurrentFilament( 
 		PrevFilament,
 		NULL ) );
@@ -573,7 +579,8 @@ static HRESULT CfixsRunTestCaseTestModule(
 	return CfixsRunTestRoutine( 
 		( CFIX_PE_TESTCASE_ROUTINE ) TestCase->Routine,
 		Context,
-		Flags );
+		Flags,
+		TRUE );
 }
 
 static HRESULT CfixsRunSetupTestModule(
@@ -592,20 +599,18 @@ static HRESULT CfixsRunSetupTestModule(
 	}
 
 	//
-	// Initialize TLS.
-	//
-	CfixPeSetValue( 0, NULL );
-	CfixPeSetValue( CFIX_TAG_RESERVED_FOR_CC, NULL );
-
-	//
 	// Setup routines are optional.
 	//
 	if ( Fixture->SetupRoutine )
 	{
+		//
+		// N.B. Do not restore storage as this is a new fixture.
+		//
 		Hr = CfixsRunTestRoutine( 
 			( CFIX_PE_TESTCASE_ROUTINE ) Fixture->SetupRoutine,
 			Context,
-			Flags );
+			Flags,
+			FALSE );
 
 		if ( CFIX_E_TEST_ROUTINE_FAILED == Hr )
 		{
@@ -620,13 +625,6 @@ static HRESULT CfixsRunSetupTestModule(
 	{
 		Hr = S_OK;
 	}
-
-	//
-	// Reset TLS - values set by setup routine must not be visible 
-	// afterwards.
-	//
-	CfixPeSetValue( 0, NULL );
-	CfixPeSetValue( CFIX_TAG_RESERVED_FOR_CC, NULL );
 	
 	return Hr;
 }
@@ -649,10 +647,15 @@ static HRESULT CfixsRunTeardownTestModule(
 	//
 	if ( Fixture->TeardownRoutine )
 	{
+		//
+		// N.B. Do not restore storage - teardown routines may not
+		// see anything set by before/test/after routines.
+		//
 		HRESULT Hr = CfixsRunTestRoutine( 
 			( CFIX_PE_TESTCASE_ROUTINE ) Fixture->TeardownRoutine,
 			Context,
-			Flags );
+			Flags,
+			FALSE );
 
 		if ( CFIX_E_TEST_ROUTINE_FAILED == Hr )
 		{
@@ -687,10 +690,15 @@ static HRESULT CfixsRunBeforeTestModule(
 	//
 	if ( Fixture->BeforeRoutine )
 	{
+		//
+		// N.B. Do not restore filament storage - anything set by
+		// a setup routine must not be visible.
+		//
 		HRESULT Hr = CfixsRunTestRoutine( 
 			( CFIX_PE_TESTCASE_ROUTINE ) Fixture->BeforeRoutine,
 			Context,
-			Flags );
+			Flags,
+			FALSE );
 
 		if ( CFIX_E_TEST_ROUTINE_FAILED == Hr )
 		{
@@ -730,7 +738,8 @@ static HRESULT CfixsRunAfterTestModule(
 		Hr = CfixsRunTestRoutine( 
 			( CFIX_PE_TESTCASE_ROUTINE ) Fixture->AfterRoutine,
 			Context,
-			Flags );
+			Flags,
+			TRUE );
 
 		if ( CFIX_E_TEST_ROUTINE_FAILED == Hr )
 		{
@@ -742,13 +751,6 @@ static HRESULT CfixsRunAfterTestModule(
 		Hr = S_OK;
 	}
 
-	//
-	// Reset TLS - values must not be visible in subsequent tests and
-	// teardown routine.
-	//
-	CfixPeSetValue( 0, NULL );
-	CfixPeSetValue( CFIX_TAG_RESERVED_FOR_CC, NULL );
-	
 	return Hr;
 }
 

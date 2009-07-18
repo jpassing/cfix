@@ -50,13 +50,6 @@ BOOL APIENTRY DllMain(
 			return FALSE;
 		}
 
-		if ( ! CfixpSetupTestTls() )
-		{
-			CfixpTeardownStackTraceCapturing();
-			CfixpTeardownTestTls();
-			return FALSE;
-		}
-
 		return TRUE;
 	}
 	else if ( Reason ==  DLL_PROCESS_DETACH )
@@ -65,7 +58,7 @@ BOOL APIENTRY DllMain(
 		_CrtDumpMemoryLeaks();
 #endif
 		CfixpTeardownStackTraceCapturing();
-		return CfixpTeardownFilamentTls() && CfixpTeardownTestTls();
+		return CfixpTeardownFilamentTls();
 	}
 	else
 	{

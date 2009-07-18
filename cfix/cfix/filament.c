@@ -32,6 +32,15 @@
 //
 static DWORD CfixsTlsSlotForFilament = TLS_OUT_OF_INDEXES;
 
+//
+// Separate slots are needed for storage as these "survive"
+// multiple filaments.
+//
+// Only used on main thread.
+//
+static DWORD CfixsDefaultStorageSlot = TLS_OUT_OF_INDEXES;
+static DWORD CfixsReservedForCcStorageSlot = TLS_OUT_OF_INDEXES;
+
 static HRESULT CfixsGetCurrentThreadHandle( 
 	__out HANDLE *Thread
 	)
@@ -91,19 +100,29 @@ Cleanup:
  */
 BOOL CfixpSetupFilamentTls()
 {
-	CfixsTlsSlotForFilament = TlsAlloc();
-	return CfixsTlsSlotForFilament != TLS_OUT_OF_INDEXES;
+	CfixsTlsSlotForFilament			= TlsAlloc();
+	CfixsDefaultStorageSlot			= TlsAlloc();
+	CfixsReservedForCcStorageSlot	= TlsAlloc();
+	
+	return 
+		CfixsTlsSlotForFilament != TLS_OUT_OF_INDEXES &&
+		CfixsDefaultStorageSlot != TLS_OUT_OF_INDEXES &&
+		CfixsReservedForCcStorageSlot != TLS_OUT_OF_INDEXES;
 }
 
 BOOL CfixpTeardownFilamentTls()
 {
-	return TlsFree( CfixsTlsSlotForFilament );
+	return 
+		TlsFree( CfixsTlsSlotForFilament ) &&
+		TlsFree( CfixsDefaultStorageSlot ) &&
+		TlsFree( CfixsReservedForCcStorageSlot );
 }
 
 VOID CfixpInitializeFilament(
 	__in PCFIX_EXECUTION_CONTEXT ExecutionContext,
 	__in ULONG MainThreadId,
 	__in ULONG Flags,
+	__in BOOL RestoreStorage,
 	__out PCFIXP_FILAMENT Filament
 	)
 {
@@ -114,6 +133,15 @@ VOID CfixpInitializeFilament(
 	Filament->Flags				= Flags;
 
 	InitializeCriticalSection( &Filament->ChildThreads.Lock );
+
+	if ( RestoreStorage && ( GetCurrentThreadId() == MainThreadId ) )
+	{
+		//
+		// Load values from previous incarnation.
+		//
+		Filament->Storage.DefaultSlot = TlsGetValue( CfixsDefaultStorageSlot );
+		Filament->Storage.CcSlot	  = TlsGetValue( CfixsReservedForCcStorageSlot );
+	}
 }
 
 VOID CfixpDestroyFilament(
@@ -131,6 +159,12 @@ VOID CfixpDestroyFilament(
 	}
 
 	DeleteCriticalSection( &Filament->ChildThreads.Lock );
+
+	if ( GetCurrentThreadId() == Filament->MainThreadId )
+	{
+		TlsSetValue( CfixsDefaultStorageSlot, Filament->Storage.DefaultSlot );
+		TlsSetValue( CfixsReservedForCcStorageSlot, Filament->Storage.CcSlot );
+	}
 }
 
 HRESULT CfixpSetCurrentFilament(

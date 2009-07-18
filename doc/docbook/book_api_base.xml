@@ -412,8 +412,9 @@ CFIX_LOG( L"Value is %x, Last error was: %d", foo, GetLastError() );
 			<simplesect>
 				<title>Synopsis</title>
 				<para>
-				CfixPeGetValue retrieves the user-defined value associated with the currently executing fixture on the
-				current thread. 
+				CfixPeGetValue retrieves a user-defined value associated with the currently executing fixture. The
+				visibility of the value is restricted to the current thread and (as of cfix 1.5) its child threads created by
+				<link linkend="CfixCreateThread2">CfixCreateThread2</link> or <link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link>.
 				</para>
 			</simplesect>
 			
@@ -445,9 +446,12 @@ PVOID CfixPeGetValue(
 				<title>Remarks</title>
 				<para>
 				With CfixPeGetValue and <link linkend='CfixPeSetValue'>CfixPeSetValue</link>, access is provided
-				to a TLS slot that is maintained for the duration of the execution of a fixture. In order to limit the
-				usage of global or static variables, authors of test suites are encouraged to store fixture-specific
-				data using these functions.
+				to a piece of memory that behaves similar to TLS. Unlike TLS, however, the memory is also visible
+				to child threads.
+				</para>
+				<para>
+				In order to limit the usage of global or static variables, authors of test suites are encouraged 
+				to store fixture-specific data using these functions.
 				</para>
 				<para>
 				Note, however, that such fixture-specific data should be maintained and accessed by <link linkend="CFIX_FIXTURE_BEFORE">before-</link>,
