@@ -71,6 +71,147 @@
 --*/
 #define EXCEPTION_TESTCASE_FAILED_ABORT	( ( ULONG ) 0x8004AFFDUL )
 
+/*----------------------------------------------------------------------
+ *
+ * Embedding.
+ *
+ */
+
+#if ! defined( CFIX_KERNELMODE ) && ! defined( CFIX_NO_EMBEDDING )
+
+typedef void ( __cdecl * CFIX_CRT_INIT_ROUTINE )();
+
+/*++
+	Routine Description:
+		Embedding initialization routine.
+
+		If the routine returns CFIX_S_EXIT_PROCESS, the process
+		will be terminated so that main is not called.
+--*/
+typedef HRESULT ( CFIXCALLTYPE * CFIX_EMBEDDING_ROUTINE )();
+
+/*++
+	Routine Description:
+		CRT initializer function, called before main(). Accepts
+		a routine to be specified via a environment variable that
+		will be called at the end of CRT initialization.
+
+		The routine has to conform to CFIX_EMBEDDING_ROUTINE.
+--*/
+EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
+{
+	PSTR Bang;
+	HRESULT Hr;
+	PCSTR ModuleName;
+	CHAR RoutineNameBuffer[ 100 ];
+	PCSTR RoutineName;
+
+	HMODULE Module;
+	CFIX_EMBEDDING_ROUTINE Routine;
+
+	//
+	// N.B. No threadsafe initialization required.
+	//
+	static BOOL Initialized = FALSE;
+	if ( Initialized )
+	{
+		//
+		// Call from test map; ignore.
+		//
+		return;
+	}
+	else
+	{
+		Initialized = TRUE;
+	}
+
+	// printf( "CfixpCrtInitEmbedding()\n" );
+
+	if ( 0 == GetEnvironmentVariableA(
+		CFIX_EMB_INIT_ENVVAR_NAMEA,
+		RoutineNameBuffer,
+		sizeof( RoutineNameBuffer ) / sizeof( *RoutineNameBuffer ) ) )
+	{
+		return;
+	}
+
+	//
+	// Variable has format module!routine. Split accordingly.
+	//
+
+	Bang = strchr( RoutineNameBuffer, '!' );
+	if ( Bang == NULL )
+	{
+		return;
+	}
+
+	*Bang = UNICODE_NULL;
+	ModuleName = RoutineNameBuffer;
+	RoutineName = Bang + 1;
+
+	Module = LoadLibraryA( ModuleName );
+	if ( Module == NULL )
+	{
+		//
+		// Do not bail out here - the executable may have been started
+		// without the intent to run tests.
+		//
+		return;
+	}
+
+	Routine = ( CFIX_EMBEDDING_ROUTINE ) 
+		GetProcAddress( Module, RoutineName );
+
+	if ( Routine == NULL )
+	{
+		return;
+	}
+
+	Hr = ( Routine )();
+	( VOID ) FreeLibrary( Module );
+
+	if ( CFIX_S_EXIT_PROCESS == Hr )
+	{
+		ExitProcess( 0 );
+	}
+	else if ( FAILED( Hr ) )
+	{
+		ExitProcess( ( UINT ) Hr );
+	}
+}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+//
+// Register as CRT initializer that runs after all C++ constructors
+// (these live in .CRT$XCU -- see MSDN).
+//
+#pragma section( ".CRT$XCX", read )
+__declspec( allocate( ".CRT$XCX" ) )
+extern const CFIX_CRT_INIT_ROUTINE CfixpCrtInitEmbeddingRegistration;
+
+//
+// N.B. To avoid /OPT:REF-caused COMDAT elimination, this variable
+// must be referenced elsewhere. This is done by having the test maps
+// call CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION(), which is effectively
+// a no-op.
+//
+__declspec( selectany )
+const CFIX_CRT_INIT_ROUTINE CfixpCrtInitEmbeddingRegistration = CfixpCrtInitEmbedding;
+
+#define CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION() \
+	( CfixpCrtInitEmbeddingRegistration ) ()
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#else
+#define CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION() 
+#endif
 
 /*----------------------------------------------------------------------
  *
@@ -162,6 +303,7 @@ PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##name()		\
 		CFIX_PE_API_VERSION,										\
 		Entries														\
 	};																\
+	CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION();							\
 	return &Fixture;												\
 }			
 

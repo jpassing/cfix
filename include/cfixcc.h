@@ -1221,6 +1221,7 @@ PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##Class()			\
 		CFIX_PE_API_VERSION,											\
 		Entries															\
 	};																	\
+	CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION();								\
 	return &Fixture;													\
 }			
 

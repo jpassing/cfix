@@ -30,79 +30,107 @@
 #include <strsafe.h>
 #pragma warning( pop )
 
+typedef struct _CFIXRUNP_ASSEMBLE_ACTION_CONTEXT
+{
+	PCFIXRUN_STATE RunState;
+	ULONG FixtureCount;
+} CFIXRUNP_ASSEMBLE_ACTION_CONTEXT, *PCFIXRUNP_ASSEMBLE_ACTION_CONTEXT;
+
 static HRESULT CfixrunsCreateDisplayAction(
 	__in PCFIX_FIXTURE Fixture,
-	__in PVOID Context,
+	__in PVOID PvContext,
 	__in ULONG TestCase,
 	__out PCFIX_ACTION *Action
 	)
 {
-	PCFIXRUN_STATE State = ( PCFIXRUN_STATE ) Context;
+	PCFIXRUNP_ASSEMBLE_ACTION_CONTEXT Context;
+	HRESULT Hr;
+
+	Context = ( PCFIXRUNP_ASSEMBLE_ACTION_CONTEXT ) PvContext;
+	ASSERT( Context != NULL );
 
 	//
 	// N.B. TestCase is ignored - it is of little value when displaying.
 	//
 	UNREFERENCED_PARAMETER( TestCase );
 
-	return CfixrunpCreateDisplayAction(
+	Hr = CfixrunpCreateDisplayAction(
 		Fixture,
-		State->Options,
+		Context->RunState->Options,
 		Action );
+
+	if ( SUCCEEDED( Hr ) )
+	{
+		Context->FixtureCount++;
+	}
+
+	return Hr;
 }
 
 static HRESULT CfixrunsCreateTsExecAction(
 	__in PCFIX_FIXTURE Fixture,
-	__in PVOID Context,
+	__in PVOID PvContext,
 	__in ULONG TestCase,
 	__out PCFIX_ACTION *Action
 	)
 {
+	PCFIXRUNP_ASSEMBLE_ACTION_CONTEXT Context;
 	ULONG ExecutionFlags = 0;
-	PCFIXRUN_STATE State = ( PCFIXRUN_STATE ) Context;
+	HRESULT Hr;
 
-	ASSERT( State != NULL );
+	Context = ( PCFIXRUNP_ASSEMBLE_ACTION_CONTEXT ) PvContext;
+	ASSERT( Context != NULL );
 
-	if ( ! State->Options->DisableStackTraces )
+	if ( ! Context->RunState->Options->DisableStackTraces )
 	{
 		ExecutionFlags = CFIX_FIXTURE_EXECUTION_CAPTURE_STACK_TRACES;
 	}
 
-	if ( State->Options->ShortCircuitFixtureOnFailure )
+	if ( Context->RunState->Options->ShortCircuitFixtureOnFailure )
 	{
 		ExecutionFlags |= CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_FIXTURE_ON_FAILURE;
 	}
 
-	if ( State->Options->ShortCircuitRunOnFailure )
+	if ( Context->RunState->Options->ShortCircuitRunOnFailure )
 	{
 		ExecutionFlags |= CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_RUN_ON_FAILURE;
 	}
 
-	if ( State->Options->ShortCircuitRunOnSetupFailure )
+	if ( Context->RunState->Options->ShortCircuitRunOnSetupFailure )
 	{
 		ExecutionFlags |= CFIX_FIXTURE_EXECUTION_SHORTCIRCUIT_RUN_ON_SETUP_FAILURE;
 	}
 
-	return CfixCreateFixtureExecutionAction(
+	Hr = CfixCreateFixtureExecutionAction(
 		Fixture,
 		ExecutionFlags,
 		TestCase,
 		Action );
+
+	if ( SUCCEEDED( Hr ) )
+	{
+		Context->FixtureCount++;
+	}
+
+	return Hr;
 }
 
 static BOOL CfixrunsFilterFixtureByName(
 	__in PCFIX_FIXTURE Fixture,
-	__in PVOID Context,
+	__in PVOID PvContext,
 	__out PULONG TestCase
 	)
 {
-	PCFIXRUN_STATE State = ( PCFIXRUN_STATE ) Context;
-	
+	PCFIXRUNP_ASSEMBLE_ACTION_CONTEXT Context;
 	PCWSTR FixtureName = Fixture->Name;
+
+	Context = ( PCFIXRUNP_ASSEMBLE_ACTION_CONTEXT ) PvContext;
+	ASSERT( Context != NULL );
 
 	ASSERT( TestCase );
 	*TestCase = ( ULONG ) -1;	// All.
 
-	if ( State->Options->Fixture )
+	if ( Context->RunState->Options->Fixture )
 	{
 		WCHAR Filter[ CFIX_MAX_FIXTURE_NAME_CCH * 2 ];
 		PWSTR TestCaseName;
@@ -113,7 +141,7 @@ static BOOL CfixrunsFilterFixtureByName(
 		if ( FAILED( StringCchCopy( 
 			Filter, 
 			_countof( Filter ), 
-			State->Options->Fixture ) ) )
+			Context->RunState->Options->Fixture ) ) )
 		{
 			return FALSE;
 		}
@@ -161,9 +189,9 @@ static BOOL CfixrunsFilterFixtureByName(
 			return FALSE;
 		}
 	}
-	else if ( State->Options->FixturePrefix )
+	else if ( Context->RunState->Options->FixturePrefix )
 	{
-		if ( FixtureName != StrStrI( FixtureName, State->Options->FixturePrefix ) )
+		if ( FixtureName != StrStrI( FixtureName, Context->RunState->Options->FixturePrefix ) )
 		{
 			//
 			// Skip.
@@ -177,37 +205,63 @@ static BOOL CfixrunsFilterFixtureByName(
 
 HRESULT CfixrunpAssembleExecutionAction( 
 	__in PCFIXRUN_STATE State,
-	__out PCFIX_ACTION *Action
+	__out PCFIX_ACTION *Action,
+	__out PULONG FixtureCount
 	)
 {
+	CFIXRUNP_ASSEMBLE_ACTION_CONTEXT Context;
+	HRESULT Hr;
+
+	ASSERT( Action );
+	ASSERT( FixtureCount );
+
 	if ( State->Options->InputFileType != CfixrunInputDllOrDirectory )
 	{
 		return E_INVALIDARG;
 	}
+
+	Context.RunState		= State;
+	Context.FixtureCount	= 0;
 	
-	return CfixrunpSearchFixturesAndCreateSequenceAction(
+	Hr = CfixrunpSearchFixturesAndCreateSequenceAction(
 		State->Options->InputFile,
 		State->Options->RecursiveSearch,
 		State->Options->EnableKernelFeatures,
 		State->LogSession,
 		CfixrunsFilterFixtureByName,
 		CfixrunsCreateTsExecAction,
-		State,
+		&Context,
 		Action );
+
+	*FixtureCount = Context.FixtureCount;
+	return Hr;
 }
 
 HRESULT CfixrunpAssembleDisplayAction( 
 	__in PCFIXRUN_STATE State,
-	__out PCFIX_ACTION *Action
+	__out PCFIX_ACTION *Action,
+	__out PULONG FixtureCount
 	)
 {
-	return CfixrunpSearchFixturesAndCreateSequenceAction(
+	CFIXRUNP_ASSEMBLE_ACTION_CONTEXT Context;
+	HRESULT Hr;
+
+	ASSERT( Action );
+	ASSERT( FixtureCount );
+
+	Context.RunState		= State;
+	Context.FixtureCount	= 0;
+	
+	Hr = CfixrunpSearchFixturesAndCreateSequenceAction(
 		State->Options->InputFile,
 		State->Options->RecursiveSearch,
 		State->Options->EnableKernelFeatures,
 		State->LogSession,
 		CfixrunsFilterFixtureByName,
 		CfixrunsCreateDisplayAction,
-		State,
+		&Context,
 		Action );
+
+	*FixtureCount = Context.FixtureCount;
+	return Hr;
 }

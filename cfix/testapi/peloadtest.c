@@ -46,6 +46,17 @@ static void TestDllWithNoTestExports()
 	Mod->Routines.Dereference( Mod );
 }
 
+static void TestCurrentExecutable()
+{
+	PCFIX_TEST_MODULE Mod;
+
+	TEST_HR( CfixCreateTestModule( GetModuleHandle( NULL ), &Mod ) );
+
+	TEST( 0 == Mod->FixtureCount );
+
+	Mod->Routines.Dereference( Mod );
+}
+
 static void TestDllWithDuplicateSetup()
 {
 	PCFIX_TEST_MODULE Mod;
@@ -168,6 +179,7 @@ static void TestDllWithValidFixture()
 CFIX_BEGIN_FIXTURE(PeLoading)
 	CFIX_FIXTURE_ENTRY(TestNonExistingDll)
 	CFIX_FIXTURE_ENTRY(TestDllWithNoTestExports)
+	CFIX_FIXTURE_ENTRY(TestCurrentExecutable)
 	CFIX_FIXTURE_ENTRY(TestDllWithDuplicateSetup)
 	CFIX_FIXTURE_ENTRY(TestDllWithDuplicateTeardown)
 	CFIX_FIXTURE_ENTRY(TestDllWithEmptyFixture)

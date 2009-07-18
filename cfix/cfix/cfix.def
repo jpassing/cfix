@@ -17,6 +17,7 @@
 ; along with cfix.  If not, see <http://www.gnu.org/licenses/>.
  
 EXPORTS
+	CfixCreateTestModule
 	CfixCreateTestModuleFromPeImage
 	CfixPeReportFailedAssertion
 	CfixPeReportFailedAssertionFormatA
