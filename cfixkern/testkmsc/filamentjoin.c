@@ -52,7 +52,7 @@ static void SpawnAndJoinPolitely()
 		NULL, 
 		NULL );
 
-	CFIX_ASSERT( STATUS_SUCCESS == CfixCreateSystemThread(
+	CFIX_ASSERT_STATUS( STATUS_SUCCESS, CfixCreateSystemThread(
 		&ThreadHandle,
 		THREAD_ALL_ACCESS,
 		&ObjectAttributes,
@@ -72,7 +72,7 @@ static void SpawnAndJoinPolitely()
 
 	CFIX_ASSERT( Thread );
 
-	CFIX_ASSERT( STATUS_SUCCESS == KeWaitForSingleObject( 
+	CFIX_ASSERT_STATUS( STATUS_SUCCESS, KeWaitForSingleObject( 
 		Thread, 
 		Executive,
 		KernelMode,
@@ -95,7 +95,7 @@ static void SpawnAndAutoJoin()
 		NULL, 
 		NULL );
 
-	CFIX_ASSERT( STATUS_SUCCESS == CfixCreateSystemThread(
+	CFIX_ASSERT_STATUS( STATUS_SUCCESS, CfixCreateSystemThread(
 		&Thread,
 		THREAD_ALL_ACCESS,
 		&ObjectAttributes,
@@ -126,7 +126,7 @@ static void SpawnAndAutoJoinLotsOfThreads()
 		NULL, 
 		NULL );
 
-	CFIX_ASSERT( STATUS_ALLOTTED_SPACE_EXCEEDED == CfixCreateSystemThread(
+	CFIX_ASSERT_STATUS( STATUS_ALLOTTED_SPACE_EXCEEDED, CfixCreateSystemThread(
 		&Thread,
 		THREAD_ALL_ACCESS,
 		&ObjectAttributes,
@@ -152,7 +152,7 @@ static void SpawnAndAutoJoinLotsOfThreadsUsingSystemContext()
 			NULL, 
 			NULL );
 
-		CFIX_ASSERT( STATUS_SUCCESS == CfixCreateSystemThread(
+		CFIX_ASSERT_STATUS( STATUS_SUCCESS, CfixCreateSystemThread(
 			&Thread,
 			THREAD_ALL_ACCESS,
 			&ObjectAttributes,
@@ -172,7 +172,7 @@ static void SpawnAndAutoJoinLotsOfThreadsUsingSystemContext()
 		NULL, 
 		NULL );
 
-	CFIX_ASSERT( STATUS_ALLOTTED_SPACE_EXCEEDED == CfixCreateSystemThread(
+	CFIX_ASSERT_STATUS( STATUS_ALLOTTED_SPACE_EXCEEDED, CfixCreateSystemThread(
 		&Thread,
 		THREAD_ALL_ACCESS,
 		&ObjectAttributes,

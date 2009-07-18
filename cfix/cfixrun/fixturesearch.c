@@ -162,7 +162,7 @@ static HRESULT CfixrunsAddFixturesOfDllToSequenceAction(
 	}
 
 	TestModule->Routines.Dereference( TestModule );
-	return S_OK;
+	return Hr;
 }
 
 HRESULT CfixrunpSearchFixturesAndCreateSequenceAction( 

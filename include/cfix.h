@@ -258,6 +258,12 @@ CFIXREPORTAPI VOID __cdecl CfixPeReportLogA(
 		( ( ULONG ) ( HRESULT ) ( Hr ) ),								\
 		( ( ULONG ) ( HRESULT ) ( Expr ) ) )
 
+#else // CFIX_KERNELMODE
+#define CFIX_ASSERT_STATUS( Status, Expr )								\
+	CFIX_ASSERT_EQUALS_ULONG(											\
+		( ( ULONG ) ( NTSTATUS ) ( Status ) ),							\
+		( ( ULONG ) ( NTSTATUS ) ( Expr ) ) )
+
 #endif // CFIX_KERNELMODE
 
 /*----------------------------------------------------------------------

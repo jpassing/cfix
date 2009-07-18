@@ -37,6 +37,7 @@ static HRESULT CfixrunsMainWorker(
 {
 	PCFIX_ACTION Action;
 	HRESULT Hr;
+	ULONG FixtureCount;
 
 	ASSERT( ExitCode );
 
@@ -55,14 +56,32 @@ static HRESULT CfixrunsMainWorker(
 	
 	if ( State->Options->DisplayOnly )
 	{
-		Hr = CfixrunpAssembleDisplayAction( State, &Action );
+		Hr = CfixrunpAssembleDisplayAction( State, &Action, &FixtureCount );
 	}
 	else
 	{
-		Hr = CfixrunpAssembleExecutionAction( State, &Action );
+		Hr = CfixrunpAssembleExecutionAction( State, &Action, &FixtureCount );
 	}
 		
-	if ( SUCCEEDED( Hr ) )
+	if ( FAILED( Hr ) )
+	{
+		*ExitCode = CFIXRUN_EXIT_FAILURE;
+	}
+	else if ( FixtureCount == 0 )
+	{
+		State->Options->PrintConsole( 
+			L"No matching test modules/fixtures found\n" );
+
+		if ( ! State->Options->EnableKernelFeatures )
+		{
+			State->Options->PrintConsole( 
+				L"Note: Kernel mode tests were not included in the search - \n"
+				L"      Use the -kern switch to search for kernel mode tests as well.\n" );
+		}
+
+		*ExitCode = CFIXRUN_EXIT_NONE_EXECUTED;
+	}
+	else
 	{
 		PCFIX_EXECUTION_CONTEXT ExecCtx;
 		Hr = CfixrunpCreateExecutionContext( State, &ExecCtx );
@@ -113,10 +132,6 @@ static HRESULT CfixrunsMainWorker(
 		}
 
 		Action->Dereference( Action );
-	}
-	else
-	{
-		*ExitCode = CFIXRUN_EXIT_FAILURE;
 	}
 
 	return Hr;

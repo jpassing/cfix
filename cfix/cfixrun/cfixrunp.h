@@ -54,7 +54,8 @@ typedef struct _CFIXRUN_STATE
 --*/
 HRESULT CfixrunpAssembleDisplayAction( 
 	__in PCFIXRUN_STATE State,
-	__out PCFIX_ACTION *Action
+	__out PCFIX_ACTION *Action,
+	__out PULONG FixtureCount
 	);
 
 /*++
@@ -63,7 +64,8 @@ HRESULT CfixrunpAssembleDisplayAction(
 --*/
 HRESULT CfixrunpAssembleExecutionAction( 
 	__in PCFIXRUN_STATE State,
-	__out PCFIX_ACTION *Action
+	__out PCFIX_ACTION *Action,
+	__out PULONG FixtureCount
 	);
 
 /*++
