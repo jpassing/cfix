@@ -81,13 +81,17 @@ static HRESULT CfixsCreateFixture(
 	__out PCFIX_FIXTURE *Fixture
 	)
 {
-	CFIX_GET_FIXTURE_ROUTINE GetTcRoutine = 
-		( CFIX_GET_FIXTURE_ROUTINE ) ExportedRoutine;
-	PCFIX_TEST_PE_DEFINITION TestDef;
+	ULONG ApiType;
 	PCFIX_PE_DEFINITION_ENTRY Entry;
-	PCFIX_FIXTURE NewFixture = NULL;
 	UINT EntryCount = 0;
+	CFIX_GET_FIXTURE_ROUTINE GetTcRoutine;
+	
 	HRESULT Hr = E_UNEXPECTED;
+	
+	PCFIX_FIXTURE NewFixture = NULL;
+	PCFIX_TEST_PE_DEFINITION TestDef;
+	
+	GetTcRoutine = ( CFIX_GET_FIXTURE_ROUTINE ) ExportedRoutine;
 
 	//
 	// Obtain information from DLL.
@@ -98,7 +102,8 @@ static HRESULT CfixsCreateFixture(
 		return CFIX_E_MISBEHAVIOUD_GETTC_ROUTINE;
 	}
 
-	if ( TestDef->ApiVersion != CFIX_PE_API_VERSION )
+	ApiType = CFIX_PE_API_TYPE_FROM_APIVERSION( TestDef->ApiVersion );
+	if ( ApiType < CfixApiTypeMin || ApiType > CfixApiTypeMax )
 	{
 		return CFIX_E_UNSUPPORTED_VERSION;
 	}
@@ -154,6 +159,7 @@ static HRESULT CfixsCreateFixture(
 	NewFixture->Module			= Module;
 	NewFixture->TestCaseCount	= 0;
 	NewFixture->Reserved		= 0;
+	NewFixture->ApiType			= ApiType;
 
 	for ( Entry = TestDef->Entries; Entry->Type != CfixEntryTypeEnd; Entry++ )
 	{

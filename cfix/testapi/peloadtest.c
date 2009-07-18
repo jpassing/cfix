@@ -153,6 +153,7 @@ static void TestDllWithValidFixture()
 	TEST( 2 == Mod->FixtureCount );
 	
 	TEST( 0 == _wcsicmp( Mod->Fixtures[ 0 ]->Name, L"SampleFixture1" ) );
+	TEST( Mod->Fixtures[ 0 ]->ApiType == CfixApiTypeBase );
 	TEST( Mod->Fixtures[ 0 ]->SetupRoutine );
 	TEST( Mod->Fixtures[ 0 ]->TeardownRoutine );
 	TEST( Mod->Fixtures[ 0 ]->BeforeRoutine );
@@ -167,6 +168,7 @@ static void TestDllWithValidFixture()
 	TEST( 0 == _wcsicmp( Mod->Fixtures[ 0 ]->TestCases[ 1 ].Name, L"Test02" ) );
 	TEST( Mod->Fixtures[ 0 ]->TestCases[ 1 ].Routine );
 
+	TEST( Mod->Fixtures[ 0 ]->ApiType == CfixApiTypeBase );
 	TEST( Mod->Fixtures[ 1 ]->SetupRoutine );
 	TEST( Mod->Fixtures[ 1 ]->TeardownRoutine );
 	TEST( Mod->Fixtures[ 1 ]->BeforeRoutine == 0 );

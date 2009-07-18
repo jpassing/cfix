@@ -133,3 +133,24 @@ typedef struct _CFIX_THREAD_ID
 	//
 	ULONG MainThreadId;
 } CFIX_THREAD_ID, *PCFIX_THREAD_ID;
+
+typedef enum CFIX_API_TYPE
+{
+	//
+	// C/C++ Base API.
+	//
+	CfixApiTypeBase		= 1,
+
+	//
+	// C++ API.
+	//
+	CfixApiTypeCc		= 2,
+
+	//
+	// WinUnit.
+	//
+	CfixApiTypeWinUnit	= 3,
+
+	CfixApiTypeMin		= 1,
+	CfixApiTypeMax		= 3
+} CFIX_API_TYPE;

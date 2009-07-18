@@ -69,7 +69,7 @@
 		{ CfixEntryTypeEnd, NULL, NULL }								\
 		};																\
 		static CFIX_TEST_PE_DEFINITION Fixture = {						\
-			CFIX_PE_API_VERSION,										\
+			CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeWinUnit, 0 ),		\
 			Entries														\
 		};																\
 		return &Fixture;												\
@@ -159,7 +159,8 @@ namespace cfixwu
 			//
 			// Base structure.
 			//
-			this->Definition->Header.ApiVersion	= CFIX_PE_API_VERSION;
+			this->Definition->Header.ApiVersion	= 
+				CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeWinUnit, 0 );
 			this->Definition->Header.Entries	= this->Definition->Entries;
 
 			//

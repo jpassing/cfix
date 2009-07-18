@@ -230,6 +230,7 @@ static HRESULT CfixklsCreateFixture(
 	NewFixture->Reserved		= IoFixture->Key;
 	NewFixture->Module			= &Module->Base;
 	NewFixture->TestCaseCount	= TestCaseCount;
+	NewFixture->ApiType			= CfixApiTypeBase;
 
 	//
 	// Iterate over entries and create setup/teardown/testcases.

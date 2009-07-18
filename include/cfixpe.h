@@ -273,7 +273,18 @@ typedef struct _CFIX_TEST_PE_DEFINITION
 --*/
 typedef PCFIX_TEST_PE_DEFINITION ( CFIXCALLTYPE * CFIX_GET_FIXTURE_ROUTINE )();
 
-#define CFIX_PE_API_VERSION	MAKELONG( 1, 0 )
+
+#define CFIX_PE_API_MAKEAPIVERSION( Type, Version )					\
+	MAKELONG( ( ( ULONG ) ( Type ) ), ( Version ) )
+
+#define CFIX_PE_API_TYPE_FROM_APIVERSION( Version )					\
+	( ( CFIX_API_TYPE ) LOWORD( ( Version ) ) )
+
+//
+// Backcompat.
+//
+#define CFIX_PE_API_VERSION MAKELONG( 1, 0 )
+C_ASSERT( CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeBase, 0 ) == CFIX_PE_API_VERSION );
 
 #define CFIX_BEGIN_FIXTURE(name)									\
 EXTERN_C __declspec(dllexport)										\
@@ -300,10 +311,10 @@ PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##name()		\
 	{ CfixEntryTypeEnd, NULL, NULL }								\
 	};																\
 	static CFIX_TEST_PE_DEFINITION Fixture = {						\
-		CFIX_PE_API_VERSION,										\
+		CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeBase, 0 ),			\
 		Entries														\
 	};																\
-	CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION();							\
+	CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION();					\
 	return &Fixture;												\
 }			
 

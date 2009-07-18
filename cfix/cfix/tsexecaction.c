@@ -450,6 +450,9 @@ CFIXAPI HRESULT CFIXCALLTYPE CfixCreateFixtureExecutionAction(
 		return E_INVALIDARG;
 	}
 
+	ASSERT( Fixture->ApiType >= CfixApiTypeMin );
+	ASSERT( Fixture->ApiType <= CfixApiTypeMax );
+
 	//
 	// Allocate.
 	//

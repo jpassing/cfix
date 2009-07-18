@@ -377,6 +377,11 @@ typedef struct _CFIX_FIXTURE
 	ULONG_PTR Reserved;
 
 	//
+	// Type of API used to implement this fixture.
+	//
+	CFIX_API_TYPE ApiType;
+
+	//
 	// Backpointer to enclosing module.
 	//
 	struct _CFIX_TEST_MODULE *Module;
