@@ -18,18 +18,18 @@ VERSION = 1.5.0.$(BUILDNUMBER)
 
 cfix.msi: cfix.wixobj ui.wixobj dialogs.wixlib
 	if not exist wixca.dll copy /Y $(WIXBINPATH)\wixca.dll .
-	light -b .. -nologo -w0 -loc dialogs\WixUI_en-us.wxl -loc cfix_en-us.wxl dialogs.wixlib cfix.wixobj ui.wixobj -out cfix_$(VERSION).msi
+	$(WIXBINPATH)\light -b .. -nologo -w0 -loc dialogs\WixUI_en-us.wxl -loc cfix_en-us.wxl dialogs.wixlib cfix.wixobj ui.wixobj -out cfix_$(VERSION).msi
 
 cfix.wixobj: cfix.wxs
-	candle -dCFIX_TREE=. -dProductCode=$(PRODUCTCODE) -dPackageCode=$(PACKAGECODE) -dProductVersion=$(VERSION) -nologo cfix.wxs
+	$(WIXBINPATH)\candle -dCFIX_TREE=. -dProductCode=$(PRODUCTCODE) -dPackageCode=$(PACKAGECODE) -dProductVersion=$(VERSION) -nologo cfix.wxs
 
 ui.wixobj: ui.wxi
-	candle -nologo ui.wxi
+	$(WIXBINPATH)\candle -nologo ui.wxi
 	
 dialogs.wixlib:
 	cd dialogs
-	candle -nologo *.wxs
-	lit -out ..\dialogs.wixlib *.wixobj
+	$(WIXBINPATH)\candle -nologo *.wxs
+	$(WIXBINPATH)\lit -out ..\dialogs.wixlib *.wixobj
 	cd ..
 	
 clean:

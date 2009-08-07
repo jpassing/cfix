@@ -131,6 +131,23 @@
                Value="1" />
           </Component>
 
+          <Component Id="CompCfixEnvCmd" Guid="df217896-ab4d-4e0d-aad4-87b65ea0c779">
+            <File
+							Id="FileCfixEnvCmd"
+							Name="cfixenv.cmd"
+							DiskId="1"
+							Source="cfix\cfixenv.cmd"
+							Vital="yes"/>
+            <Registry
+               Id="CompCfixEnvCmdComponent"
+               Root="HKCU"
+               Key="Software\cfix\cfix\1.4\Components"
+               Name="CompCfixEnvCmdComponent"
+               Type="integer"
+               KeyPath="yes"
+               Value="1" />
+          </Component>
+
           <Directory Id="DirBin" Name="bin">
             <Directory Id="DirBinI386" Name="i386">
               <Component Id="CompBinI386" Guid="29ff75fe-b9da-4ae9-b3fa-0506bae54cae">
@@ -407,6 +424,7 @@
 
       <ComponentRef Id="CompCfixHome"/>
       <ComponentRef Id="CompCOPYING"/>
+      <ComponentRef Id="CompCfixEnvCmd"/>
       <ComponentRef Id="CompInstallLocation"/>
 
       <Feature Id="FeatureBinI386" Title="i386 (x86) binaries" Level="1" AllowAdvertise="no" Description="Tools for i386 (x86). Required if you intend to write tests for this platform.">
