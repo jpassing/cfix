@@ -272,8 +272,9 @@ CFIXREPORTAPI VOID __cdecl CfixPeReportLogA(
  *
  */
 
-#if _MSC_VER >= 1400 
-#define CFIX_ASSERT_EXPR_FORMAT( ver, expr, format, ... )	\
+#if _MSC_VER >= 1400 && !defined( CFIXCC_NO_VARIADIC_ASSERTIONS )
+
+#define __CFIX_ASSERT_MESSAGE( ver, expr, format, ... )	\
 	( void ) ( ( !! ( expr ) ) ||							\
 	( CfixBreak != CfixPeReportFailedAssertionFormat##ver(	\
 			__CFIX_WIDE( __FILE__ ),						\
@@ -283,13 +284,31 @@ CFIXREPORTAPI VOID __cdecl CfixPeReportLogA(
 			__VA_ARGS__ ) ||								\
 		( __debugbreak(), CfixPeFail(), 0 ) ) )
 
+#define __CFIX_FAIL( ver, format, ... )	\
+	( void ) ( ( CfixBreak != CfixPeReportFailedAssertionFormat##ver(	\
+			__CFIX_WIDE( __FILE__ ),						\
+			__CFIX_WIDE( __FUNCTION__ ),					\
+			__LINE__,										\
+			format,											\
+			__VA_ARGS__ ) ||								\
+		( __debugbreak(), CfixPeFail(), 0 ) ) )
 
 #if ! defined( UNICODE ) && ! defined( CFIX_KERNELMODE )
+
 #define CFIX_ASSERT_MESSAGE( expr, format, ... )			\
-	CFIX_ASSERT_EXPR_FORMAT( A, expr, format, __VA_ARGS__ )
+	__CFIX_ASSERT_MESSAGE( A, expr, format, __VA_ARGS__ )
+
+#define CFIX_FAIL( format, ... )							\
+	__CFIX_FAIL( A, format, __VA_ARGS__ )
+
 #else
+
 #define CFIX_ASSERT_MESSAGE( expr, format, ... )			\
-	CFIX_ASSERT_EXPR_FORMAT( W, expr, format, __VA_ARGS__ )
+	__CFIX_ASSERT_MESSAGE( W, expr, format, __VA_ARGS__ )
+
+#define CFIX_FAIL( format, ... )							\
+	__CFIX_FAIL( W, format, __VA_ARGS__ )
+
 #endif
 
 #endif // _MSC_VER

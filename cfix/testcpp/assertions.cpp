@@ -79,9 +79,11 @@ private:
 static void Nulls()
 {
 	CFIXCC_ASSERT( TRUE );
-	CFIXCC_ASSERT_MESSAGE( TRUE, NULL );
 	CFIXCC_LOG( NULL );
-	//CFIX_INCONCLUSIVE( NULL );
+
+#ifndef CFIXCC_NO_VARIADIC_ASSERTIONS
+	CFIXCC_ASSERT_MESSAGE( TRUE, NULL );
+#endif
 }
 
 static void SucceedingEquals()
@@ -89,14 +91,18 @@ static void SucceedingEquals()
 	CFIX_ASSERT_EXPR( TRUE, L"test" );
 
 #ifdef UNICODE
+#ifndef CFIXCC_NO_VARIADIC_ASSERTIONS
 	CFIX_ASSERT_MESSAGE( TRUE, L"test" );
 	CFIX_ASSERT_MESSAGE( TRUE, L"test %d%s", 1, L"123" );
+#endif
 	CFIX_LOG( L"test" );
 	CFIX_LOG( L"test %d%s", 1, L"123" );
 	//CFIX_INCONCLUSIVE( L"test" );
 	//CFIX_INCONCLUSIVE( L"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" );
 #else
+#ifndef CFIXCC_NO_VARIADIC_ASSERTIONS
 	CFIX_ASSERT_MESSAGE( TRUE, "test %d%s", 1, "123" );
+#endif
 	CFIX_LOG( "test" );
 	CFIX_LOG( "test %d%s", 1, "123" );
 	//CFIX_INCONCLUSIVE( "test" );
@@ -212,6 +218,32 @@ static void FailingEqualsObject()
 	TEST_EQ( SomeClass( 1 ), SomeClass( 2 ) );
 }
 
+#ifndef CFIXCC_NO_VARIADIC_ASSERTIONS
+
+static void Fail01()
+{
+	CFIX_FAIL( NULL );
+}
+
+static void Fail02()
+{
+	CFIX_FAIL( __TEXT( "" ) );
+}
+
+static void Fail03()
+{
+	CFIX_FAIL( __TEXT( "!" ) );
+}
+
+#ifndef UNICODE
+static void FailAnsi()
+{
+	CFIX_FAIL( "Ansi" );
+}
+
+#endif // UNICODE
+#endif // CFIXCC_NO_VARIADIC_ASSERTIONS
+
 struct TestException
 {
 };
@@ -257,16 +289,65 @@ static CFIX_REPORT_DISPOSITION CFIXCALLTYPE ExpectReportFailedAssertion(
 	return CfixContinue;
 }
 
+static CFIX_REPORT_DISPOSITION CFIXCALLTYPE ExpectReportFailedAssertionFormatA(
+	__in PCWSTR File,
+	__in PCWSTR Routine,
+	__in ULONG Line,
+	__in __format_string PCSTR Format,
+	...
+	)
+{
+	UNREFERENCED_PARAMETER( File );
+	UNREFERENCED_PARAMETER( Routine );
+	UNREFERENCED_PARAMETER( Line );
+	UNREFERENCED_PARAMETER( Format );
+
+	FailureReported = TRUE;
+	return CfixContinue;
+}
+
+static CFIX_REPORT_DISPOSITION CFIXCALLTYPE ExpectReportFailedAssertionFormatW(
+	__in PCWSTR File,
+	__in PCWSTR Routine,
+	__in ULONG Line,
+	__in __format_string PCWSTR Format,
+	...
+	)
+{
+	UNREFERENCED_PARAMETER( File );
+	UNREFERENCED_PARAMETER( Routine );
+	UNREFERENCED_PARAMETER( Line );
+	UNREFERENCED_PARAMETER( Format );
+
+	FailureReported = TRUE;
+	return CfixContinue;
+}
+
 template< CFIX_PE_TESTCASE_ROUTINE RoutineT >
 void ExpectFailure()
 {
-	PVOID OldProc;
+	PVOID OldReportFailedAssertion;
+	PVOID OldReportFailedAssertionFormatA;
+	PVOID OldReportFailedAssertionFormatW;
+	
 	CFIX_ASSERT( S_OK == PatchIat(
 		GetModuleHandleW( L"testcpp" ),
 		"cfix.dll",
 		"CfixPeReportFailedAssertion",
 		( PVOID ) ExpectReportFailedAssertion,
-		&OldProc ) );
+		&OldReportFailedAssertion ) );
+	CFIX_ASSERT( S_OK == PatchIat(
+		GetModuleHandleW( L"testcpp" ),
+		"cfix.dll",
+		"CfixPeReportFailedAssertionFormatA",
+		( PVOID ) ExpectReportFailedAssertionFormatA,
+		&OldReportFailedAssertionFormatA ) );
+	CFIX_ASSERT( S_OK == PatchIat(
+		GetModuleHandleW( L"testcpp" ),
+		"cfix.dll",
+		"CfixPeReportFailedAssertionFormatW",
+		( PVOID ) ExpectReportFailedAssertionFormatW,
+		&OldReportFailedAssertionFormatW ) );
 
 	__try
 	{
@@ -279,7 +360,19 @@ void ExpectFailure()
 			GetModuleHandleW( L"testcpp" ),
 			"cfix.dll",
 			"CfixPeReportFailedAssertion",
-			OldProc,
+			OldReportFailedAssertion,
+			NULL ) );
+		CFIX_ASSERT( S_OK == PatchIat(
+			GetModuleHandleW( L"testcpp" ),
+			"cfix.dll",
+			"CfixPeReportFailedAssertionFormatA",
+			OldReportFailedAssertionFormatA,
+			NULL ) );
+		CFIX_ASSERT( S_OK == PatchIat(
+			GetModuleHandleW( L"testcpp" ),
+			"cfix.dll",
+			"CfixPeReportFailedAssertionFormatW",
+			OldReportFailedAssertionFormatW,
 			NULL ) );
 	}
 

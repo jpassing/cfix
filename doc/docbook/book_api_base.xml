@@ -220,7 +220,7 @@ CFIX_ASSERT_STATUS(
 				as the function name. 
 				</para>
 				<para>
-				The macro allows printf-style formatting to construct the message. Consult the documentation for printf for
+				The macro allows printf-style formatting to construct the message. Consult the documentation of printf for
 				a list of format specifiers.
 				</para>
 				<para>
@@ -304,6 +304,65 @@ CFIX_ASSERT_EQUALS_ULONG( 42, foo );
 			&TestApiDefaultRequirements10;
 		</section>
 
+		<section id="CFIX_FAIL">
+			<title>CFIX_FAIL</title>
+			<indexterm><primary>CFIX_FAIL</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Use CFIX_FAIL to unconditionally fail a test.
+				</para>
+				<para>
+				The macro allows printf-style formatting to construct the message. Consult the documentation of printf for
+				a list of format specifiers.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+void CFIX_FAIL( 
+	__in PCTSTR Format, 
+	... 
+	);
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<para>
+				If UNICODE has been defined, string parameters are expected to by of type PCWSTR. Otherwise,
+				ANSI is assumed and string parameters are expected to by of type PCSTR. 
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				In kernel mode, ANSI strings are not supported. Strings are always assumed to by of type PCWSTR.
+				Moreover, formatting can only take place at IRQL &lt;= APC_LEVEL. At higher IRQL, formatting is
+				skipped and the Format string is used as-is.
+				</para>
+				<para>
+				As variadic macro arguments have not been supported until cl 14.00, this macro is not available 
+				if downlevel compilers are used.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Usage example</title>
+			
+				<programlisting>
+void SomeCallback()
+{
+  CFIX_FAIL( __TEXT( "SomeCallback should not be invoked" ) );
+}
+				</programlisting>
+			</simplesect>
+			
+			&TestApiDefaultRequirements15;
+		</section>
+		
 		<section id="CFIX_INCONCLUSIVE">
 			<title>CFIX_INCONCLUSIVE</title>
 			<indexterm><primary>CFIX_INCONCLUSIVE</primary></indexterm>
@@ -358,7 +417,7 @@ CFIX_INCONCLUSIVE( L"This test case requires admin privileges" );
 				<title>Synopsis</title>
 				<para>
 				Use CFIX_LOG to log arbitrary information. The macro allows printf-style formatting and variable argument lists.  
-				Consult the documentation for printf for a list of format specifiers.
+				Consult the documentation of printf for a list of format specifiers.
 				</para>
 			</simplesect>
 			
