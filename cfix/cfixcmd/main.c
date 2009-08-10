@@ -29,11 +29,6 @@
 #include <cfixrun.h>
 #include <cdiag.h>
 
-#pragma warning( push )
-#pragma warning( disable: 6011; disable: 6387 )
-#include <strsafe.h>
-#pragma warning( pop )
-
 static VOID CfixcmdsPrintBanner()
 {
 	CDIAG_MODULE_VERSION Version;
@@ -89,10 +84,9 @@ static VOID CfixcmdsPrintUsage(
 		L"    -Y             Pause at beginning of testrun\n"
 		L"    -y             Pause at end of testrun\n"
 		L"    -kern          Enable kernel mode features\n"
-		//L"    -Oca           Run testcases in alphabetic order\n"
-		//L"    -Ocr           Run testcases in random order\n"
-		//L"    -Osa           Run fixtures in alphabetic order\n"
-		//L"    -Osr           Run fixtures in random order\n"
+		L"    -exe           Enable support for EXE modules\n"
+		L"                   When this witch is used, the exact path to the module must be specified;\n"
+		L"                   wilcards and the -r option are not supported\n"
 		L"\n"
 		L"  Output Options:\n"
 		L"    -nologo        Do not display logo\n"
@@ -100,7 +94,6 @@ static VOID CfixcmdsPrintUsage(
 		L"    -log [<target>] Output log messages to <target>\n"
 		L"    -td             Disable stack trace capturing\n"
 		L"    -ts             Omit source information in stack traces\n"
-		//L"    -d <dir>      Create crash dump on failure and save it in <dir>\n"
 		L"\n"
 		L"    Targets:\n"
 		L"      debug        Print to debug console\n"
@@ -126,25 +119,65 @@ static VOID CfixcmdsPrintUsage(
 		CFIXRUN_EXIT_FAILURE );
 }
 
-int CfixcmdsPrintConsoleAndDebug(
-	__in_z __format_string PCWSTR Format, 
-	... 
+static DWORD CfixcmdsSpawnAndRun(
+	__in PCFIXRUN_OPTIONS Options
 	)
 {
-	WCHAR Buffer[ 256 ];
+	WCHAR CommandLine[] = L"";
+	DWORD ExitCode;
+	PROCESS_INFORMATION ProcessInfo;
+	STARTUPINFO StartupInfo;
+    
+	if ( GetFileAttributes( Options->InputFile ) == INVALID_FILE_ATTRIBUTES )
+	{
+		Options->PrintConsole( 
+			L"The file %s could not be found\n",
+			Options->InputFile );
+		return CFIXRUN_EXIT_USAGE_FAILURE;
+	}
 
-	va_list lst;
-	va_start( lst, Format );
-	( VOID ) StringCchVPrintfW(
-		Buffer, 
-		_countof( Buffer ),
-		Format,
-		lst );
-	va_end( lst );
-	
-	OutputDebugString( Buffer );
+	//
+	// Inject cfixemb.dll and pass it our command line.
+	//
 
-	return wprintf( L"%s", Buffer );;
+	( VOID ) SetEnvironmentVariable(
+		CFIX_EMB_INIT_ENVVAR_NAME,
+		L"cfixemb.dll!CfixEmbMain" );
+	( VOID ) SetEnvironmentVariable(
+		CFIXRUN_EMB_CMDLINE_ENVVAR_NAME,
+		GetCommandLine() );
+
+	ZeroMemory( &ProcessInfo, sizeof( PROCESS_INFORMATION ) );
+	ZeroMemory( &StartupInfo, sizeof( STARTUPINFO ) );
+    StartupInfo.cb = sizeof( STARTUPINFO );
+    
+	if ( ! CreateProcess(
+		Options->InputFile,
+		CommandLine,
+		NULL,
+		NULL,
+		FALSE,
+		0,
+		NULL,
+		NULL,
+		&StartupInfo,
+		&ProcessInfo ) )
+	{
+		Options->PrintConsole( 
+			L"The file %s could not launched: Win32 error %d\n",
+			Options->InputFile,
+			GetLastError() );
+
+		return CFIXRUN_EXIT_USAGE_FAILURE;
+	}
+
+	( VOID ) WaitForSingleObject( ProcessInfo.hProcess, INFINITE );
+	( VOID ) GetExitCodeProcess( ProcessInfo.hProcess, &ExitCode );
+
+	CloseHandle( ProcessInfo.hThread );
+	CloseHandle( ProcessInfo.hProcess );
+
+	return ExitCode;
 }
 
 int __cdecl wmain(
@@ -156,15 +189,6 @@ int __cdecl wmain(
 	DWORD ExitCode;
 
 	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
-
-	if ( IsDebuggerPresent() )
-	{
-		Options.PrintConsole = CfixcmdsPrintConsoleAndDebug;
-	}
-	else
-	{
-		Options.PrintConsole = wprintf;
-	}
 
 	if ( Argc == 0 )
 	{
@@ -185,12 +209,19 @@ int __cdecl wmain(
 		CfixcmdsPrintBanner();
 	}
 
-	//
-	// No 'drive not ready'-dialogs, please.
-	//
-	SetErrorMode( SetErrorMode( 0 ) | SEM_FAILCRITICALERRORS );
+	if ( Options.InputFileType == CfixrunInputRequiresSpawn )
+	{
+		ExitCode = CfixcmdsSpawnAndRun( &Options );
+	}
+	else
+	{
+		//
+		// No 'drive not ready'-dialogs, please.
+		//
+		SetErrorMode( SetErrorMode( 0 ) | SEM_FAILCRITICALERRORS );
 
-	ExitCode = CfixrunMain( &Options );
+		ExitCode = CfixrunMain( &Options );
+	}
 
 #ifdef DBG	
 	_CrtDumpMemoryLeaks();

@@ -41,8 +41,6 @@ static HRESULT CfixrunsMainWorker(
 
 	ASSERT( ExitCode );
 
-	ASSERT ( State->Options->InputFileType == CfixrunInputDllOrDirectory );
-	
 	if ( State->Options->InputFile == NULL ||
 		 wcslen( State->Options->InputFile ) == 0 )
 	{

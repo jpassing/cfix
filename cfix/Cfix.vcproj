@@ -563,6 +563,30 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="cfixemb"
+				>
+				<File
+					RelativePath=".\cfixemb\cfixemb.def"
+					>
+				</File>
+				<File
+					RelativePath=".\cfixemb\cfixemb.rc"
+					>
+				</File>
+				<File
+					RelativePath=".\cfixemb\embmain.c"
+					>
+				</File>
+				<File
+					RelativePath=".\cfixemb\resource.h"
+					>
+				</File>
+				<File
+					RelativePath=".\cfixemb\SOURCES"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"

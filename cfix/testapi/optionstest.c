@@ -102,7 +102,7 @@ void TestOptions()
 		ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 		Options.PrintConsole = PrintNop;
 
-		Options.InputFileType	= CfixrunInputDllOrDirectory;
+		Options.InputFileType	= CfixrunInputDynamicallyLoadable;
 		Options.InputFile		= DllOrDirectory[ DllIndex ].DllOrDirectory;
 		Options.Fixture			= FixtureNames[ FixtureIndex ].FixtureName;
 		Options.FixturePrefix	= FixtureNames[ FixtureIndex ].FixturePrefix;

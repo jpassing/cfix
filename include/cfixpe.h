@@ -125,8 +125,6 @@ EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
 		Initialized = TRUE;
 	}
 
-	// printf( "CfixpCrtInitEmbedding()\n" );
-
 	if ( 0 == GetEnvironmentVariableA(
 		CFIX_EMB_INIT_ENVVAR_NAMEA,
 		RoutineNameBuffer,

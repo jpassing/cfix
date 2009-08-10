@@ -25,6 +25,95 @@
 #include <stdio.h>
 #include <shlwapi.h>
 
+static HRESULT CfixrunsAddFixturesOfModuleToSequenceAction(
+	__in PCFIX_TEST_MODULE TestModule,
+	__in CFIXRUNP_FILTER_FIXTURE_ROUTINE FilterCallback,
+	__in CFIXRUNP_CREATE_ACTION_ROUTINE CreateActionCallback,
+	__in PVOID CallbackContext,
+	__in PCFIX_ACTION SequenceAction,
+	__in CDIAG_SESSION_HANDLE LogSession
+	)
+{
+	HRESULT Hr = S_OK;
+
+	ASSERT( CfixIsValidAction( SequenceAction ) );
+	ASSERT( TestModule->Version == CFIX_TEST_MODULE_VERSION );
+
+	//
+	// Add fixtures to sequence.
+	//
+	if ( TestModule->FixtureCount > 0 )
+	{
+		UINT Fixture;
+
+		for ( Fixture = 0; Fixture < TestModule->FixtureCount; Fixture++ )
+		{
+			PCFIX_ACTION FixtureAction;
+			ULONG TestCase;
+
+			//
+			// Apply filter.
+			//
+			if ( ! ( FilterCallback )( 
+				TestModule->Fixtures[ Fixture ],
+				CallbackContext,
+				&TestCase ) )
+			{
+				//
+				// Ignore this one.
+				//
+				continue;
+			}
+
+			//
+			// Create an action for this fixture.
+			//
+			Hr = ( CreateActionCallback )(
+				TestModule->Fixtures[ Fixture ],
+				CallbackContext,
+				TestCase,
+				&FixtureAction );
+
+			ASSERT( SUCCEEDED( Hr ) == ( FixtureAction != NULL ) );
+
+			if ( FAILED( Hr ) || FixtureAction == NULL )
+			{
+				CfixrunpOutputLogMessage(
+					LogSession,
+					CdiagErrorSeverity,
+					L"Failed to create fixture execution action: 0x%08X\n",
+					Hr );
+				break;
+			}
+			else
+			{
+				ASSERT( CfixIsValidAction( FixtureAction ) );
+
+				//
+				// Add to sequence
+				//
+				Hr = CfixAddEntrySequenceAction(
+					SequenceAction,
+					FixtureAction );
+	
+				FixtureAction->Dereference( FixtureAction );
+
+				if ( FAILED( Hr ) )
+				{
+					CfixrunpOutputLogMessage(
+						LogSession,
+						CdiagErrorSeverity,
+						L"Failed to enqueue fixture execution action: 0x%08X\n",
+						Hr );
+					break;
+				}
+			}
+		}
+	}
+
+	return Hr;
+}
+
 typedef struct _CFIXRUNP_SEARCH_CONTEXT
 {
 	PCFIX_ACTION SequenceAction;
@@ -87,81 +176,16 @@ static HRESULT CfixrunsAddFixturesOfDllToSequenceAction(
 		L"Loaded module %s\n",
 		Path );
 
-	ASSERT( TestModule->Version == CFIX_TEST_MODULE_VERSION );
-
-	//
-	// Add fixtures to sequence.
-	//
-	if ( TestModule->FixtureCount > 0 )
-	{
-		UINT Fixture;
-
-		for ( Fixture = 0; Fixture < TestModule->FixtureCount; Fixture++ )
-		{
-			PCFIX_ACTION FixtureAction;
-			ULONG TestCase;
-
-			//
-			// Apply filter.
-			//
-			if ( ! SearchCtx->FilterCallback( 
-				TestModule->Fixtures[ Fixture ],
-				SearchCtx->CallbackContext,
-				&TestCase ) )
-			{
-				//
-				// Ignore this one.
-				//
-				continue;
-			}
-
-			//
-			// Create an action for this fixture.
-			//
-			Hr = SearchCtx->CreateActionCallback(
-				TestModule->Fixtures[ Fixture ],
-				SearchCtx->CallbackContext,
-				TestCase,
-				&FixtureAction );
-
-			ASSERT( SUCCEEDED( Hr ) == ( FixtureAction != NULL ) );
-
-			if ( FAILED( Hr ) || FixtureAction == NULL )
-			{
-				CfixrunpOutputLogMessage(
-					SearchCtx->LogSession,
-					CdiagErrorSeverity,
-					L"Failed to create fixture execution action: 0x%08X\n",
-					Hr );
-				break;
-			}
-			else
-			{
-				ASSERT( CfixIsValidAction( FixtureAction ) );
-
-				//
-				// Add to sequence
-				//
-				Hr = CfixAddEntrySequenceAction(
-					SearchCtx->SequenceAction,
-					FixtureAction );
+	Hr = CfixrunsAddFixturesOfModuleToSequenceAction(
+		TestModule,
+		SearchCtx->FilterCallback,
+		SearchCtx->CreateActionCallback,
+		SearchCtx->CallbackContext,
+		SearchCtx->SequenceAction,
+		SearchCtx->LogSession );
 	
-				FixtureAction->Dereference( FixtureAction );
-
-				if ( FAILED( Hr ) )
-				{
-					CfixrunpOutputLogMessage(
-						SearchCtx->LogSession,
-						CdiagErrorSeverity,
-						L"Failed to enqueue fixture execution action: 0x%08X\n",
-						Hr );
-					break;
-				}
-			}
-		}
-	}
-
 	TestModule->Routines.Dereference( TestModule );
+
 	return Hr;
 }
 
@@ -217,6 +241,59 @@ HRESULT CfixrunpSearchFixturesAndCreateSequenceAction(
 		IncludeKernelModules,
 		CfixrunsAddFixturesOfDllToSequenceAction,
 		&SearchCtx );
+
+	if ( SUCCEEDED( Hr ) )
+	{
+		return S_OK;
+	}
+	else
+	{
+		( *SequenceAction )->Dereference( *SequenceAction );
+		*SequenceAction = NULL;
+		return Hr;
+	}
+}
+
+HRESULT CfixrunpCreateSequenceAction( 
+	__in PCFIX_TEST_MODULE TestModule,
+	__in CDIAG_SESSION_HANDLE LogSession,
+	__in CFIXRUNP_FILTER_FIXTURE_ROUTINE FilterCallback,
+	__in CFIXRUNP_CREATE_ACTION_ROUTINE CreateActionCallback,
+	__in PVOID CallbackContext,
+	__out PCFIX_ACTION *SequenceAction
+	)
+{
+	HRESULT Hr;
+	
+	if ( ! TestModule || 
+		 ! LogSession || 
+		 ! FilterCallback || 
+		 ! CreateActionCallback || 
+		 ! SequenceAction )
+	{
+		return E_INVALIDARG;
+	}
+
+	*SequenceAction = NULL;
+	
+	Hr = CfixCreateSequenceAction( SequenceAction );
+	if ( FAILED( Hr ) )
+	{
+		CfixrunpOutputLogMessage(
+			LogSession,
+			CdiagErrorSeverity,
+			L"Failed to create sequence action: 0x%08X\n",
+			Hr );
+		return Hr;
+	}
+
+	Hr = CfixrunsAddFixturesOfModuleToSequenceAction(
+		TestModule,
+		FilterCallback,
+		CreateActionCallback,
+		CallbackContext,
+		*SequenceAction,
+		LogSession );
 
 	if ( SUCCEEDED( Hr ) )
 	{

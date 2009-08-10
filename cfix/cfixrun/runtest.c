@@ -203,6 +203,37 @@ static BOOL CfixrunsFilterFixtureByName(
 	return TRUE;
 }
 
+static HRESULT CfixrunsCreateSequenceActionForCurrentExecutable( 
+	__in CDIAG_SESSION_HANDLE LogSession,
+	__in CFIXRUNP_FILTER_FIXTURE_ROUTINE FilterCallback,
+	__in CFIXRUNP_CREATE_ACTION_ROUTINE CreateActionCallback,
+	__in PVOID CallbackContext,
+	__out PCFIX_ACTION *SequenceAction
+	)
+{
+	HRESULT Hr;
+	PCFIX_TEST_MODULE TestModule;
+
+	Hr = CfixCreateTestModule(
+		GetModuleHandle( NULL ),
+		&TestModule );
+	if ( FAILED( Hr ) )
+	{
+		return Hr;
+	}
+
+	Hr = CfixrunpCreateSequenceAction(
+		TestModule,
+		LogSession,
+		FilterCallback,
+		CreateActionCallback,
+		CallbackContext,
+		SequenceAction );
+
+	TestModule->Routines.Dereference( TestModule );
+	return Hr;
+}
+
 HRESULT CfixrunpAssembleExecutionAction( 
 	__in PCFIXRUN_STATE State,
 	__out PCFIX_ACTION *Action,
@@ -215,23 +246,30 @@ HRESULT CfixrunpAssembleExecutionAction(
 	ASSERT( Action );
 	ASSERT( FixtureCount );
 
-	if ( State->Options->InputFileType != CfixrunInputDllOrDirectory )
-	{
-		return E_INVALIDARG;
-	}
-
 	Context.RunState		= State;
 	Context.FixtureCount	= 0;
-	
-	Hr = CfixrunpSearchFixturesAndCreateSequenceAction(
-		State->Options->InputFile,
-		State->Options->RecursiveSearch,
-		State->Options->EnableKernelFeatures,
-		State->LogSession,
-		CfixrunsFilterFixtureByName,
-		CfixrunsCreateTsExecAction,
-		&Context,
-		Action );
+
+	if ( State->Options->InputFileType == CfixrunInputDynamicallyLoadable )
+	{
+		Hr = CfixrunpSearchFixturesAndCreateSequenceAction(
+			State->Options->InputFile,
+			State->Options->RecursiveSearch,
+			State->Options->EnableKernelFeatures,
+			State->LogSession,
+			CfixrunsFilterFixtureByName,
+			CfixrunsCreateTsExecAction,
+			&Context,
+			Action );
+	}
+	else
+	{
+		Hr = CfixrunsCreateSequenceActionForCurrentExecutable(
+			State->LogSession,
+			CfixrunsFilterFixtureByName,
+			CfixrunsCreateTsExecAction,
+			&Context,
+			Action );
+	}
 
 	*FixtureCount = Context.FixtureCount;
 	return Hr;
@@ -252,15 +290,27 @@ HRESULT CfixrunpAssembleDisplayAction(
 	Context.RunState		= State;
 	Context.FixtureCount	= 0;
 	
-	Hr = CfixrunpSearchFixturesAndCreateSequenceAction(
-		State->Options->InputFile,
-		State->Options->RecursiveSearch,
-		State->Options->EnableKernelFeatures,
-		State->LogSession,
-		CfixrunsFilterFixtureByName,
-		CfixrunsCreateDisplayAction,
-		&Context,
-		Action );
+	if ( State->Options->InputFileType == CfixrunInputDynamicallyLoadable )
+	{
+		Hr = CfixrunpSearchFixturesAndCreateSequenceAction(
+			State->Options->InputFile,
+			State->Options->RecursiveSearch,
+			State->Options->EnableKernelFeatures,
+			State->LogSession,
+			CfixrunsFilterFixtureByName,
+			CfixrunsCreateDisplayAction,
+			&Context,
+			Action );
+	}
+	else
+	{
+		Hr = CfixrunsCreateSequenceActionForCurrentExecutable(
+			State->LogSession,
+			CfixrunsFilterFixtureByName,
+			CfixrunsCreateDisplayAction,
+			&Context,
+			Action );
+	}
 
 	*FixtureCount = Context.FixtureCount;
 	return Hr;

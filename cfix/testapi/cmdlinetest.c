@@ -52,11 +52,11 @@ void TestCmdLineParser()
 	}
 
 	TEST( ParseCommandLine( L"runtest foo.dll", &Options ) );
-	TEST( CfixrunInputDllOrDirectory == Options.InputFileType );
+	TEST( CfixrunInputDynamicallyLoadable == Options.InputFileType );
 	TEST( 0 == wcscmp( Options.InputFile, L"foo.dll" ) );
 
 	TEST( ParseCommandLine( L"runtest -f -d -b -u /y /nologo -z foo.dll", &Options ) );
-	TEST( CfixrunInputDllOrDirectory == Options.InputFileType );
+	TEST( CfixrunInputDynamicallyLoadable == Options.InputFileType );
 	TEST( 0 == wcscmp( Options.InputFile, L"foo.dll" ) );
 	TEST( Options.AbortOnFirstFailure );
 	TEST( Options.DisplayOnly );
@@ -70,16 +70,17 @@ void TestCmdLineParser()
 	TEST( DefOutputProgress == Options.ProgressOutputTarget );
 	TEST( CfixrunTargetNone == Options.LogOutputTarget );
 
-	TEST( ParseCommandLine( L"runtest -out debug /td -log \"console\" foo.dll", &Options ) );
-	TEST( CfixrunInputDllOrDirectory == Options.InputFileType );
+	TEST( ParseCommandLine( L"runtest -exe -out debug /td -log \"console\" foo.dll", &Options ) );
+	TEST( CfixrunInputDynamicallyLoadable == Options.InputFileType );
 	TEST( 0 == wcscmp( Options.InputFile, L"foo.dll" ) );
 	TEST( 0 == wcscmp( Options.ProgressOutputTargetName, L"debug" ) );
 	TEST( 0 == wcscmp( Options.LogOutputTargetName, L"console" ) );
 	TEST( ! Options.EnableKernelFeatures );
+	TEST( Options.InputFileType == CfixrunInputRequiresSpawn );
 	TEST( Options.DisableStackTraces );
 
 	TEST( ParseCommandLine( L"runtest -kern -fsr -fss -out debug -out b foo.dll", &Options ) );
-	TEST( CfixrunInputDllOrDirectory == Options.InputFileType );
+	TEST( CfixrunInputDynamicallyLoadable == Options.InputFileType );
 	TEST( 0 == wcscmp( Options.InputFile, L"foo.dll" ) );
 	TEST( Options.ProgressOutputTarget == CfixrunTargetFile );
 	TEST( 0 == wcscmp( Options.ProgressOutputTargetName, L"b" ) );
@@ -90,7 +91,7 @@ void TestCmdLineParser()
 
 	TEST( ParseCommandLine( L"runtest -Y -ts -r -n a /fsf -p b foo.dll", &Options ) );
 	TEST( Options.RecursiveSearch );
-	TEST( CfixrunInputDllOrDirectory == Options.InputFileType );
+	TEST( CfixrunInputDynamicallyLoadable == Options.InputFileType );
 	TEST( 0 == wcscmp( Options.InputFile, L"foo.dll" ) );
 	TEST( 0 == wcscmp( Options.Fixture, L"a" ) );
 	TEST( 0 == wcscmp( Options.FixturePrefix, L"b" ) );
