@@ -309,6 +309,12 @@ BOOL CfixrunParseCommandLine(
 			Options->PrintConsole( L"Cannot use -r and -exe at the same time\n" );
 			return FALSE;
 		}
+		else if ( Options->PauseAtBeginning || Options->PauseAtEnd )
+		{
+			Options->PrintConsole( L"-y and -Y are currently not supported in "
+				L"conjunction with -exe\n" );
+			return FALSE;
+		}
 		else if ( ! CfixrunpIsExe( Options->InputFile ) )
 		{
 			Options->PrintConsole( L"-exe is only applicable for .exe files\n" );
