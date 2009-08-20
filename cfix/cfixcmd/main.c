@@ -119,6 +119,96 @@ static VOID CfixcmdsPrintUsage(
 		CFIXRUN_EXIT_FAILURE );
 }
 
+static BOOL CfixcmdsCreatePipe(
+	__out HANDLE *ReadEnd,
+	__out HANDLE *WriteEnd
+	)
+{
+	HANDLE ReadEndTemp;
+	SECURITY_ATTRIBUTES SecurityAttr;
+	
+	SecurityAttr.nLength = sizeof( SECURITY_ATTRIBUTES );
+	SecurityAttr.bInheritHandle = TRUE;
+	SecurityAttr.lpSecurityDescriptor = NULL;
+
+	//
+	// Create pipe with two inheritable handles.
+	//
+	if ( ! CreatePipe( 
+			&ReadEndTemp, 
+			WriteEnd, 
+			&SecurityAttr, 
+			0 ) )
+	{
+		return FALSE;
+	}
+
+	//
+	// Convert the read end into a noninheritable handle.
+	//
+	if ( DuplicateHandle( 
+			GetCurrentProcess(), 
+			ReadEndTemp, 
+			GetCurrentProcess(), 
+			ReadEnd, 
+			0, 
+			FALSE, 
+			DUPLICATE_SAME_ACCESS ) )
+	{
+		CloseHandle( ReadEndTemp );
+
+		return TRUE;
+	}
+	else
+	{
+		CloseHandle( ReadEndTemp );
+		CloseHandle( *WriteEnd );
+
+		return FALSE;
+	}
+}
+
+static BOOL CfixcmdsRelayOutput(
+	__in HANDLE ReadHandle
+	)
+{
+	BYTE Buffer[ 512 ];
+	DWORD BytesRead;
+	DWORD BytesWritten;
+	HANDLE StdoutHandle = GetStdHandle( STD_OUTPUT_HANDLE );
+
+	if ( ! StdoutHandle )
+	{
+		return FALSE;
+	}
+
+	for ( ;; )
+	{
+		if ( ! ReadFile(
+			ReadHandle,
+			Buffer,
+			sizeof( Buffer ),
+			&BytesRead,
+			NULL ) )
+		{
+			break;
+		}
+
+		if ( ! WriteFile(
+			StdoutHandle,
+			Buffer,
+			BytesRead,
+			&BytesWritten,
+			NULL ) )
+		{
+			break;
+		}
+	}
+
+	CloseHandle( StdoutHandle );
+	return TRUE;
+}
+
 static DWORD CfixcmdsSpawnAndRun(
 	__in PCFIXRUN_OPTIONS Options
 	)
@@ -127,6 +217,9 @@ static DWORD CfixcmdsSpawnAndRun(
 	DWORD ExitCode;
 	PROCESS_INFORMATION ProcessInfo;
 	STARTUPINFO StartupInfo;
+
+	HANDLE PipeReadHandle  = NULL;
+    HANDLE PipeWriteHandle = NULL;
     
 	if ( GetFileAttributes( Options->InputFile ) == INVALID_FILE_ATTRIBUTES )
 	{
@@ -137,7 +230,8 @@ static DWORD CfixcmdsSpawnAndRun(
 	}
 
 	//
-	// Inject cfixemb.dll and pass it our command line.
+	// Inject cfixemb.dll and pass it our command line via environment
+	// variables.
 	//
 
 	( VOID ) SetEnvironmentVariable(
@@ -147,16 +241,32 @@ static DWORD CfixcmdsSpawnAndRun(
 		CFIXRUN_EMB_CMDLINE_ENVVAR_NAME,
 		GetCommandLine() );
 
+	//
+	// To support GUI children, use a pipe to relay console I/O.
+	//
+	if ( ! CfixcmdsCreatePipe( &PipeReadHandle, &PipeWriteHandle ) )
+	{
+		Options->PrintConsole( 
+			L"Failed to create I/O pipes: Win32 error %d\n",
+			GetLastError() );
+
+		return CFIXRUN_EXIT_USAGE_FAILURE;
+	}
+
 	ZeroMemory( &ProcessInfo, sizeof( PROCESS_INFORMATION ) );
 	ZeroMemory( &StartupInfo, sizeof( STARTUPINFO ) );
     StartupInfo.cb = sizeof( STARTUPINFO );
     
+	StartupInfo.hStdOutput = PipeWriteHandle;
+	StartupInfo.hStdError  = PipeWriteHandle;
+	StartupInfo.dwFlags    = STARTF_USESTDHANDLES;
+
 	if ( ! CreateProcess(
 		Options->InputFile,
 		CommandLine,
 		NULL,
 		NULL,
-		FALSE,
+		TRUE,
 		0,
 		NULL,
 		NULL,
@@ -168,7 +278,19 @@ static DWORD CfixcmdsSpawnAndRun(
 			Options->InputFile,
 			GetLastError() );
 
-		return CFIXRUN_EXIT_USAGE_FAILURE;
+		ExitCode = CFIXRUN_EXIT_USAGE_FAILURE;
+	}
+
+	CloseHandle( PipeWriteHandle );
+
+	if ( ! CfixcmdsRelayOutput( PipeReadHandle ) )
+	{
+		Options->PrintConsole( 
+			L"Failed to relay I/O: Win32 error %d\n",
+			Options->InputFile,
+			GetLastError() );
+
+		ExitCode = CFIXRUN_EXIT_USAGE_FAILURE;
 	}
 
 	( VOID ) WaitForSingleObject( ProcessInfo.hProcess, INFINITE );
@@ -176,6 +298,7 @@ static DWORD CfixcmdsSpawnAndRun(
 
 	CloseHandle( ProcessInfo.hThread );
 	CloseHandle( ProcessInfo.hProcess );
+	CloseHandle( PipeReadHandle );
 
 	return ExitCode;
 }
