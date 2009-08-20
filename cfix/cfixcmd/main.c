@@ -28,6 +28,12 @@
 #include <cfixapi.h>
 #include <cfixrun.h>
 #include <cdiag.h>
+#include <shlwapi.h>
+
+#pragma warning( push )
+#pragma warning( disable: 6011; disable: 6387 )
+#include <strsafe.h>
+#pragma warning( pop )
 
 static VOID CfixcmdsPrintBanner()
 {
@@ -117,6 +123,19 @@ static VOID CfixcmdsPrintUsage(
 		CFIXRUN_EXIT_SOME_FAILED,	
 		CFIXRUN_EXIT_USAGE_FAILURE,
 		CFIXRUN_EXIT_FAILURE );
+}
+
+static BOOL CfixcmdsGetCfixEmbPath(
+	__in DWORD PathCch,
+	__out_ecount( BufferCch ) PWSTR Path 
+	)
+{
+	ASSERT( PathCch >= MAX_PATH );
+
+	return 
+		0 != GetModuleFileName( GetModuleHandle( NULL ), Path, PathCch ) &&
+	    PathRemoveFileSpec( Path ) &&
+		PathAppend( Path, L"cfixemb.dll" );
 }
 
 static BOOL CfixcmdsCreatePipe(
@@ -213,6 +232,7 @@ static DWORD CfixcmdsSpawnAndRun(
 	__in PCFIXRUN_OPTIONS Options
 	)
 {
+	WCHAR CfixEmbInitEnvvar[ MAX_PATH  + 64 ];
 	WCHAR CommandLine[] = L"";
 	DWORD ExitCode;
 	PROCESS_INFORMATION ProcessInfo;
@@ -230,13 +250,32 @@ static DWORD CfixcmdsSpawnAndRun(
 	}
 
 	//
+	// The working directory and PATH may be anything -- to play it safe,
+	// use a fully qualified path to cfixemb.dll.
+	//
+	if ( ! CfixcmdsGetCfixEmbPath( 
+		_countof( CfixEmbInitEnvvar ), 
+		CfixEmbInitEnvvar ) )
+	{
+		Options->PrintConsole( 
+			L"Failed to construct path to helper DLL\n",
+			Options->InputFile );
+		return CFIXRUN_EXIT_USAGE_FAILURE;
+	}
+
+	( VOID ) StringCchCat(
+		CfixEmbInitEnvvar,
+		_countof( CfixEmbInitEnvvar ),
+		L"!CfixEmbMain" );
+
+	//
 	// Inject cfixemb.dll and pass it our command line via environment
 	// variables.
 	//
 
 	( VOID ) SetEnvironmentVariable(
 		CFIX_EMB_INIT_ENVVAR_NAME,
-		L"cfixemb.dll!CfixEmbMain" );
+		CfixEmbInitEnvvar );
 	( VOID ) SetEnvironmentVariable(
 		CFIXRUN_EMB_CMDLINE_ENVVAR_NAME,
 		GetCommandLine() );
