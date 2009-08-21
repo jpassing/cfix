@@ -77,9 +77,12 @@
  *
  * Embedding.
  *
+ * Due to limitations in the VS2003 linker, embedding is only supported
+ * for VS2005 +.
+ *
  */
 
-#if ! defined( CFIX_KERNELMODE ) && ! defined( CFIX_NO_EMBEDDING )
+#if ! defined( CFIX_KERNELMODE ) && ! defined( CFIX_NO_EMBEDDING ) && _MSC_VER >= 1400
 
 /*++
 	Routine Description:
