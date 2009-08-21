@@ -70,12 +70,12 @@ BEGIN
         BLOCK "000004b0"
         BEGIN
             VALUE "CompanyName", "Johannes Passing"
-            VALUE "FileDescription", "Cfix Kernel Reflector"
+            VALUE "FileDescription", "cfix Embedding Helper Library"
             VALUE "FileVersion", "1, 5, 0, 3520\0"
-            VALUE "InternalName", "Cfixkr"
+            VALUE "InternalName", "cfix"
             VALUE "LegalCopyright", "Copyright (C) 2008 Johannes Passing"
-            VALUE "OriginalFilename", "Cfixkr"
-            VALUE "ProductName", "Cfix"
+            VALUE "OriginalFilename", "cfix"
+            VALUE "ProductName", "cfix"
             VALUE "ProductVersion", "1, 1, 0, 1"
         END
     END
@@ -99,6 +99,11 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
+
+
+
+
 
 
 

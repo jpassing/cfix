@@ -33,6 +33,12 @@
 #endif
 
 
+//
+// Environment variable used to exchange command line arguments
+// betwen cfixcmd and cfixemb.
+//
+#define CFIXRUN_EMB_CMDLINE_ENVVAR_NAME L"CFIX_INIT_CMDLINE"
+
 #define CFIXRUN_EXIT_ALL_SUCCEEDED		0
 #define CFIXRUN_EXIT_NONE_EXECUTED		1
 #define CFIXRUN_EXIT_SOME_FAILED		2
@@ -49,8 +55,17 @@ typedef enum
 
 typedef enum
 {
-	CfixrunInputDllOrDirectory = 0,
-	CfixrunInputMax = CfixrunInputDllOrDirectory
+	//
+	// Input file can be loaded into/is already present in current
+	// process.
+	//
+	CfixrunInputDynamicallyLoadable = 0,
+
+	//
+	// Input file is an exe that requires a process to be spawned.
+	//
+	CfixrunInputRequiresSpawn = 1,
+	CfixrunInputMax = CfixrunInputRequiresSpawn
 } CFIXRUN_INPUT_FILE_TYPE;
 
 typedef struct _CFIXRUN_OPTIONS

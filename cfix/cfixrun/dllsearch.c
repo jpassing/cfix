@@ -30,22 +30,6 @@ typedef struct _CFIXRUNP_SEARCH_CONTEXT
 	BOOL IncludeDrivers;
 } CFIXRUNP_SEARCH_CONTEXT, *PCFIXRUNP_SEARCH_CONTEXT;
 
-static BOOL CfixrunsIsDll(
-	__in PCWSTR Path
-	)
-{
-	size_t Len = wcslen( Path );
-	return ( Len > 4 && 0 == _wcsicmp( Path + Len - 4, L".dll" ) );
-}
-
-static BOOL CfixrunsIsSys(
-	__in PCWSTR Path
-	)
-{
-	size_t Len = wcslen( Path );
-	return ( Len > 4 && 0 == _wcsicmp( Path + Len - 4, L".sys" ) );
-}
-
 static HRESULT CfixrunsVisit(
 	__in PCWSTR Path,
 	__in CFIXUTIL_VISIT_TYPE Type,
@@ -67,7 +51,7 @@ static HRESULT CfixrunsVisit(
 		return S_OK;
 	}
 
-	if ( CfixrunsIsDll( Path ) )
+	if ( CfixrunpIsDll( Path ) )
 	{
 		return ( SearchContext->Callback ) ( 
 			Path, 
@@ -75,7 +59,7 @@ static HRESULT CfixrunsVisit(
 			SearchContext->CallbackContext, 
 			SearchPerformed );
 	}
-	else if ( SearchContext->IncludeDrivers && CfixrunsIsSys( Path ) )
+	else if ( SearchContext->IncludeDrivers && CfixrunpIsSys( Path ) )
 	{
 		return ( SearchContext->Callback ) ( 
 			Path, 
@@ -87,6 +71,30 @@ static HRESULT CfixrunsVisit(
 	{
 		return S_OK;
 	}
+}
+
+BOOL CfixrunpIsDll(
+	__in PCWSTR Path
+	)
+{
+	size_t Len = wcslen( Path );
+	return ( Len > 4 && 0 == _wcsicmp( Path + Len - 4, L".dll" ) );
+}
+
+BOOL CfixrunpIsSys(
+	__in PCWSTR Path
+	)
+{
+	size_t Len = wcslen( Path );
+	return ( Len > 4 && 0 == _wcsicmp( Path + Len - 4, L".sys" ) );
+}
+
+BOOL CfixrunpIsExe(
+	__in PCWSTR Path
+	)
+{
+	size_t Len = wcslen( Path );
+	return ( Len > 4 && 0 == _wcsicmp( Path + Len - 4, L".exe" ) );
 }
 
 HRESULT CfixrunSearchModules(

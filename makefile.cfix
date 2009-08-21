@@ -58,6 +58,7 @@ symadd:
 version:
 	rcstamp cfix\Cfix\cfix.rc $(VERSION)
 	rcstamp cfix\cfixcmd\runtest.rc $(VERSION)
+	rcstamp cfix\cfixemb\cfixemb.rc $(VERSION)
 	rcstamp cdiag\cdiag\cdiag.rc $(VERSION)
 	rcstamp cfixctl\cfixctl\cfixctl.rc $(VERSION)
 	rcstamp cfixkern\Cfixkl\cfixkl.rc $(VERSION)

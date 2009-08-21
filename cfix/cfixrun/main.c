@@ -41,8 +41,6 @@ static HRESULT CfixrunsMainWorker(
 
 	ASSERT( ExitCode );
 
-	ASSERT ( State->Options->InputFileType == CfixrunInputDllOrDirectory );
-	
 	if ( State->Options->InputFile == NULL ||
 		 wcslen( State->Options->InputFile ) == 0 )
 	{
@@ -72,11 +70,13 @@ static HRESULT CfixrunsMainWorker(
 		State->Options->PrintConsole( 
 			L"No matching test modules/fixtures found\n" );
 
-		if ( ! State->Options->EnableKernelFeatures )
+		if ( ! State->Options->EnableKernelFeatures ||
+			 ! State->Options->InputFileType != CfixrunInputRequiresSpawn )
 		{
 			State->Options->PrintConsole( 
-				L"Note: Kernel mode tests were not included in the search - \n"
-				L"      Use the -kern switch to search for kernel mode tests as well.\n" );
+				L"Note: Kernel mode and/or exe-based tests were not included in the search.\n"
+				L"      Use the -exe switch to search for exe-based tests\n"
+				L"      Use the -kern switch to search for kernel mode tests\n" );
 		}
 
 		*ExitCode = CFIXRUN_EXIT_NONE_EXECUTED;

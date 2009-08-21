@@ -243,7 +243,7 @@ typedef BOOL ( CFIXCALLTYPE * CFIXRUNP_FILTER_FIXTURE_ROUTINE ) (
 
 /*++
 	Routine Description:
-		Create Action displaying the contents of a fixture.
+		Search fixtures and assemble them into a sequence action.
 
 	Parameters:
 		DllOrDirectory	Path to search.
@@ -264,4 +264,49 @@ HRESULT CfixrunpSearchFixturesAndCreateSequenceAction(
 	__in CFIXRUNP_CREATE_ACTION_ROUTINE CreateActionCallback,
 	__in PVOID CallbackContext,
 	__out PCFIX_ACTION *SequenceAction
+	);
+
+/*++
+	Routine Description:
+		Create sequence action for a given module.
+
+	Parameters:
+		TestModule		Module to use.
+		LogSession		Session for diagnostic output.
+		Callback		Callback for creating an action for each 
+						fixture encountered.
+		CallbackContext Context passed to callback.
+		SequenceAction	Result. Contains one action per fixture.
+--*/
+HRESULT CfixrunpCreateSequenceAction( 
+	__in PCFIX_TEST_MODULE TestModule,
+	__in CDIAG_SESSION_HANDLE LogSession,
+	__in CFIXRUNP_FILTER_FIXTURE_ROUTINE FilterCallback,
+	__in CFIXRUNP_CREATE_ACTION_ROUTINE CreateActionCallback,
+	__in PVOID CallbackContext,
+	__out PCFIX_ACTION *SequenceAction
+	);
+
+/*++
+	Routine Description:
+		Test whether a given path addresses a DLL file.
+--*/
+BOOL CfixrunpIsDll(
+	__in PCWSTR Path
+	);
+
+/*++
+	Routine Description:
+		Test whether a given path addresses a SYS file.
+--*/
+BOOL CfixrunpIsSys(
+	__in PCWSTR Path
+	);
+
+/*++
+	Routine Description:
+		Test whether a given path addresses a EXE file.
+--*/
+BOOL CfixrunpIsExe(
+	__in PCWSTR Path
 	);

@@ -28,6 +28,7 @@
 #include <cfixapi.h>
 #include <cfixrun.h>
 #include <cdiag.h>
+#include <shlwapi.h>
 
 #pragma warning( push )
 #pragma warning( disable: 6011; disable: 6387 )
@@ -89,10 +90,9 @@ static VOID CfixcmdsPrintUsage(
 		L"    -Y             Pause at beginning of testrun\n"
 		L"    -y             Pause at end of testrun\n"
 		L"    -kern          Enable kernel mode features\n"
-		//L"    -Oca           Run testcases in alphabetic order\n"
-		//L"    -Ocr           Run testcases in random order\n"
-		//L"    -Osa           Run fixtures in alphabetic order\n"
-		//L"    -Osr           Run fixtures in random order\n"
+		L"    -exe           Enable support for EXE modules\n"
+		L"                   When this witch is used, the exact path to the module must be specified;\n"
+		L"                   wilcards and the -r option are not supported\n"
 		L"\n"
 		L"  Output Options:\n"
 		L"    -nologo        Do not display logo\n"
@@ -100,7 +100,6 @@ static VOID CfixcmdsPrintUsage(
 		L"    -log [<target>] Output log messages to <target>\n"
 		L"    -td             Disable stack trace capturing\n"
 		L"    -ts             Omit source information in stack traces\n"
-		//L"    -d <dir>      Create crash dump on failure and save it in <dir>\n"
 		L"\n"
 		L"    Targets:\n"
 		L"      debug        Print to debug console\n"
@@ -126,25 +125,221 @@ static VOID CfixcmdsPrintUsage(
 		CFIXRUN_EXIT_FAILURE );
 }
 
-int CfixcmdsPrintConsoleAndDebug(
-	__in_z __format_string PCWSTR Format, 
-	... 
+static BOOL CfixcmdsGetCfixEmbPath(
+	__in DWORD PathCch,
+	__out_ecount( BufferCch ) PWSTR Path 
 	)
 {
-	WCHAR Buffer[ 256 ];
+	ASSERT( PathCch >= MAX_PATH );
 
-	va_list lst;
-	va_start( lst, Format );
-	( VOID ) StringCchVPrintfW(
-		Buffer, 
-		_countof( Buffer ),
-		Format,
-		lst );
-	va_end( lst );
+	return 
+		0 != GetModuleFileName( GetModuleHandle( NULL ), Path, PathCch ) &&
+	    PathRemoveFileSpec( Path ) &&
+		PathAppend( Path, L"cfixemb.dll" );
+}
+
+static BOOL CfixcmdsCreatePipe(
+	__out HANDLE *ReadEnd,
+	__out HANDLE *WriteEnd
+	)
+{
+	HANDLE ReadEndTemp;
+	SECURITY_ATTRIBUTES SecurityAttr;
 	
-	OutputDebugString( Buffer );
+	SecurityAttr.nLength = sizeof( SECURITY_ATTRIBUTES );
+	SecurityAttr.bInheritHandle = TRUE;
+	SecurityAttr.lpSecurityDescriptor = NULL;
 
-	return wprintf( L"%s", Buffer );;
+	//
+	// Create pipe with two inheritable handles.
+	//
+	if ( ! CreatePipe( 
+			&ReadEndTemp, 
+			WriteEnd, 
+			&SecurityAttr, 
+			0 ) )
+	{
+		return FALSE;
+	}
+
+	//
+	// Convert the read end into a noninheritable handle.
+	//
+	if ( DuplicateHandle( 
+			GetCurrentProcess(), 
+			ReadEndTemp, 
+			GetCurrentProcess(), 
+			ReadEnd, 
+			0, 
+			FALSE, 
+			DUPLICATE_SAME_ACCESS ) )
+	{
+		CloseHandle( ReadEndTemp );
+
+		return TRUE;
+	}
+	else
+	{
+		CloseHandle( ReadEndTemp );
+		CloseHandle( *WriteEnd );
+
+		return FALSE;
+	}
+}
+
+static BOOL CfixcmdsRelayOutput(
+	__in HANDLE ReadHandle
+	)
+{
+	BYTE Buffer[ 512 ];
+	DWORD BytesRead;
+	DWORD BytesWritten;
+	HANDLE StdoutHandle = GetStdHandle( STD_OUTPUT_HANDLE );
+
+	if ( ! StdoutHandle )
+	{
+		return FALSE;
+	}
+
+	for ( ;; )
+	{
+		if ( ! ReadFile(
+			ReadHandle,
+			Buffer,
+			sizeof( Buffer ),
+			&BytesRead,
+			NULL ) )
+		{
+			break;
+		}
+
+		if ( ! WriteFile(
+			StdoutHandle,
+			Buffer,
+			BytesRead,
+			&BytesWritten,
+			NULL ) )
+		{
+			break;
+		}
+	}
+
+	CloseHandle( StdoutHandle );
+	return TRUE;
+}
+
+static DWORD CfixcmdsSpawnAndRun(
+	__in PCFIXRUN_OPTIONS Options
+	)
+{
+	WCHAR CfixEmbInitEnvvar[ MAX_PATH  + 64 ];
+	WCHAR CommandLine[] = L"";
+	DWORD ExitCode;
+	PROCESS_INFORMATION ProcessInfo;
+	STARTUPINFO StartupInfo;
+
+	HANDLE PipeReadHandle  = NULL;
+    HANDLE PipeWriteHandle = NULL;
+    
+	if ( GetFileAttributes( Options->InputFile ) == INVALID_FILE_ATTRIBUTES )
+	{
+		Options->PrintConsole( 
+			L"The file %s could not be found\n",
+			Options->InputFile );
+		return CFIXRUN_EXIT_USAGE_FAILURE;
+	}
+
+	//
+	// The working directory and PATH may be anything -- to play it safe,
+	// use a fully qualified path to cfixemb.dll.
+	//
+	if ( ! CfixcmdsGetCfixEmbPath( 
+		_countof( CfixEmbInitEnvvar ), 
+		CfixEmbInitEnvvar ) )
+	{
+		Options->PrintConsole( 
+			L"Failed to construct path to helper DLL\n",
+			Options->InputFile );
+		return CFIXRUN_EXIT_USAGE_FAILURE;
+	}
+
+	( VOID ) StringCchCat(
+		CfixEmbInitEnvvar,
+		_countof( CfixEmbInitEnvvar ),
+		L"!CfixEmbMain" );
+
+	//
+	// Inject cfixemb.dll and pass it our command line via environment
+	// variables.
+	//
+
+	( VOID ) SetEnvironmentVariable(
+		CFIX_EMB_INIT_ENVVAR_NAME,
+		CfixEmbInitEnvvar );
+	( VOID ) SetEnvironmentVariable(
+		CFIXRUN_EMB_CMDLINE_ENVVAR_NAME,
+		GetCommandLine() );
+
+	//
+	// To support GUI children, use a pipe to relay console I/O.
+	//
+	if ( ! CfixcmdsCreatePipe( &PipeReadHandle, &PipeWriteHandle ) )
+	{
+		Options->PrintConsole( 
+			L"Failed to create I/O pipes: Win32 error %d\n",
+			GetLastError() );
+
+		return CFIXRUN_EXIT_USAGE_FAILURE;
+	}
+
+	ZeroMemory( &ProcessInfo, sizeof( PROCESS_INFORMATION ) );
+	ZeroMemory( &StartupInfo, sizeof( STARTUPINFO ) );
+    StartupInfo.cb = sizeof( STARTUPINFO );
+    
+	StartupInfo.hStdOutput = PipeWriteHandle;
+	StartupInfo.hStdError  = PipeWriteHandle;
+	StartupInfo.dwFlags    = STARTF_USESTDHANDLES;
+
+	if ( ! CreateProcess(
+		Options->InputFile,
+		CommandLine,
+		NULL,
+		NULL,
+		TRUE,
+		0,
+		NULL,
+		NULL,
+		&StartupInfo,
+		&ProcessInfo ) )
+	{
+		Options->PrintConsole( 
+			L"The file %s could not launched: Win32 error %d\n",
+			Options->InputFile,
+			GetLastError() );
+
+		ExitCode = CFIXRUN_EXIT_USAGE_FAILURE;
+	}
+
+	CloseHandle( PipeWriteHandle );
+
+	if ( ! CfixcmdsRelayOutput( PipeReadHandle ) )
+	{
+		Options->PrintConsole( 
+			L"Failed to relay I/O: Win32 error %d\n",
+			Options->InputFile,
+			GetLastError() );
+
+		ExitCode = CFIXRUN_EXIT_USAGE_FAILURE;
+	}
+
+	( VOID ) WaitForSingleObject( ProcessInfo.hProcess, INFINITE );
+	( VOID ) GetExitCodeProcess( ProcessInfo.hProcess, &ExitCode );
+
+	CloseHandle( ProcessInfo.hThread );
+	CloseHandle( ProcessInfo.hProcess );
+	CloseHandle( PipeReadHandle );
+
+	return ExitCode;
 }
 
 int __cdecl wmain(
@@ -156,15 +351,6 @@ int __cdecl wmain(
 	DWORD ExitCode;
 
 	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
-
-	if ( IsDebuggerPresent() )
-	{
-		Options.PrintConsole = CfixcmdsPrintConsoleAndDebug;
-	}
-	else
-	{
-		Options.PrintConsole = wprintf;
-	}
 
 	if ( Argc == 0 )
 	{
@@ -185,12 +371,19 @@ int __cdecl wmain(
 		CfixcmdsPrintBanner();
 	}
 
-	//
-	// No 'drive not ready'-dialogs, please.
-	//
-	SetErrorMode( SetErrorMode( 0 ) | SEM_FAILCRITICALERRORS );
+	if ( Options.InputFileType == CfixrunInputRequiresSpawn )
+	{
+		ExitCode = CfixcmdsSpawnAndRun( &Options );
+	}
+	else
+	{
+		//
+		// No 'drive not ready'-dialogs, please.
+		//
+		SetErrorMode( SetErrorMode( 0 ) | SEM_FAILCRITICALERRORS );
 
-	ExitCode = CfixrunMain( &Options );
+		ExitCode = CfixrunMain( &Options );
+	}
 
 #ifdef DBG	
 	_CrtDumpMemoryLeaks();

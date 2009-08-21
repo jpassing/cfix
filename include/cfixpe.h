@@ -71,6 +71,8 @@
 --*/
 #define EXCEPTION_TESTCASE_FAILED_ABORT	( ( ULONG ) 0x8004AFFDUL )
 
+#define CfixPtrFromRva( base, rva ) ( ( ( PUCHAR ) base ) + rva )
+
 /*----------------------------------------------------------------------
  *
  * Embedding.
@@ -78,6 +80,38 @@
  */
 
 #if ! defined( CFIX_KERNELMODE ) && ! defined( CFIX_NO_EMBEDDING )
+
+/*++
+	Routine Description:
+		Check whether the image this code is part of is an EXE image.
+--*/
+__inline BOOL CfixpIsExeImage()
+{
+	DWORD_PTR Address;
+	PVOID Base;
+	PIMAGE_DOS_HEADER DosHeader;
+	PIMAGE_NT_HEADERS NtHeader;
+
+#pragma warning( push )
+#pragma warning( disable: 4054 )
+	Address = ( DWORD_PTR ) ( PVOID ) &CfixpIsExeImage;
+#pragma warning( pop )
+
+	Base = GetModuleHandle( NULL );
+
+	DosHeader = ( PIMAGE_DOS_HEADER ) ( PVOID ) Base;
+	if ( DosHeader == NULL )
+	{
+		return FALSE;
+	}
+
+	NtHeader = ( PIMAGE_NT_HEADERS ) 
+		CfixPtrFromRva( DosHeader, DosHeader->e_lfanew );
+	
+	return 
+		Address >= ( DWORD_PTR ) Base &&
+		Address < ( ( DWORD_PTR ) Base ) + NtHeader->OptionalHeader.SizeOfImage;
+}
 
 typedef void ( __cdecl * CFIX_CRT_INIT_ROUTINE )();
 
@@ -93,8 +127,7 @@ typedef HRESULT ( CFIXCALLTYPE * CFIX_EMBEDDING_ROUTINE )();
 /*++
 	Routine Description:
 		CRT initializer function, called before main(). Accepts
-		a routine to be specified via a environment variable that
-		will be called at the end of CRT initialization.
+		a hook routine to be specified via a environment variable.
 
 		The routine has to conform to CFIX_EMBEDDING_ROUTINE.
 --*/
@@ -120,12 +153,18 @@ EXTERN_C __inline void __cdecl CfixpCrtInitEmbedding()
 		//
 		return;
 	}
+	else if ( ! CfixpIsExeImage() )
+	{
+		//
+		// This is a DLL loaded by an EXE that itself houses tests.
+		// Ignore this call.
+		//
+		return;
+	}
 	else
 	{
 		Initialized = TRUE;
 	}
-
-	// printf( "CfixpCrtInitEmbedding()\n" );
 
 	if ( 0 == GetEnvironmentVariableA(
 		CFIX_EMB_INIT_ENVVAR_NAMEA,
@@ -318,8 +357,6 @@ PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##name()		\
 	return &Fixture;												\
 }			
 
-
-#define CfixPtrFromRva( base, rva ) ( ( ( PUCHAR ) base ) + rva )
 
 #define CFIX_FIXTURE_EXPORT_PREFIX "__CfixFixturePe"
 #define CFIX_FIXTURE_EXPORT_PREFIX_CCH 15

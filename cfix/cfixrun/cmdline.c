@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------
  * Purpose:
- *		Search for Test-DLLs.
+ *		Command line parsing.
  *
  * Copyright:
  *		2008-2009, Johannes Passing (passing at users.sourceforge.net)
@@ -20,8 +20,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with cfix.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "Cfixrun.h"
+#include "cfixrunp.h"
+#include <stdlib.h>
 #include <stdio.h>
+
+#pragma warning( push )
+#pragma warning( disable: 6011; disable: 6387 )
+#include <strsafe.h>
+#pragma warning( pop )
 
 typedef enum
 {
@@ -73,6 +79,27 @@ static BOOL CfixrunsSetOutputTarget(
 	return TRUE;
 }
 
+static int CfixcmdsPrintConsoleAndDebug(
+	__in_z __format_string PCWSTR Format, 
+	... 
+	)
+{
+	WCHAR Buffer[ 256 ];
+
+	va_list lst;
+	va_start( lst, Format );
+	( VOID ) StringCchVPrintfW(
+		Buffer, 
+		_countof( Buffer ),
+		Format,
+		lst );
+	va_end( lst );
+	
+	OutputDebugString( Buffer );
+
+	return wprintf( L"%s", Buffer );;
+}
+
 BOOL CfixrunParseCommandLine(
 	__in UINT Argc,
 	__in PCWSTR *Argv,
@@ -83,7 +110,21 @@ BOOL CfixrunParseCommandLine(
 	PCWSTR *Value = NULL;
 	UINT ArgIndex;
 
-	ASSERT( Options->PrintConsole );
+	ASSERT( Options->PrintConsole == NULL );
+
+	if ( IsDebuggerPresent() )
+	{
+		Options->PrintConsole = CfixcmdsPrintConsoleAndDebug;
+	}
+	else
+	{
+		Options->PrintConsole = wprintf;
+	}
+
+	//
+	// Default, may be overridden during parsing.
+	//
+	Options->InputFileType = CfixrunInputDynamicallyLoadable;
 
 	for ( ArgIndex = 1; ArgIndex < Argc; ArgIndex++ )
 	{
@@ -107,7 +148,6 @@ BOOL CfixrunParseCommandLine(
 				return FALSE;
 			}
 
-			Options->InputFileType = CfixrunInputDllOrDirectory;
 			Options->InputFile = Argv[ ArgIndex ];
 		}
 		else if ( Argv[ ArgIndex ][ 0 ] == L'-' ||
@@ -185,6 +225,11 @@ BOOL CfixrunParseCommandLine(
 				Options->EnableKernelFeatures = TRUE;
 				State = StateExpectAny;
 			}
+			else if ( 0 == wcscmp( FlagName, L"exe" ) )
+			{
+				Options->InputFileType = CfixrunInputRequiresSpawn;
+				State = StateExpectAny;
+			}
 			else if ( 0 == wcscmp( FlagName, L"fsf" ) )
 			{
 				Options->ShortCircuitFixtureOnFailure = TRUE;
@@ -249,6 +294,31 @@ BOOL CfixrunParseCommandLine(
 			ASSERT( Value != NULL );
 			*Value = Argv[ ArgIndex ];
 			State = StateExpectAny;
+		}
+	}
+
+	if ( Options->InputFileType == CfixrunInputRequiresSpawn )
+	{
+		if ( Options->EnableKernelFeatures )
+		{
+			Options->PrintConsole( L"Cannot use -kern and -exe at the same time\n" );
+			return FALSE;
+		}
+		else if ( Options->RecursiveSearch )
+		{
+			Options->PrintConsole( L"Cannot use -r and -exe at the same time\n" );
+			return FALSE;
+		}
+		else if ( Options->PauseAtBeginning || Options->PauseAtEnd )
+		{
+			Options->PrintConsole( L"-y and -Y are currently not supported in "
+				L"conjunction with -exe\n" );
+			return FALSE;
+		}
+		else if ( ! CfixrunpIsExe( Options->InputFile ) )
+		{
+			Options->PrintConsole( L"-exe is only applicable for .exe files\n" );
+			return FALSE;
 		}
 	}
 
