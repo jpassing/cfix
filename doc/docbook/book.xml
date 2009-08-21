@@ -343,21 +343,23 @@
 		<title>Multithreading<indexterm><primary>Multithreading</primary></indexterm></title>
 		<para>
 		cfix has been implemented in a threadsafe manner. Furthermore, test cases are explicily allowed to make use
-		of multithreading as long as they use the wrapper function CfixCreateThread rather than CreateThread.
+		of multithreading as long as they use the wrapper function 
+		<link linkend="CfixCreateThread">CfixCreateThread</link>/<link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link> 
+		rather than the Win32 CreateThread function.
 		</para>
 		<para>
-		The motivation behind this is as follows. Although the current release supports execution of one fixture
-		at a time only, future releases are planned to allow parallel test execution. While the details are not of
-		importance at this stage, it already raises the question of how to deal with unknown threads, i.e. threads that
-		have been created by test cases and are thus outside of cfix' control. In order to relate such threads
-		to the test case they belong to, cfix needs some help -- and this help comes in the form of using
-		the CfixCreateThread wrapper function. cfix will relate a thread created by CfixCreateThread with the 
-		existing test case and is now also able to handle any events (assertions etc) by this thread properly.
+		The motivation behind this is as follows: To allow future releases of the framework to execute multiple
+		tests in parallel within the same process, cfix has to maintain a proper correlation between events (assertions) 
+		and threads. To allow such correlation to be maintained as well for threads that are spawned by individual test cases,
+		these thread spawns need to be made explicit by using <link linkend="CfixCreateThread">CfixCreateThread</link> (User Mode)
+		or <link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link> (Kernel Mode): cfix will relate threads spawned
+		in this manner with the spawning test case and will correlate all assertions accordingly.
 		
 		<note>
-			When creating threads from within a test case and these threads use the cfix API (CFIX_ASSERT, CFIX_LOG etc), always
-			make sure to use CfixCreateThread rather than CreateThread. Threads not using the cfix API (worker threads etc)
-			are not affected by this requirement.
+			When creating threads from within a test case and these threads make use of the cfix API (CFIX_ASSERT, CFIX_LOG etc), 
+			make sure to use <link linkend="CfixCreateThread">CfixCreateThread</link> (User Mode)
+			or <link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link> (Kernel Mode) rather than CreateThread. 
+			Threads not using the cfix API (worker threads etc) are not affected by this requirement.
 		</note>
 		</para>
 	</section>
