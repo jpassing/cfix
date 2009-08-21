@@ -39,9 +39,6 @@ void TestCmdLineParser()
 	CFIXRUN_OPTIONS Options;
 	CFIXRUN_OUTPUT_TARGET DefOutputProgress;
 
-	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
-	Options.PrintConsole = wprintf;
-
 	if ( IsDebuggerPresent() )
 	{
 		DefOutputProgress = CfixrunTargetDebug;
@@ -51,10 +48,12 @@ void TestCmdLineParser()
 		DefOutputProgress = CfixrunTargetConsole;
 	}
 
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 	TEST( ParseCommandLine( L"runtest foo.dll", &Options ) );
 	TEST( CfixrunInputDynamicallyLoadable == Options.InputFileType );
 	TEST( 0 == wcscmp( Options.InputFile, L"foo.dll" ) );
 
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 	TEST( ParseCommandLine( L"runtest -f -d -b -u /y /nologo -z foo.dll", &Options ) );
 	TEST( CfixrunInputDynamicallyLoadable == Options.InputFileType );
 	TEST( 0 == wcscmp( Options.InputFile, L"foo.dll" ) );
@@ -70,15 +69,29 @@ void TestCmdLineParser()
 	TEST( DefOutputProgress == Options.ProgressOutputTarget );
 	TEST( CfixrunTargetNone == Options.LogOutputTarget );
 
-	TEST( ParseCommandLine( L"runtest -exe -out debug /td -log \"console\" foo.dll", &Options ) );
-	TEST( CfixrunInputDynamicallyLoadable == Options.InputFileType );
-	TEST( 0 == wcscmp( Options.InputFile, L"foo.dll" ) );
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
+	TEST( ! ParseCommandLine( L"runtest -exe -out debug /td foo.dll", &Options ) );
+
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
+	TEST( ! ParseCommandLine( L"runtest -exe -out debug /td -y foo.exe", &Options ) );
+
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
+	TEST( ! ParseCommandLine( L"runtest -exe -out debug /td -Y foo.exe", &Options ) );
+
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
+	TEST( ! ParseCommandLine( L"runtest -exe -out debug /td -r foo.exe", &Options ) );
+
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
+	TEST( ParseCommandLine( L"runtest -exe -out debug /td -log \"console\" foo.exe", &Options ) );
+	TEST( CfixrunInputRequiresSpawn == Options.InputFileType );
+	TEST( 0 == wcscmp( Options.InputFile, L"foo.exe" ) );
 	TEST( 0 == wcscmp( Options.ProgressOutputTargetName, L"debug" ) );
 	TEST( 0 == wcscmp( Options.LogOutputTargetName, L"console" ) );
 	TEST( ! Options.EnableKernelFeatures );
 	TEST( Options.InputFileType == CfixrunInputRequiresSpawn );
 	TEST( Options.DisableStackTraces );
 
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 	TEST( ParseCommandLine( L"runtest -kern -fsr -fss -out debug -out b foo.dll", &Options ) );
 	TEST( CfixrunInputDynamicallyLoadable == Options.InputFileType );
 	TEST( 0 == wcscmp( Options.InputFile, L"foo.dll" ) );
@@ -89,6 +102,7 @@ void TestCmdLineParser()
 	TEST( Options.ShortCircuitRunOnFailure );
 	TEST( Options.ShortCircuitRunOnSetupFailure );
 
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 	TEST( ParseCommandLine( L"runtest -Y -ts -r -n a /fsf -p b foo.dll", &Options ) );
 	TEST( Options.RecursiveSearch );
 	TEST( CfixrunInputDynamicallyLoadable == Options.InputFileType );
@@ -99,11 +113,17 @@ void TestCmdLineParser()
 	TEST( Options.PauseAtBeginning );
 	TEST( Options.ShortCircuitFixtureOnFailure );
 
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 	TEST ( ParseCommandLine( L"runtest -r", &Options ) );
 	TEST( 0 == wcscmp( Options.InputFile, L"-r" ) );
 
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 	TEST ( ! ParseCommandLine( L"runtest foo.dll foo.dll", &Options ) );
+
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 	TEST ( ! ParseCommandLine( L"runtest -out foo.dll", &Options ) );
+
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 	TEST ( ! ParseCommandLine( L"runtest -out -r foo.dll", &Options ) );
 }
 
