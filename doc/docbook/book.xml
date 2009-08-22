@@ -363,6 +363,46 @@
 		</note>
 		</para>
 	</section>
+	<section id="ExeTargets">
+		<title>EXE targets<indexterm><primary>EXE targets</primary></indexterm></title>
+		
+		<para>
+			Previous to cfix 1.5, the framework only supported tests compiled and linked into a DLL file.
+			While such DLL-based tests remain the preferred and most flexible choice, cfix 1.5 has added
+			support for EXE-based tests.
+		</para>
+		<para>
+			In cases where cleanly isolating test code from application code is not possible or implementing
+			tests in a DLL is not feasible for other reasons, cfix can be directed to execute tests embedded
+			into an EXE file.
+		</para>
+		<para>
+			When using EXE targets, please note the following:
+			<itemizedlist>
+				<listitem>
+					The project's main/WinMain routine can remain as is and will not be executed by cfix.
+				</listitem>
+				<listitem>
+					CRT initialization is conducted as normal. In particular, this means that you can rely
+					on constructors of global objects to have run.
+				</listitem>
+				<listitem>
+					To avoid tests from being included in shipping code, it is usually advisable to make
+					use of preprocessor #ifdefs or the "Exclude from build" feature offered by Visual Studio.
+				</listitem>
+				<listitem>
+					Due to limitations of downlevel linker versions, this feature requires Visual Studio 2005 
+					(cl 14.0/link 8.0) or better.
+				</listitem>
+			</itemizedlist>
+			
+			Because the application's main/WinMain routine is not changed, launching the EXE will cause
+			normal program behavior. To run the unit tests, launch the EXE indirectly
+			using cfix32 (for 32 bit programs) or cfix64 (for 64 bit programs) while specifying the 
+			<emphasis>-exe</emphasis> command line switch -- e.g.: <emphasis>cfix32 -exe app.exe</emphasis>.
+			cfix32/cfix64 will then spawn app.exe as child process, causing all unit tests to be run.
+		</para>
+	</section>
 	<!--
 	<section id="Building">
 		<title>Building cfix<indexterm><primary>Building</primary></indexterm></title>
@@ -1646,7 +1686,8 @@ f9fc50fe cc              int     3
 				<listitem><link linkend="CFIX_ASSERT_HRESULT">CFIX_ASSERT_HRESULT</link></listitem>
 				<listitem><link linkend="CFIX_ASSERT_STATUS">CFIX_ASSERT_STATUS</link></listitem>
 				<listitem><link linkend="CFIX_FAIL">CFIX_FAIL</link></listitem>
-				<listitem>Command line switch -td</listitem>
+				<listitem>Command line switch -td for disabling stack trace capturing</listitem>
+				<listitem>Unit tests may be <link linkend="ExeTargets">embedded into EXE modules</link> and run using the -exe switch</listitem>
 			</itemizedlist>	
 		</para>
 		</simplesect>
