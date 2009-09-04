@@ -158,7 +158,7 @@ static void QueryCfixExe()
 	CFIX_MODULE_INFO Info;
 	WCHAR Path[ MAX_PATH ];
 
-#ifdef WIN64
+#ifdef _WIN64
 	TEST( PathCombine( Path, DifferentArchBinPath, L"cfix32.exe" ) );
 #else
 	TEST( PathCombine( Path, SameArchBinPath, L"cfix32.exe" ) );
