@@ -86,6 +86,8 @@ static VOID ThreadProc( PVOID Pv )
 	CFIX_ASSERT_EQUALS_DWORD( 
 		0xBABEFACE, 
 		( ULONG ) ( ULONG_PTR ) CfixPeGetValue( 0 ) );
+
+	CfixPeSetValue( 0, &BeforeDummy1 );
 }
 
 static void TestTlsVisibleOnChildThread()
@@ -113,8 +115,6 @@ static void TestTlsVisibleOnChildThread()
 		0 ) );
 
 	CFIX_ASSERT( NT_SUCCESS( ZwClose( ThreadHandle ) ) );
-
-	CfixPeSetValue( 0, &BeforeDummy1 );
 }
 
 CFIX_BEGIN_FIXTURE( Tls )
