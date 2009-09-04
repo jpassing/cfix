@@ -101,6 +101,15 @@ h4
         padding-top: 0px;
 }
 
+#main_content_half
+{
+        width: 380px;
+        float: left;
+        padding-right: 15px;
+        padding-left: 15px;
+        padding-top: 0px;
+}
+
 #main_clear
 {
 	height: 1px;

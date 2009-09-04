@@ -80,7 +80,7 @@
 
 	<body>
 		<div id='tab'>
-			<div class='tab_passive'><a href='http://www.cfix-studio.com/'>cfix studio &#x2013; C/C++ unit testing for Visual Studio</a></div>
+			<div class='tab_passive'><a href='http://www.visualassert.com/'>Visual Assert &#x2013; The Unit Testing Add-In for Visual C++</a></div>
 			<div class='tab_passive2active'><img src='../assets/img/tab_passive2active.png' alt=''/></div>
 			<div class='tab_active'><a href='../index.html'>cfix &#x2013;  C/C++ Unit Testing for Win32 and NT</a></div>
 			<div class='tab_activeend'><img src='../assets/img/tab_activeend.png' alt=''/></div>
