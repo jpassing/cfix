@@ -22,6 +22,7 @@
  */
 
 #include <cfix.h>
+#include <cfixapi.h>
 #include <cfixkrio.h>
 #include <stdlib.h>
 #include <stdio.h>

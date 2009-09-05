@@ -25,15 +25,6 @@
 
 #define TEST CFIX_ASSERT
 
-extern VOID CfixklGetNativeSystemInfo(
-	__out LPSYSTEM_INFO SystemInfo
-	);
-
-extern BOOL CfixklIsWow64Process(
-	__in HANDLE Process,
-	__out PBOOL Wow64Process
-	);
-
 DWORD LoadDriver(
 	__in PCWSTR Name,
 	__in PCWSTR DriverPath 

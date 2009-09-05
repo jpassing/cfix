@@ -77,20 +77,6 @@ HRESULT CfixklpStartCfixKernelReflector();
 
 /*----------------------------------------------------------------------
  *
- * Compatibility Routines.
- *
- */
-VOID CfixklGetNativeSystemInfo(
-	__out LPSYSTEM_INFO SystemInfo
-	);
-
-BOOL CfixklIsWow64Process(
-	__in HANDLE Process,
-	__out PBOOL Wow64Process
-	);
-
-/*----------------------------------------------------------------------
- *
  * IOCTL Wrappers.
  *
  */

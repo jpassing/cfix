@@ -21,6 +21,7 @@
  * along with cfix.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <cfix.h>
+#include <cfixapi.h>
 #include <util.h>
 #include <stdlib.h>
 

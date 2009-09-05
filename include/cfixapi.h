@@ -522,6 +522,24 @@ CFIXAPI HRESULT CFIXCALLTYPE CfixklCreateTestModuleFromDriver(
 	__out_opt PBOOL Loaded
 	);
 
+/*++
+	Routine Description:
+		Compatibility routine. Wrapper for GetNativeSystemInfo,
+		also works on downloevel Windows versions.
+--*/
+CFIXAPI VOID CFIXCALLTYPE CfixklGetNativeSystemInfo(
+	__out LPSYSTEM_INFO SystemInfo
+	);
+
+/*++
+	Routine Description:
+		Compatibility routine. Wrapper for IsWow64Process,
+		also works on downloevel Windows versions.
+--*/
+CFIXAPI BOOL CFIXCALLTYPE CfixklIsWow64Process(
+	__in HANDLE Process,
+	__out PBOOL Wow64Process
+	);
 
 //
 // If one routine fails, prematurely abort fixture.

@@ -20,6 +20,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with cfix.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#define CFIXAPI
+
 #include "cfixklp.h"
 
 typedef VOID ( * GETNATIVESYSTEMINFO_ROUTINE )(
@@ -31,7 +34,7 @@ typedef BOOL ( * ISWOW64PROCESS_ROUTINE )(
 	__out PBOOL Wow64Process
 	);
 
-VOID CfixklGetNativeSystemInfo(
+VOID CFIXCALLTYPE CfixklGetNativeSystemInfo(
 	__out LPSYSTEM_INFO SystemInfo
 	)
 {
@@ -62,7 +65,7 @@ VOID CfixklGetNativeSystemInfo(
 	}
 }
 
-BOOL CfixklIsWow64Process(
+BOOL CFIXCALLTYPE CfixklIsWow64Process(
 	__in HANDLE Process,
 	__out PBOOL Wow64Process
 	)

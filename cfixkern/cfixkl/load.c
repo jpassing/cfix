@@ -21,6 +21,8 @@
  * along with cfix.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define CFIXAPI
+
 #include "cfixklp.h"
 #include <stdlib.h>
 #include <shlwapi.h>
