@@ -72,6 +72,7 @@
 			CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeWinUnit, 0 ),		\
 			Entries														\
 		};																\
+		CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION();					\
 		return &Fixture;												\
 	}																	\
 	static void CFIXCALLTYPE TestCaseName()								\
@@ -231,6 +232,7 @@ namespace cfixwu
 	EXTERN_C __declspec(dllexport)										\
 	PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##FixtureName()\
 	{																	\
+		CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION();					\
 		return __GetDefinition##FixtureName##().GetDefinition();								\
 	}																	
 
