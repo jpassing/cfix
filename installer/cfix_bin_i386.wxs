@@ -29,6 +29,20 @@
     KeyPath="no"/>
 
   <File
+    Id="FileI386CfixembDll"
+    Name="cfixemb.dll"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\i386\cfixemb.dll"
+    Vital="yes"/>
+  <File
+    Id="FileI386CfixembPdb"
+    Name="cfixemb.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\i386\cfixemb.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
     Id="FileI386Cfix32Exe"
     Name="cfix32.exe"
     DiskId="1"

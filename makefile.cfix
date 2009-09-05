@@ -343,8 +343,10 @@ srcrelease: cleantemps
 	del /S *.user
 	cd ..\..\..
 
+	cd rtm\cfix-src-$(VERSION)
 	-1 for /f "delims=" %%i in ('dir /s/b __*.txt') do @del  %%i
 	-1 for /f "delims=" %%i in ('dir /s/b *.cmd') do @del  %%i
+	cd ..\..
 	
 	cd rtm\cfix-src-$(VERSION)\cfix
 	

@@ -29,6 +29,20 @@
     KeyPath="no"/>
 
   <File
+    Id="FileAmd64CfixembDll"
+    Name="cfixemb.dll"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\amd64\cfixemb.dll"
+    Vital="yes"/>
+  <File
+    Id="FileAmd64CfixembPdb"
+    Name="cfixemb.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\amd64\cfixemb.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
     Id="FileAmd64Cfix64Exe"
     Name="cfix64.exe"
     DiskId="1"
