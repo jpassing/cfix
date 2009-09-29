@@ -59,23 +59,23 @@
 		Standalone test case. Exposed as cfix fixture containing a single
 		test case only.
 --*/
-#define BEGIN_TEST( TestCaseName )										\
-	static void CFIXCALLTYPE TestCaseName();							\
-	EXTERN_C __declspec(dllexport)										\
+#define BEGIN_TEST( TestCaseName )											\
+	static void CFIXCALLTYPE TestCaseName();								\
+	EXTERN_C __declspec(dllexport)											\
 	PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##TestCaseName()	\
-	{																	\
-		static CFIX_PE_DEFINITION_ENTRY Entries[] = {					\
+	{																		\
+		static CFIX_PE_DEFINITION_ENTRY Entries[] = {						\
 		{ CfixEntryTypeTestcase, __CFIX_WIDE( #TestCaseName ), TestCaseName },	\
-		{ CfixEntryTypeEnd, NULL, NULL }								\
-		};																\
-		static CFIX_TEST_PE_DEFINITION Fixture = {						\
-			CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeWinUnit, 0 ),		\
-			Entries														\
-		};																\
-		CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION();					\
-		return &Fixture;												\
-	}																	\
-	static void CFIXCALLTYPE TestCaseName()								\
+		{ CfixEntryTypeEnd, NULL, NULL }									\
+		};																	\
+		static CFIX_TEST_PE_DEFINITION Fixture = {							\
+			CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeWinUnitStandalone, 0 ),	\
+			Entries															\
+		};																	\
+		CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION();						\
+		return &Fixture;													\
+	}																		\
+	static void CFIXCALLTYPE TestCaseName()									\
 
 #define END_TEST
 
@@ -161,7 +161,7 @@ namespace cfixwu
 			// Base structure.
 			//
 			this->Definition->Header.ApiVersion	= 
-				CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeWinUnit, 0 );
+				CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeWinUnitFixture, 0 );
 			this->Definition->Header.Entries	= this->Definition->Entries;
 
 			//

@@ -139,18 +139,19 @@ typedef enum CFIX_API_TYPE
 	//
 	// C/C++ Base API.
 	//
-	CfixApiTypeBase		= 1,
+	CfixApiTypeBase					= 1,
 
 	//
 	// C++ API.
 	//
-	CfixApiTypeCc		= 2,
+	CfixApiTypeCc					= 2,
 
 	//
 	// WinUnit.
 	//
-	CfixApiTypeWinUnit	= 3,
+	CfixApiTypeWinUnitFixture		= 3,
+	CfixApiTypeWinUnitStandalone	= 4,
 
-	CfixApiTypeMin		= 1,
-	CfixApiTypeMax		= 3
+	CfixApiTypeMin					= 1,
+	CfixApiTypeMax					= 4
 } CFIX_API_TYPE;
