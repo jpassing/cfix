@@ -145,6 +145,10 @@
 							>
 						</File>
 						<File
+							RelativePath=".\tests\testwu\NameConflicts.cpp"
+							>
+						</File>
+						<File
 							RelativePath=".\tests\testwu\Simple.cpp"
 							>
 						</File>

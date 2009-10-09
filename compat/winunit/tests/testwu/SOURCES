@@ -33,4 +33,5 @@ SOURCES=\
 	Fixture.cpp \
 	Assertions.cpp \
 	Messages.cpp \
+	NameConflicts.cpp \
 	iatpatch.c	

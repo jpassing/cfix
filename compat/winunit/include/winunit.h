@@ -244,7 +244,7 @@ namespace cfixwu
 --*/
 #define SETUP( FixtureName )											\
 	static void CFIXCALLTYPE FixtureName##_Setup();						\
-	static cfixwu::DynamicFixtureAdder __FixtureName##_SetupAdder(		\
+	static cfixwu::DynamicFixtureAdder __##FixtureName##_SetupAdder(	\
 		__GetDefinition##FixtureName(),									\
 		CfixEntryTypeBefore,											\
 		FixtureName##_Setup,											\
@@ -259,7 +259,7 @@ namespace cfixwu
 --*/
 #define TEARDOWN( FixtureName )											\
 	static void CFIXCALLTYPE FixtureName##_Teardown();					\
-	static cfixwu::DynamicFixtureAdder __FixtureName##_TeardownAdder(	\
+	static cfixwu::DynamicFixtureAdder __##FixtureName##_TeardownAdder(	\
 		__GetDefinition##FixtureName(),									\
 		CfixEntryTypeAfter,												\
 		FixtureName##_Teardown,											\
@@ -272,7 +272,7 @@ namespace cfixwu
 --*/
 #define BEGIN_TESTF( TestName, FixtureName )							\
 	static void CFIXCALLTYPE FixtureName##_##TestName();				\
-	static cfixwu::DynamicFixtureAdder __FixtureName##_##TestName##Adder(	\
+	static cfixwu::DynamicFixtureAdder __##FixtureName##_##TestName##Adder(	\
 		__GetDefinition##FixtureName(),									\
 		CfixEntryTypeTestcase,											\
 		FixtureName##_##TestName,										\
