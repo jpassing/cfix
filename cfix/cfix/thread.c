@@ -31,7 +31,7 @@
 typedef struct _CFIXP_THREAD_START_PARAMETERS
 {
 	PTHREAD_START_ROUTINE StartAddress;
-	PVOID UserParaneter;
+	PVOID UserParameter;
 	
 	PVOID ParentContext;
 	PCFIXP_FILAMENT Filament;
@@ -100,7 +100,7 @@ static DWORD CfixsThreadStart(
 	__try
 	{
 		ExitCode = ( CopyOfParameters.StartAddress )( 
-			CopyOfParameters.UserParaneter );
+			CopyOfParameters.UserParameter );
 	}
 	__except ( CfixpExceptionFilter( 
 		GetExceptionInformation(), 
@@ -161,7 +161,7 @@ HANDLE CfixCreateThread2(
 		GetCurrentThreadId() );
 
 	Parameters.StartAddress		= StartAddress;
-	Parameters.UserParaneter	= UserParameter;
+	Parameters.UserParameter	= UserParameter;
 	Parameters.Filament			= Filament;
 
 	Parameters.InitializationCompleted = CreateEvent( NULL, FALSE, FALSE, NULL );
