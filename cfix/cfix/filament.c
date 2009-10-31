@@ -172,15 +172,7 @@ HRESULT CfixpSetCurrentFilament(
 	__out_opt PCFIXP_FILAMENT *Prev
 	)
 {
-	HANDLE CurrentThread;
-	HRESULT Hr;
 	PCFIXP_FILAMENT OldFilament;
-
-	Hr = CfixsGetCurrentThreadHandle( &CurrentThread );
-	if ( FAILED( Hr ) )
-	{
-		return Hr;
-	}
 
 	( VOID ) CfixpGetCurrentFilament( &OldFilament );
 
@@ -196,6 +188,19 @@ HRESULT CfixpSetCurrentFilament(
 	if ( NewFilament != NULL &&
 		 GetCurrentThreadId() != NewFilament->MainThreadId )
 	{
+		HANDLE CurrentThread;
+		HRESULT Hr;
+
+		//
+		// N.B. Obtain a "real" handle s.t. it can be used from a different
+		// thread.
+		//
+		Hr = CfixsGetCurrentThreadHandle( &CurrentThread );
+		if ( FAILED( Hr ) )
+		{
+			return Hr;
+		}
+
 		//
 		// This is not the main thread - so register as child thread.
 		//
@@ -206,6 +211,7 @@ HRESULT CfixpSetCurrentFilament(
 		if ( FAILED( Hr ) )
 		{
 			( VOID ) TlsSetValue( CfixsTlsSlotForFilament, NULL );
+			( VOID ) CloseHandle( CurrentThread );
 			return Hr;
 		}
 	}
