@@ -1,14 +1,10 @@
-#
-# 7z a -tzip src.zip cfix-src-1.1.3059 -xr!*.ncb -xr!*.suo
-#
-
 WIXBINPATH=D:\prog\wix\wix-2.0.5805.0-binaries
 
 !IF [cscript /nologo buildnum.vbs > __buildnum.inc]
 !ENDIF
 !INCLUDE __buildnum.inc
 
-VERSION = 1.5.0.$(BUILDNUMBER)
+VERSION = 1.5.1.$(BUILDNUMBER)
 
 #----------------------------------------------------------------------
 #
