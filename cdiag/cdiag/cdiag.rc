@@ -97,7 +97,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1, 5, 0, 3535
+ FILEVERSION 1, 5, 1, 3598
  PRODUCTVERSION 1,0,0,1
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -116,7 +116,7 @@ BEGIN
             VALUE "Comments", "Cfix Diagnostics Library"
             VALUE "CompanyName", "Johannes Passing"
             VALUE "FileDescription", "Cfix Diagnostics Library"
-            VALUE "FileVersion", "1, 5, 0, 3535\0"
+            VALUE "FileVersion", "1, 5, 1, 3598\0"
             VALUE "InternalName", "cdiag"
             VALUE "LegalCopyright", "Copyright (C) 2007"
             VALUE "OriginalFilename", "cdiag.dll"
@@ -146,6 +146,11 @@ END
 #endif    // not APSTUDIO_INVOKED
 
 #include "cdiagmsg.rc"
+
+
+
+
+
 
 
 
