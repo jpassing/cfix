@@ -150,12 +150,9 @@ static HRESULT CfixsQueryPeImage(
 			NtHeader,
 			ExportDir->AddressOfFunctions );
 
-		if ( NamesRvaArray == NULL || FunctionRvaArray == NULL )
-		{
-			return HRESULT_FROM_WIN32( ERROR_BAD_EXE_FORMAT );
-		}
-
-		if ( ExportDir->NumberOfFunctions > 0 )
+		if ( NamesRvaArray != NULL && 
+			 FunctionRvaArray != NULL &&
+			 ExportDir->NumberOfFunctions > 0 )
 		{
 			ULONG Index;
 
