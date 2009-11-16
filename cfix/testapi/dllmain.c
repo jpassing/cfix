@@ -1,5 +1,3 @@
-#pragma once
-
 /*----------------------------------------------------------------------
  * Copyright:
  *		Johannes Passing (johannes.passing@googlemail.com)
@@ -22,27 +20,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with cfix.  If not, see <http://www.gnu.org/licenses/>.
  */
-				
-
-#include <stdio.h>
-#include <tchar.h>
-#include <crtdbg.h>
-#include <shlwapi.h>
-
-#pragma warning( push )
-#pragma warning( disable: 6011; disable: 6387 )
-#include <strsafe.h>
-#pragma warning( pop )
 
 #include <cfix.h>
-#include <cfixapi.h>
 
-#define TEST CFIX_ASSERT
-#define TEST_HR( expr ) CFIX_ASSERT_EQUALS_DWORD( S_OK, ( expr ) )
-#define TEST_RETURN( Expected, Expr ) \
-	CFIX_ASSERT_EQUALS_DWORD( ( DWORD ) Expected, ( DWORD ) ( Expr ) )
+HMODULE ModuleHandle = NULL;
 
-//
-// Handle to this module.
-//
-extern HMODULE ModuleHandle;
+BOOL WINAPI DllMain(
+	__in HINSTANCE Module,
+	__in DWORD Reason,
+	__in LPVOID Reserved
+	)
+{
+	UNREFERENCED_PARAMETER( Reserved );
+
+	if ( Reason == DLL_PROCESS_ATTACH )
+	{
+		ModuleHandle = Module;
+	}
+
+	return TRUE;
+}

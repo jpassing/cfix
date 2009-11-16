@@ -34,7 +34,7 @@ static void TestDllWithNoTestExports()
 	PCFIX_TEST_MODULE Mod;
 	WCHAR Path[ MAX_PATH ];
 
-	TEST( GetModuleFileName( GetModuleHandle( NULL ), Path, _countof( Path ) ) );
+	TEST( GetModuleFileName( ModuleHandle, Path, _countof( Path ) ) );
 	TEST( PathRemoveFileSpec( Path ) );
 	TEST( PathAppend( Path, L"cdiag.dll" ) );
 
@@ -62,7 +62,7 @@ static void TestDllWithDuplicateSetup()
 	PCFIX_TEST_MODULE Mod;
 	WCHAR Path[ MAX_PATH ];
 
-	TEST( GetModuleFileName( GetModuleHandle( NULL ), Path, _countof( Path ) ) );
+	TEST( GetModuleFileName( ModuleHandle, Path, _countof( Path ) ) );
 	TEST( PathRemoveFileSpec( Path ) );
 	TEST( PathAppend( Path, L"testlib3.dll" ) );
 
@@ -74,7 +74,7 @@ static void TestDllWithDuplicateBefore()
 	PCFIX_TEST_MODULE Mod;
 	WCHAR Path[ MAX_PATH ];
 
-	TEST( GetModuleFileName( GetModuleHandle( NULL ), Path, _countof( Path ) ) );
+	TEST( GetModuleFileName( ModuleHandle, Path, _countof( Path ) ) );
 	TEST( PathRemoveFileSpec( Path ) );
 	TEST( PathAppend( Path, L"testlib7.dll" ) );
 
@@ -86,7 +86,7 @@ static void TestDllWithDuplicateAfter()
 	PCFIX_TEST_MODULE Mod;
 	WCHAR Path[ MAX_PATH ];
 
-	TEST( GetModuleFileName( GetModuleHandle( NULL ), Path, _countof( Path ) ) );
+	TEST( GetModuleFileName( ModuleHandle, Path, _countof( Path ) ) );
 	TEST( PathRemoveFileSpec( Path ) );
 	TEST( PathAppend( Path, L"testlib8.dll" ) );
 
@@ -98,7 +98,7 @@ static void TestDllWithDuplicateTeardown()
 	PCFIX_TEST_MODULE Mod;
 	WCHAR Path[ MAX_PATH ];
 
-	TEST( GetModuleFileName( GetModuleHandle( NULL ), Path, _countof( Path ) ) );
+	TEST( GetModuleFileName( ModuleHandle, Path, _countof( Path ) ) );
 	TEST( PathRemoveFileSpec( Path ) );
 	TEST( PathAppend( Path, L"testlib2.dll" ) );
 
@@ -110,7 +110,7 @@ static void TestDllWithEmptyFixture()
 	PCFIX_TEST_MODULE Mod;
 	WCHAR Path[ MAX_PATH ];
 
-	TEST( GetModuleFileName( GetModuleHandle( NULL ), Path, _countof( Path ) ) );
+	TEST( GetModuleFileName( ModuleHandle, Path, _countof( Path ) ) );
 	TEST( PathRemoveFileSpec( Path ) );
 	TEST( PathAppend( Path, L"testlib1.dll" ) );
 
@@ -132,7 +132,7 @@ static void TestDllWithNameTooLong()
 	PCFIX_TEST_MODULE Mod;
 	WCHAR Path[ MAX_PATH ];
 
-	TEST( GetModuleFileName( GetModuleHandle( NULL ), Path, _countof( Path ) ) );
+	TEST( GetModuleFileName( ModuleHandle, Path, _countof( Path ) ) );
 	TEST( PathRemoveFileSpec( Path ) );
 	TEST( PathAppend( Path, L"testlib5.dll" ) );
 
@@ -144,7 +144,7 @@ static void TestDllWithValidFixture()
 	PCFIX_TEST_MODULE Mod;
 	WCHAR Path[ MAX_PATH ];
 
-	TEST( GetModuleFileName( GetModuleHandle( NULL ), Path, _countof( Path ) ) );
+	TEST( GetModuleFileName( ModuleHandle, Path, _countof( Path ) ) );
 	TEST( PathRemoveFileSpec( Path ) );
 	TEST( PathAppend( Path, L"testlib4.dll" ) );
 

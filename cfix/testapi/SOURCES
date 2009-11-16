@@ -51,6 +51,7 @@ TARGETNAME=testapi
 TARGETPATH=..\..\bin\$(DDKBUILDENV)
 TARGETTYPE=DYNLINK
 SOURCES=\
+	dllmain.c \
 	filamentjoin.c \
 	peloadtest.c \
 	actiontest.c \

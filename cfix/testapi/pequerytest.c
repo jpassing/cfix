@@ -42,7 +42,7 @@ static WCHAR DifferentArchBinPath[ MAX_PATH ];
 static void Setup()
 {
 	TEST( GetModuleFileName( 
-		GetModuleHandle( NULL ), SameArchBinPath, _countof( SameArchBinPath ) ) );
+		ModuleHandle, SameArchBinPath, _countof( SameArchBinPath ) ) );
 	TEST( PathRemoveFileSpec( SameArchBinPath ) );
 
 	TEST( PathCombine( 

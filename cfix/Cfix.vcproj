@@ -215,6 +215,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\testapi\dllmain.c"
+					>
+				</File>
+				<File
 					RelativePath=".\testapi\filamentjoin.c"
 					>
 				</File>

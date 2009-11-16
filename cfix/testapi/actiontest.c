@@ -259,7 +259,7 @@ void TestActionRun()
 	UINT Index = 0;
 	WCHAR Path[ MAX_PATH ];
 
-	TEST( GetModuleFileName( GetModuleHandle( NULL ), Path, _countof( Path ) ) );
+	TEST( GetModuleFileName( ModuleHandle, Path, _countof( Path ) ) );
 	TEST( PathRemoveFileSpec( Path ) );
 	TEST( PathAppend( Path, L"testlib6.dll" ) );
 

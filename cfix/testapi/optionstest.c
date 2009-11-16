@@ -87,7 +87,7 @@ void TestOptions()
 	// Construct path to some DLL.
 	//
 	TEST( GetModuleFileName( 
-		GetModuleHandle( NULL ),
+		ModuleHandle,
 		SampleTestDllPath,
 		_countof( SampleTestDllPath ) ) );
 	TEST( PathRemoveFileSpec( SampleTestDllPath ) );

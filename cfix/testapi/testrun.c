@@ -51,7 +51,7 @@ void TestSearchDll()
 	WCHAR BasePath[ MAX_PATH ];
 	WCHAR TestPath[ MAX_PATH ];
 	WCHAR TestPath2[ MAX_PATH ];
-	TEST( GetModuleFileName( GetModuleHandle( NULL ), BasePath, _countof( BasePath ) ) );
+	TEST( GetModuleFileName( ModuleHandle, BasePath, _countof( BasePath ) ) );
 
 	TEST( PathRemoveFileSpec( BasePath ) );
 
