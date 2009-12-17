@@ -29,7 +29,7 @@
 				BuildCommandLine="ddkbuild -WNETW2K checked $(SolutionDir)"
 				ReBuildCommandLine="ddkbuild -WNETW2K checked $(SolutionDir) -cZ "
 				CleanCommandLine=""
-				Output="..\..\bin\chk\i386\testwusampleliba.dll"
+				Output="..\..\bin\chk\i386\testwu.dll"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -140,6 +140,10 @@
 					<Filter
 						Name="WinUnit"
 						>
+						<File
+							RelativePath=".\tests\testwu\Bugfixes.cpp"
+							>
+						</File>
 						<File
 							RelativePath=".\tests\testwu\Fixture.cpp"
 							>

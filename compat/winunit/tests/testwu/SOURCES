@@ -31,6 +31,7 @@ TARGETTYPE=DYNLINK
 SOURCES=\
 	Simple.cpp \
 	Fixture.cpp \
+	Bugfixes.cpp \
 	Assertions.cpp \
 	Messages.cpp \
 	NameConflicts.cpp \

@@ -376,11 +376,15 @@ namespace cfixwu
 			__LINE__ ) ||												\
 		( __debugbreak(), CfixPeFail(), 0 ) ) )
 
+//
+// N.B. WinUnit allows pointers to be passed to WIN_ASSERT_ZERO and
+// WIN_ASSERT_NOT_ZERO, therefore an additional cast is required.
+//
 
 #define WIN_ASSERT_ZERO( ZeroExpression, ... )							\
-	( void ) ( ( CfixBreak != cfixcc::Assertion< cfixcc::Equal >::Relate< ULONGLONG >(	\
-			0ULL,															\
-			( ZeroExpression ),											\
+	( void ) ( ( CfixBreak != cfixcc::Assertion< cfixcc::Equal >::Relate< LONGLONG >(	\
+			0ULL,														\
+			( LONG_PTR ) ( ZeroExpression ),							\
 			L"0",														\
 			__CFIX_WIDE( #ZeroExpression ),								\
 			cfixwu::WinunitMessage( 0, __VA_ARGS__ ),					\
@@ -390,9 +394,9 @@ namespace cfixwu
 		( __debugbreak(), CfixPeFail(), 0 ) ) )	
 
 #define WIN_ASSERT_NOT_ZERO( NonzeroExpression, ... ) 					\
-	( void ) ( ( CfixBreak != cfixcc::Assertion< cfixcc::NotEqual >::Relate< ULONGLONG >(	\
-			0ULL,															\
-			( NonzeroExpression ),										\
+	( void ) ( ( CfixBreak != cfixcc::Assertion< cfixcc::NotEqual >::Relate< LONGLONG >(	\
+			0ULL,														\
+			( LONG_PTR ) ( NonzeroExpression ),							\
 			L"0",														\
 			__CFIX_WIDE( #NonzeroExpression ),							\
 			cfixwu::WinunitMessage( 0, __VA_ARGS__ ),					\
