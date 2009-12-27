@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN">
 <html>
 	<head>
-		<title>cfix &#151; C and C++ Unit Testing Framework for Win32 and Windows NT Kernel Mode</title>
+		<title>cfix &#151; C and C++ Unit Testing Framework for Windows</title>
 		<meta name="description" content="cfix is an xUnit testing framework for C/C++, specialized for Win32 (32/64 bit), written by Johannes Passing." />
 	    <meta name="keywords" content="cfix, unit testing, c, c++, win32, windows, native code" />
 		<link rel="stylesheet" href="assets/master.css" type="text/css">
@@ -19,7 +19,7 @@
 	</head>
 	<body>
 		<div id='tab'>
-			<div class='tab_passive'><a href='http://www.cfix-studio.com/'>cfix studio &#x2013; C/C++ unit testing for Visual Studio</a></div>
+			<div class='tab_passive'><a href='http://www.visualassert.com/'>Visual Assert &#x2013; The Unit Testing Add-In for Visual C++</a></div>
 			<div class='tab_passive2active'><img src='assets/img/tab_passive2active.png' alt=''/></div>
 			<div class='tab_active'><a href='index.html'>cfix &#x2013;  C/C++ Unit Testing for Win32 and NT</a></div>
 			<div class='tab_activeend'><img src='assets/img/tab_activeend.png' alt=''/></div>
@@ -73,7 +73,7 @@
 				
 				<table width='100%'>
 				<tr><td width='49%' valign='top'>
-					<img src='download.png' align='left' vspace='5' hspace='5'/><a href='http://sourceforge.net/project/showfiles.php?group_id=218233&package_id=263204'><b>Download</b> the current release of cfix.</a>
+					<img src='download.png' alt='Download' lign='left' vspace='5' hspace='5'/><a href='http://sourceforge.net/project/showfiles.php?group_id=218233&package_id=263204'><b>Download</b> the current release of cfix.</a>
 					The release contains both 32 bit (i386) and 64 bit (amd64) binaries. 
 					cfix runs on Windows 2000, XP, Server 2003, Vista, Server 2008, and Windows 7 beta. <br /><br />
 					The installation does <i>not</i> require administrative privileges.
@@ -82,7 +82,7 @@
 				<td width='2%'>
 				</td>
 				<td width='49%' valign='top'>
-					<img src='help.png' align='left' vspace='5' hspace='5'/><a href='doc/TutorialUserVsCc.html'/>Read the <b>tutorial</b></a> to see how to properly configure Visual Studio and
+					<img src='help.png' alt='Help' align='left' vspace='5' hspace='5'/><a href='doc/TutorialUserVsCc.html'>Read the <b>tutorial</b></a> to see how to properly configure Visual Studio and
 					how to create and run a test suite. All documentation is also contained in the download package as a Html Help (CHM) file.
 				</td></tr>
 				</table>
@@ -90,8 +90,29 @@
 				
 				<br /><br />
 				
-				<span class='heading'>NEWS</span><a href='http://sourceforge.net/export/rss2_projnews.php?group_id=218233&rss_fulltext=1'><img src='feed.png' align='right' border='0' /></a>
+				<span class='heading'>NEWS</span><a href='http://sourceforge.net/export/rss2_projnews.php?group_id=218233&rss_fulltext=1'><img src='feed.png' alt='RSS Feed' align='right' border='0' /></a>
 				<hr />
+			
+	
+				<h3 class='rss'>cfix finished 2nd in ATI's Automation Honors Awards, surpassed only by JUnit</h3>
+				<p class='rssdesc'>
+				Along with JUnit, JWebUnit, NUnit, and SimpleTest, cfix was one of the nominees for the <a href='http://www.atihonors.automatedtestinginstitute.com/'>Automated Testing Institute's Automation Honors Award 2009</a> in the category <i>Best Open Source Unit Automated Test Tool</i>. A few days ago, the results were published and cfix finished second -- surpassed only by JUnit, which finished 1st. If you are interested, there is a <a href='http://www.automatedtestinginstitute.com/home/index.php?option=com_content&amp;view=article&amp;id=1262&amp;Itemid=131'>video</a> in which the results are presented.
+				</p>
+				<p class='rssfooter'>2009-12-19 15:30</p>
+				
+				
+				<h3 class='rss'>cfix 1.5.1 released, fixing several minor issues</h3>
+				<p class='rssdesc'>
+				A new version of cfix, the unit testing framework for C and C++ on Windows, is now available for download. Despite fixing several minor issues, the new version resolves the following two issues that were reported by users:
+<ul>
+ <li>Definiting multiple WinUnit fixtures with setup/teardown routines in a single .cpp file leads to a compilation error</li>
+ <li>A thread handle is leaked during execution of a test (#2889511)</li>
+</ul> 
+ </p><p class='rssdesc'>
+Updated binaries and source code are available on <a href='http://sourceforge.net/projects/cfix/files/'>Sourceforge</a>.
+				</p>
+				<p class='rssfooter'>2009-08-23 10:00</p>
+				
 				
 				<h3 class='rss'>cfix 1.4 released; Visual Studio Addin <i>cfix studio</i> enters public beta</h3>
 				<p class='rssdesc'>
