@@ -1,10 +1,11 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   version="1.0">
-  <xsl:import href="D:/prog/docbook-xsl-1.73.2/html/chunk.xsl"/>
+  <xsl:import href="D:/prog/docbook-xsl-1.75.2/html/chunk.xsl"/>
   <xsl:param name="admon.graphics" select="1"/>
   <xsl:param name="html.stylesheet" select="'../styleweb.css'"/>
   <xsl:param name="chunk.section.depth" select="4"></xsl:param>
   <xsl:param name="chunk.first.sections" select="1"></xsl:param>
+  <xsl:param name="suppress.header.navigation" select="1"></xsl:param>
   <xsl:param name="use.id.as.filename" select="1"></xsl:param>
   <xsl:param name="highlight.source" select="0"></xsl:param>
   <xsl:param name="toc.section.depth" select="4"></xsl:param>
@@ -36,9 +37,6 @@
   </xsl:template>
   
   <xsl:template name="user.head.content">
-	<meta name="description" content="cfix &#151; C and C++ Unit Testing Framework for Win32 and Windows NT Kernel Mode" />
-	<meta name="keywords" lang="en" content="unit testing framework, c, c++, windows, win32, nt, native, kernel, test" />
-	
 	<!-- Mind the whitespace! -->
 	<xsl:comment>[if lt IE 7]&gt;
 		&lt;link rel="stylesheet" href="../assets/master-ie6patch.css" type="text/css" /&gt;
@@ -52,9 +50,12 @@
 	  </xsl:param>
 
 	  <title>
-		<xsl:copy-of select="$title"/> &#151; cfix C and C++ Unit Testing Framework
+		<xsl:copy-of select="$title"/> &#151; [cfix Testing Framework]
 	  </title>
 
+	  <meta name="description" content="{$title}: cfix &#151; C and C++ Unit Testing Framework for Windows" />
+	  <meta name="keywords" lang="en" content="unit testing framework, c, c++, windows, win32, nt, native, kernel, test" />
+	
 	  <xsl:if test="$html.stylesheet != ''">
 		<xsl:call-template name="output.html.stylesheets">
 		  <xsl:with-param name="stylesheets" select="normalize-space($html.stylesheet)"/>
@@ -63,16 +64,21 @@
   </xsl:template>
   
   <xsl:template name="chunk-element-content">
-  <xsl:param name="prev"/>
-  <xsl:param name="next"/>
-  <xsl:param name="nav.context"/>
-  <xsl:param name="content">
-    <xsl:apply-imports/>
-  </xsl:param>
+	  <xsl:param name="prev"/>
+	  <xsl:param name="next"/>
+	  <xsl:param name="nav.context"/>
+	  <xsl:param name="content">
+		<xsl:apply-imports/>
+	  </xsl:param>
+	  <xsl:param name="node" select="."/>
+	  <xsl:param name="title">
+		<xsl:apply-templates select="$node" mode="object.title.markup.textonly"/>
+	  </xsl:param>
 
-  <xsl:call-template name="user.preroot"/>
+	  <xsl:call-template name="user.preroot"/>
 
-  <html>
+	  <html>
+	  
     <xsl:call-template name="html.head">
       <xsl:with-param name="prev" select="$prev"/>
       <xsl:with-param name="next" select="$next"/>
@@ -82,7 +88,7 @@
 		<div id='tab'>
 			<div class='tab_passive'><a href='http://www.visualassert.com/'>Visual Assert &#x2013; The Unit Testing Add-In for Visual C++</a></div>
 			<div class='tab_passive2active'><img src='../assets/img/tab_passive2active.png' alt=''/></div>
-			<div class='tab_active'><a href='../index.html'>cfix &#x2013;  C/C++ Unit Testing for Win32 and NT</a></div>
+			<div class='tab_active'><a href='../'>cfix &#x2013;  C/C++ Unit Testing for Win32 and NT</a></div>
 			<div class='tab_activeend'><img src='../assets/img/tab_activeend.png' alt=''/></div>
 			<div class='tab_pad'>&#xA0;</div>
 			<div class='tab_clear'></div>
@@ -93,7 +99,7 @@
 	    <div id='menu'>
 	        <div id='menu_box'>
 		        <ul id='mainmenu'>
-		            <li><a href='../index.html'>Home</a></li>
+		            <li><a href='../'>Home</a></li>
 					<li><a href='index.html'>Documentation</a></li>
 					<li><a href='http://sourceforge.net/projects/cfix/'>Project Page</a></li>
 					<li><a href='http://sourceforge.net/project/showfiles.php?group_id=218233&amp;package_id=263204'>Download</a></li>
@@ -138,17 +144,15 @@
 				
     			<div class='submenu'>
 				    <div style='text-align: center' class='submenu_content'>
-						<a href='http://www.gnu.org/licenses/lgpl.html'><img src='lgpl.png' hspace='7' vspace='7' border='0' /></a>
+						<a href='http://www.gnu.org/licenses/lgpl.html'><img src='lgpl.png' hspace='7' vspace='7' border='0' alt='LGPL' /></a>
 						<br /><br />
 						<a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=218233&amp;type=2" width="125" height="37" border="0" alt="SourceForge.net Logo" /></a>
 				    </div> 
 			    </div>
 	        </div>
     	    
-	        <div id='main_content'>
-	
-	
-	
+			<div id='main_content'>
+		
 			<xsl:call-template name="body.attributes"/>
 			<xsl:call-template name="user.header.navigation"/>
 
@@ -158,6 +162,9 @@
 				<xsl:with-param name="nav.context" select="$nav.context"/>
 			</xsl:call-template>
 
+			<h1><xsl:copy-of select="$title"/></h1>
+	
+	
 			<xsl:call-template name="user.header.content"/>
 
 			<xsl:copy-of select="$content"/>
@@ -180,7 +187,7 @@
 		<div id='footer'>
 			cfix &#151; C and C++ Unit Testing Framework for Win32 and Windows NT Kernel Mode<br />
 			Build <xsl:value-of select="$buildnumber" /><br />
-			(C) 2009 Johannes Passing
+			(C) 2009 <a href='http://jpassing.com/'>Johannes Passing</a>
 			<br />
 			<br />Feedback? Send to passing at users.sourceforge.net.
 			<br />

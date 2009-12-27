@@ -78,3 +78,23 @@ dd
 	border-bottom: 1px solid #CCC;
 	padding: 5px;
 }
+
+h1.title
+{
+	display: none;
+}
+
+h2.title
+{
+	display: none;
+}
+
+h3.title
+{
+	display: none;
+}
+
+h4.title
+{
+	display: none;
+}
