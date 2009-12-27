@@ -303,11 +303,49 @@ typedef struct _CFIX_PE_DEFINITION_ENTRY
 		Defines a test map. Only used by
 		CFIX_GET_FIXTURE_ROUTINE-routines.
 --*/
+#pragma warning( push )
+#pragma warning( disable: 4214  ) // 'bit field types other than int'.
 typedef struct _CFIX_TEST_PE_DEFINITION
 {
-	ULONG ApiVersion;
+	union
+	{
+		ULONG ApiVersion;
+
+		struct _CFIX_TEST_PE_DEFINITION_INFO
+		{
+			USHORT Type : 4;
+
+			#define CFIX_FIXTURE_USES_ANONYMOUS_THREADS	1
+
+			USHORT Flags : 12;
+			USHORT Revision;
+		} Info;
+	} Head;
+
+	//
+	// Array of entries, i.e. test/setup/... routines.
+	//
 	PCFIX_PE_DEFINITION_ENTRY Entries;
 } CFIX_TEST_PE_DEFINITION, *PCFIX_TEST_PE_DEFINITION;
+#pragma warning( pop )
+
+C_ASSERT( CfixApiTypeMax < 0xF );
+
+#define CFIX_PE_API_MAKEAPIVERSION_EX( Type, Revision, Flags )		\
+	( ( ULONG ) (													\
+		( ( ( ULONG ) ( Type ) ) & 0xF ) |							\
+		( ( ( ( ULONG ) ( Flags ) ) & 0xFFF ) << 4 ) |				\
+		( ( ( ( ULONG ) ( Revision ) ) & 0xFFFF ) << 16 ) ) )		\
+
+#define CFIX_PE_API_MAKEAPIVERSION( Type, Revision )				\
+		CFIX_PE_API_MAKEAPIVERSION_EX( Type, Revision, 0 )
+
+//
+// Backcompat.
+//
+#define CFIX_PE_API_VERSION CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeBase, 0 )
+C_ASSERT( MAKELONG( 1, 0 ) == CFIX_PE_API_VERSION );
+
 
 /*++
 	Description:
@@ -315,24 +353,25 @@ typedef struct _CFIX_TEST_PE_DEFINITION
 --*/
 typedef PCFIX_TEST_PE_DEFINITION ( CFIXCALLTYPE * CFIX_GET_FIXTURE_ROUTINE )();
 
-
-#define CFIX_PE_API_MAKEAPIVERSION( Type, Version )					\
-	MAKELONG( ( ( ULONG ) ( Type ) ), ( Version ) )
-
-#define CFIX_PE_API_TYPE_FROM_APIVERSION( Version )					\
-	( ( CFIX_API_TYPE ) LOWORD( ( Version ) ) )
-
-//
-// Backcompat.
-//
-#define CFIX_PE_API_VERSION MAKELONG( 1, 0 )
-C_ASSERT( CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeBase, 0 ) == CFIX_PE_API_VERSION );
-
 #define CFIX_BEGIN_FIXTURE(name)									\
 EXTERN_C __declspec(dllexport)										\
 PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##name()		\
 {																	\
-	static CFIX_PE_DEFINITION_ENTRY Entries[] = {					\
+	static ULONG ApiVersion = CFIX_PE_API_MAKEAPIVERSION(			\
+		CfixApiTypeBase, 0 );										\
+	static CFIX_PE_DEFINITION_ENTRY Entries[] = {					
+
+
+#if ! defined( CFIX_KERNELMODE )
+#define CFIX_BEGIN_FIXTURE_EX(name, flags)							\
+EXTERN_C __declspec(dllexport)										\
+PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##name()		\
+{																	\
+	ULONG ApiVersion = CFIX_PE_API_MAKEAPIVERSION_EX(				\
+		CfixApiTypeBase, 0, ( flags ) );							\
+	static CFIX_PE_DEFINITION_ENTRY Entries[] = {					
+#endif // CFIX_KERNELMODE
+
 
 #define CFIX_FIXTURE_SETUP(func)									\
 	{ CfixEntryTypeSetup, __CFIX_WIDE( #func ), func },								
@@ -353,9 +392,10 @@ PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##name()		\
 	{ CfixEntryTypeEnd, NULL, NULL }								\
 	};																\
 	static CFIX_TEST_PE_DEFINITION Fixture = {						\
-		CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeBase, 0 ),			\
+		{ 0 },														\
 		Entries														\
 	};																\
+	Fixture.Head.ApiVersion = ApiVersion;							\
 	CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION();					\
 	return &Fixture;												\
 }			

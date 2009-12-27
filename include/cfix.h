@@ -365,6 +365,25 @@ CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread2(
 	__in ULONG Flags
 	);
 
+/*++
+	Routine Description:
+		For threads not created using CfixCreateThread[2], calling
+		CfixRegisterThread will register a thread with the currently
+		executing test case.
+
+		Such auto-registration occurs automatically when an assertion
+		fails or a log message is to be output -- owever, explicitly
+		calling CfixRegisterThread allows the enclosing test case
+		to make use of auto joining.
+
+		Requires automatic anonymous thread registration to be enabled.
+		If disabled, or thre thread hsa been registered before,
+		E_UNEXPECTED will be returned.
+--*/
+HRESULT CfixRegisterThread( 
+	__reserved PVOID Reserved 
+	);
+
 #else  // CFIX_KERNELMODE
 
 /*++

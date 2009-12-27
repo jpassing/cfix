@@ -81,7 +81,6 @@ static HRESULT CfixsCreateFixture(
 	__out PCFIX_FIXTURE *Fixture
 	)
 {
-	ULONG ApiType;
 	PCFIX_PE_DEFINITION_ENTRY Entry;
 	UINT EntryCount = 0;
 	CFIX_GET_FIXTURE_ROUTINE GetTcRoutine;
@@ -102,8 +101,8 @@ static HRESULT CfixsCreateFixture(
 		return CFIX_E_MISBEHAVIOUD_GETTC_ROUTINE;
 	}
 
-	ApiType = CFIX_PE_API_TYPE_FROM_APIVERSION( TestDef->ApiVersion );
-	if ( ApiType < CfixApiTypeMin || ApiType > CfixApiTypeMax )
+	if ( TestDef->Head.Info.Type < CfixApiTypeMin || 
+		 TestDef->Head.Info.Type > CfixApiTypeMax )
 	{
 		return CFIX_E_UNSUPPORTED_VERSION;
 	}
@@ -159,7 +158,20 @@ static HRESULT CfixsCreateFixture(
 	NewFixture->Module			= Module;
 	NewFixture->TestCaseCount	= 0;
 	NewFixture->Reserved		= 0;
-	NewFixture->ApiType			= ApiType;
+	NewFixture->ApiType			= TestDef->Head.Info.Type;
+	NewFixture->Flags			= TestDef->Head.Info.Flags;
+
+	if ( TestDef->Head.Info.Revision != 0 )
+	{
+		Hr = CFIX_E_UNSUPPORTED_FIXTURE_REVISION;
+		goto Cleanup;
+	}
+
+	if ( NewFixture->Flags > CFIX_FIXTURE_USES_ANONYMOUS_THREADS )
+	{
+		Hr = CFIX_E_INVALID_FIXTURE_FLAG;
+		goto Cleanup;
+	}
 
 	for ( Entry = TestDef->Entries; Entry->Type != CfixEntryTypeEnd; Entry++ )
 	{
@@ -488,10 +500,16 @@ static HRESULT CfixsRunTestRoutine(
 		return E_UNEXPECTED;
 	}
 
-	ASSERT( Flags <= CFIX_TEST_FLAG_CAPTURE_STACK_TRACES );
+	ASSERT( Flags <= ( CFIX_TEST_FLAG_CAPTURE_STACK_TRACES | CFIX_TEST_FLAG_PROVIDE_DEFAULT_FILAMENT ) );
+
 	if ( CfixpFlagOn( Flags, CFIX_TEST_FLAG_CAPTURE_STACK_TRACES ) )
 	{
 		FilamentFlags |= CFIXP_FILAMENT_FLAG_CAPTURE_STACK_TRACES;
+	}
+
+	if ( CfixpFlagOn( Flags, CFIX_TEST_FLAG_PROVIDE_DEFAULT_FILAMENT ) )
+	{
+		FilamentFlags |= CFIXP_FILAMENT_FLAG_DEFAULT_FILAMENT;
 	}
 
 	//
@@ -515,6 +533,7 @@ static HRESULT CfixsRunTestRoutine(
 		&PrevFilament);
 	if ( FAILED( Hr ) )
 	{
+		CfixpDestroyFilament( &Filament );
 		return Hr;
 	}
 

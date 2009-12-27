@@ -25,6 +25,7 @@
 
 #include <cfix.h>
 #include <stdio.h>
+#include <crtdbg.h>
 
 DWORD AssertThreadProc( PVOID Unused )
 {
@@ -38,7 +39,26 @@ DWORD AssertThreadProc( PVOID Unused )
 	//
 	// Should break here!
 	//
-	CFIX_ASSERT( !"Dead statement" );
+	_ASSERTE( !"Dead statement" );
+
+	return 0;
+}
+
+DWORD RegisterAndAssertThreadProc( __in PVOID EventHandle )
+{
+	CFIX_ASSERT_OK( CfixRegisterThread( NULL ) );
+
+	SetEvent( ( HANDLE ) EventHandle );
+
+	//
+	// Should break here!
+	//
+	CFIX_ASSERT( !"Assert on another thread" );
+
+	//
+	// Should break here!
+	//
+	_ASSERTE( !"Dead statement" );
 
 	return 0;
 }
@@ -47,7 +67,21 @@ DWORD LogThreadProc( PVOID Unused )
 {
 	UNREFERENCED_PARAMETER( Unused );
 
-	CFIX_LOG( L"Log on another thread" );
+	CFIX_LOG( L"Log 1 on another thread" );
+	CFIX_LOG( L"Log 2 on another thread" );
+
+	return 0;
+}
+
+DWORD RegisterAndInconclusiveThreadProc(  __in PVOID EventHandle )
+{
+	CFIX_ASSERT_OK( CfixRegisterThread( NULL ) );
+
+	SetEvent( ( HANDLE ) EventHandle );
+
+	CFIX_INCONCLUSIVE( L"Inconclusive on another thread" );
+
+	_ASSERTE( !"Dead statement" );
 
 	return 0;
 }
@@ -58,7 +92,7 @@ DWORD InconclusiveThreadProc( PVOID Unused )
 
 	CFIX_INCONCLUSIVE( L"Inconclusive on another thread" );
 
-	CFIX_ASSERT( !"Dead statement" );
+	_ASSERTE( !"Dead statement" );
 
 	return 0;
 }
@@ -73,14 +107,15 @@ DWORD ThrowThreadProc( PVOID Unused )
 		0,
 		NULL );
 
+	_ASSERTE( !"Dead statement" );
+
 	return 0;
 }
 
+/*----------------------------------------------------------------------
+ * Using registered threads.
+ */
 
-
-//
-// This testcase must fail.
-//
 void AssertOnRegisteredThread()
 {
 	DWORD ExCode;
@@ -111,9 +146,6 @@ void AssertOnRegisteredThread()
 	CFIX_ASSERT( CloseHandle( Thr ) );
 }
 
-//
-// This testcase must fail.
-//
 void LogOnRegisteredThread()
 {
 	DWORD ExCode;
@@ -135,9 +167,6 @@ void LogOnRegisteredThread()
 	CFIX_ASSERT( CloseHandle( Thr ) );
 }
 
-//
-// This testcase must fail.
-//
 void InconclusiveOnRegisteredThread()
 {
 	DWORD ExCode;
@@ -190,4 +219,165 @@ CFIX_END_FIXTURE()
 
 CFIX_BEGIN_FIXTURE(ThrowOnRegisteredThread)
 	CFIX_FIXTURE_ENTRY(ThrowOnRegisteredThread)
+CFIX_END_FIXTURE()
+
+/*----------------------------------------------------------------------
+ * Using unregistered threads.
+ */
+
+void AssertOnAnonymousThread()
+{
+	DWORD ExCode;
+	HANDLE Thr = CreateThread(
+		NULL,
+		0,
+		AssertThreadProc,
+		NULL,
+		0,
+		NULL );
+	CFIX_ASSERT( Thr );
+
+	WaitForSingleObject( Thr, INFINITE );
+	
+	CFIX_ASSERT( GetExitCodeThread( Thr, &ExCode ) );
+	CFIX_ASSERT( ( ( HRESULT ) ExCode ) == CFIX_EXIT_THREAD_ABORTED );
+	CFIX_ASSERT( CloseHandle( Thr ) );
+}
+
+void AssertOnAnonymousThreadWithoutJoin()
+{
+	HANDLE RegisteredEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+	HANDLE Thr = CreateThread(
+		NULL,
+		0,
+		RegisterAndAssertThreadProc,
+		RegisteredEvent,
+		0,
+		NULL );
+	CFIX_ASSERT( Thr );
+
+	//
+	// Wait for event to ensure that CfixRegisterThread has been
+	// called.
+	//
+	WaitForSingleObject( RegisteredEvent, INFINITE );
+
+	CFIX_ASSERT( CloseHandle( Thr ) );
+	CFIX_ASSERT( CloseHandle( RegisteredEvent ) );
+}
+
+void LogOnAnonymousThread()
+{
+	DWORD ExCode;
+	HANDLE Thr = CreateThread(
+		NULL,
+		0,
+		LogThreadProc,
+		NULL,
+		0,
+		NULL );
+	CFIX_ASSERT( Thr );
+
+	WaitForSingleObject( Thr, INFINITE );
+	
+	CFIX_ASSERT( GetExitCodeThread( Thr, &ExCode ) );
+	CFIX_ASSERT( ExCode == 0 );
+	CFIX_ASSERT( ExCode == 0 );
+	CFIX_ASSERT( CloseHandle( Thr ) );
+}
+
+void InconclusiveOnAnonymousThread()
+{
+	HANDLE RegisteredEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+	HANDLE Thr = CreateThread(
+		NULL,
+		0,
+		RegisterAndInconclusiveThreadProc,
+		RegisteredEvent,
+		0,
+		NULL );
+	CFIX_ASSERT( Thr );
+
+	//
+	// Wait for event to ensure that CfixRegisterThread has been
+	// called.
+	//
+	WaitForSingleObject( RegisteredEvent, INFINITE );
+
+	CFIX_ASSERT( CloseHandle( Thr ) );
+	CFIX_ASSERT( CloseHandle( RegisteredEvent ) );
+}
+
+void InconclusiveOnAnonymousThreadWithoutJoin()
+{
+	DWORD ExCode;
+	HANDLE Thr = CreateThread(
+		NULL,
+		0,
+		InconclusiveThreadProc,
+		NULL,
+		0,
+		NULL );
+	CFIX_ASSERT( Thr );
+
+	WaitForSingleObject( Thr, INFINITE );
+	
+	CFIX_ASSERT( GetExitCodeThread( Thr, &ExCode ) );
+	CFIX_ASSERT( ExCode == CFIX_EXIT_THREAD_ABORTED );
+	CFIX_ASSERT( CloseHandle( Thr ) );
+}
+
+void ThrowOnAnonymousThread()
+{
+	DWORD ExCode;
+	HANDLE Thr = CreateThread(
+		NULL,
+		0,
+		ThrowThreadProc,
+		NULL,
+		0,
+		NULL );
+	CFIX_ASSERT( Thr );
+
+	WaitForSingleObject( Thr, INFINITE );
+	
+	CFIX_ASSERT( GetExitCodeThread( Thr, &ExCode ) );
+	CFIX_ASSERT( ExCode == CFIX_EXIT_THREAD_ABORTED );
+	CFIX_ASSERT( CloseHandle( Thr ) );
+}
+
+CFIX_BEGIN_FIXTURE(AssertOnAnonymousThread)
+	CFIX_FIXTURE_ENTRY(AssertOnAnonymousThread)
+CFIX_END_FIXTURE()
+
+CFIX_BEGIN_FIXTURE_EX(AssertOnAnonymousThreadWithAnonThreadSupport, CFIX_FIXTURE_USES_ANONYMOUS_THREADS)
+	CFIX_FIXTURE_ENTRY(AssertOnAnonymousThread)
+CFIX_END_FIXTURE()
+
+CFIX_BEGIN_FIXTURE_EX(AssertOnAnonymousThreadWithoutJoin, CFIX_FIXTURE_USES_ANONYMOUS_THREADS)
+	CFIX_FIXTURE_ENTRY(AssertOnAnonymousThreadWithoutJoin)
+CFIX_END_FIXTURE()
+
+CFIX_BEGIN_FIXTURE(LogOnAnonymousThread)
+	CFIX_FIXTURE_ENTRY(LogOnAnonymousThread)
+CFIX_END_FIXTURE()
+
+CFIX_BEGIN_FIXTURE_EX(LogOnAnonymousThreadWithAnonThreadSupport, CFIX_FIXTURE_USES_ANONYMOUS_THREADS)
+	CFIX_FIXTURE_ENTRY(LogOnAnonymousThread)
+CFIX_END_FIXTURE()
+
+CFIX_BEGIN_FIXTURE(InconclusiveOnAnonymousThread)
+	CFIX_FIXTURE_ENTRY(InconclusiveOnAnonymousThread)
+CFIX_END_FIXTURE()
+
+CFIX_BEGIN_FIXTURE_EX(InconclusiveOnAnonymousThreadWithAnonThreadSupport, CFIX_FIXTURE_USES_ANONYMOUS_THREADS)
+	CFIX_FIXTURE_ENTRY(InconclusiveOnAnonymousThread)
+CFIX_END_FIXTURE()
+
+CFIX_BEGIN_FIXTURE_EX(InconclusiveOnAnonymousThreadWithoutJoin, CFIX_FIXTURE_USES_ANONYMOUS_THREADS)
+	CFIX_FIXTURE_ENTRY(InconclusiveOnAnonymousThreadWithoutJoin)
+CFIX_END_FIXTURE()
+
+CFIX_BEGIN_FIXTURE(ThrowOnAnonymousThread)
+	CFIX_FIXTURE_ENTRY(ThrowOnAnonymousThread)
 CFIX_END_FIXTURE()

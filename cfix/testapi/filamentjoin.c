@@ -82,6 +82,11 @@ static void SpawnAndAutoJoinLotsOfThreads()
 	CFIX_ASSERT( GetLastError() == ( DWORD ) CFIX_E_TOO_MANY_CHILD_THREADS );
 }
 
+static void CfixRegisterThreadFailsWhenAutoRegisteringDisabled()
+{
+	CFIX_ASSERT_HRESULT( E_UNEXPECTED, CfixRegisterThread( NULL ) );
+}
+
 CFIX_BEGIN_FIXTURE( FilamentJoin )
 	CFIX_FIXTURE_ENTRY( SpawnAndJoinPolitely )
 	CFIX_FIXTURE_ENTRY( SpawnAndAutoJoin )
@@ -94,4 +99,6 @@ CFIX_BEGIN_FIXTURE( FilamentJoin )
 	CFIX_FIXTURE_TEARDOWN( SpawnAndAutoJoin )
 	CFIX_FIXTURE_BEFORE( SpawnAndAutoJoin )
 	CFIX_FIXTURE_AFTER( SpawnAndAutoJoin )
+
+	CFIX_FIXTURE_ENTRY( CfixRegisterThreadFailsWhenAutoRegisteringDisabled )
 CFIX_END_FIXTURE()

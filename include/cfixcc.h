@@ -1196,6 +1196,8 @@ EXTERN_C __declspec(dllexport)											\
 PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##Class()			\
 {																		\
 	typedef Class __TestClass;											\
+	static ULONG ApiVersion = CFIX_PE_API_MAKEAPIVERSION(				\
+		CfixApiTypeCc, 0 );												\
 	static CFIX_PE_DEFINITION_ENTRY Entries[] = {						\
 	{ CfixEntryTypeSetup, L"SetUp",										\
 		cfixcc::InvokeSetUp< __TestClass > },							\
@@ -1205,6 +1207,28 @@ PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##Class()			\
 		cfixcc::InvokeBefore< __TestClass > },							\
 	{ CfixEntryTypeAfter, L"After",										\
 		cfixcc::InvokeAfter< __TestClass > },							
+
+
+#if ! defined( CFIX_KERNELMODE )
+#define CFIXCC_BEGIN_CLASS_EX( Class, Flags )							\
+EXTERN_C __declspec(dllexport)											\
+PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##Class()			\
+{																		\
+	typedef Class __TestClass;											\
+	static ULONG ApiVersion = CFIX_PE_API_MAKEAPIVERSION_EX(			\
+		CfixApiTypeCc, 0, ( Flags ) );									\
+	static CFIX_PE_DEFINITION_ENTRY Entries[] = {						\
+	{ CfixEntryTypeSetup, L"SetUp",										\
+		cfixcc::InvokeSetUp< __TestClass > },							\
+	{ CfixEntryTypeTeardown, L"TearDown",								\
+		cfixcc::InvokeTearDown< __TestClass > },						\
+	{ CfixEntryTypeBefore, L"Before",									\
+		cfixcc::InvokeBefore< __TestClass > },							\
+	{ CfixEntryTypeAfter, L"After",										\
+		cfixcc::InvokeAfter< __TestClass > },							
+#endif // CFIX_KERNELMODE
+
+
 
 #define CFIXCC_METHOD( MethodName )										\
 	{ CfixEntryTypeTestcase, __CFIX_WIDE( #MethodName ),				\
@@ -1220,7 +1244,7 @@ PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##Class()			\
 	{ CfixEntryTypeEnd, NULL, NULL }									\
 	};																	\
 	static CFIX_TEST_PE_DEFINITION Fixture = {							\
-		CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeCc, 0 ),					\
+		ApiVersion,														\
 		Entries															\
 	};																	\
 	CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION();						\

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section id="FixtureDefAPI">
+<section id="FixtureDefCcAPI">
 		<title>Fixture definition (C++ only)</title>
 
 		<para>
@@ -314,6 +314,135 @@ CFIXCC_END_CLASS()
 				</para>
 			</simplesect>
 			&TestApiCcDefaultRequirements12;
+		</section>
+		
+		<section id="CFIXCC_BEGIN_CLASS_EX">
+			<title>CFIXCC_BEGIN_CLASS_EX</title>
+			<indexterm><primary>CFIXCC_BEGIN_CLASS_EX</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				CFIXCC_BEGIN_CLASS_EX defines the start of a C++ fixture definition. For each class inheriting
+				from <link linkend="TestFixture">TestFixture</link>, one such definition must be provided.
+				The name of the respective class must be provided as argument.
+				</para>
+				<para>
+					CFIXCC_BEGIN_CLASS_EX behaves like <link linkend="CFIXCC_BEGIN_CLASS">CFIXCC_BEGIN_CLASS</link>,
+					but additionally allows flags to be specified. Flags can be used to enable/disable certain features
+					for this specific fixture.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+CFIXCC_BEGIN_CLASS_EX( ClassName, ULONG Flags )
+				</programlisting>
+				<note>
+				Do not put quotes around the class name. The name must match the name of the respective class, which in turn
+				has to publicly derive from <link linkend="TestFixture">TestFixture</link>.
+				</note>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+					<emphasis>ClassName</emphasis>: name of the corresponding class. The class needs to
+					publicly derive from <link linkend="TestFixture">TestFixture</link>.
+				</para>
+				<para>
+					<emphasis>Flags</emphasis>: Flags for enabling/disabling certain features. The following flags
+					are currently availale:
+					
+					<table frame="all" tocentry="0">
+						<tgroup cols="2" align="left" colsep="1" rowsep="1">
+							<thead>
+								<row>
+								  <entry>Flag</entry>
+								  <entry>Description</entry>
+								</row>
+							</thead>
+							<tbody>
+								<row>
+									<entry>CFIX_FIXTURE_USES_ANONYMOUS_THREADS</entry>
+									<entry>
+										Enable <link linkend="AnonymousThreadsAutoRegistration">Anonymous Thread Auto-Registration</link>
+										for this fixture. 
+									</entry>
+								</row>
+							</tbody>
+						</tgroup>
+					</table>
+					If Flags is set to 0, CFIXCC_BEGIN_CLASS_EX is equivalent to 
+					<link linkend="CFIXCC_BEGIN_CLASS">CFIXCC_BEGIN_CLASS</link>.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+				When the test class resides within a custom namespace, make sure to put the fixture definition into the 
+				same namespace. Example:
+				</para>
+				<programlisting>
+#include &lt;cfixcc.h&gt;
+
+namespace test
+{
+class SimpleFixture : public cfixcc::TestFixture
+{
+public:
+  void Method01() 
+  {
+	...
+  }
+};
+
+CFIXCC_BEGIN_CLASS_EX( SimpleFixture, CFIX_FIXTURE_USES_ANONYMOUS_THREADS )
+  CFIXCC_METHOD( Method01 )
+CFIXCC_END_CLASS()
+
+} // namespace
+
+				</programlisting>
+				<para>
+				It is not allowed to specify a namespace-qualifed like <emphasis>test::SimpleFixture</emphasis> as argument 
+				to CFIXCC_BEGIN_CLASS_EX. Please also note that cfix ignores the namespace when deriving the fixture name from the class.
+				That is, the class name itself, without namespace qualification, must uniquely identify a fixture.
+				</para>
+			</simplesect>
+			<simplesect>
+				<title>Requirements</title>
+		
+				<table frame="all" tocentry="0">
+					<tgroup cols="3" align="left" colsep="1" rowsep="1">
+						<thead>
+							<row>
+							  <entry></entry>
+							  <entry>User Mode</entry>
+							  <entry>Kernel Mode</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row>
+							  <entry>Available since</entry>
+							  <entry>1.6</entry>
+							  <entry>Not supported</entry>
+							</row>
+							<row>
+							  <entry>Header</entry>
+							  <entry>Declared in cfixcc.h</entry>
+							  <entry>Not supported</entry>
+							</row>
+							<row>
+							  <entry>IRQL</entry>
+							  <entry>N/A</entry>
+							  <entry>N/A</entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</table>
+			</simplesect>
 		</section>
 		
 		<section id="CFIXCC_END_CLASS">

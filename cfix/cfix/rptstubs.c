@@ -138,11 +138,30 @@ DWORD CfixpExceptionFilter(
 
 CFIXAPI VOID CFIXCALLTYPE CfixPeFail()
 {
-	RaiseException(
-		EXCEPTION_TESTCASE_FAILED,
-		0,
-		0,
-		NULL );
+	PCFIXP_FILAMENT Filament;
+	BOOL FilamentDerivedFromDefaultFilament;
+	
+	HRESULT Hr = CfixpGetCurrentFilament( 
+		&Filament, 
+		&FilamentDerivedFromDefaultFilament );
+	
+	if ( SUCCEEDED( Hr ) && ! FilamentDerivedFromDefaultFilament )
+	{
+		RaiseException(
+			EXCEPTION_TESTCASE_FAILED,
+			0,
+			0,
+			NULL );
+	}
+	else
+	{
+		//
+		// No CfixpExceptionFilter installed as this is 
+		// an anonymous thread that has been auto-registered.
+		//
+		ExitThread( CFIX_EXIT_THREAD_ABORTED );
+	}
+
 	ASSERT( !"Will not make it here" );
 }
 
@@ -156,6 +175,7 @@ CFIXAPI CFIX_REPORT_DISPOSITION CFIXCALLTYPE CfixPeReportFailedAssertion(
 	CFIX_REPORT_DISPOSITION Disp;
 	CFIXP_EVENT_WITH_STACKTRACE Event;
 	PCFIXP_FILAMENT Filament;
+	BOOL FilamentDerivedFromDefaultFilament;
 	HRESULT Hr;
 	CFIX_THREAD_ID ThreadId;
 
@@ -165,7 +185,9 @@ CFIXAPI CFIX_REPORT_DISPOSITION CFIXCALLTYPE CfixPeReportFailedAssertion(
 	// Filament should be in TLS as this routine should only be called
 	// from within a test routine.
 	//
-	Hr = CfixpGetCurrentFilament( &Filament );
+	Hr = CfixpGetCurrentFilament( 
+		&Filament, 
+		&FilamentDerivedFromDefaultFilament );
 	if ( FAILED( Hr ) )
 	{
 		WCHAR Buffer[ 200 ] = { 0 };
@@ -221,15 +243,26 @@ CFIXAPI CFIX_REPORT_DISPOSITION CFIXCALLTYPE CfixPeReportFailedAssertion(
 	}
 	else if ( Disp == CfixAbort )
 	{
-		//
-		// Throw exception to abort testcase. Will be catched by 
-		// CfixpExceptionFilter installed a few frames deeper.
-		//
-		RaiseException(
-			EXCEPTION_TESTCASE_FAILED_ABORT,
-			0,
-			0,
-			NULL );
+		if ( ! FilamentDerivedFromDefaultFilament )
+		{
+			//
+			// Throw exception to abort testcase. Will be catched by 
+			// CfixpExceptionFilter installed a few frames deeper.
+			//
+			RaiseException(
+				EXCEPTION_TESTCASE_FAILED_ABORT,
+				0,
+				0,
+				NULL );
+		}
+		else
+		{
+			//
+			// No CfixpExceptionFilter installed as this is 
+			// an anonymous thread that has been auto-registered.
+			//
+			ExitThread( CFIX_EXIT_THREAD_ABORTED );
+		}
 
 		ASSERT( !"Will not make it here" );
 		return CfixAbort;
@@ -378,6 +411,7 @@ CFIXAPI VOID CFIXCALLTYPE CfixPeReportInconclusiveness(
 {
 	CFIXP_EVENT_WITH_STACKTRACE Event;
 	PCFIXP_FILAMENT Filament;
+	BOOL FilamentDerivedFromDefaultFilament;
 	HRESULT Hr;
 	CFIX_THREAD_ID ThreadId;
 
@@ -385,7 +419,9 @@ CFIXAPI VOID CFIXCALLTYPE CfixPeReportInconclusiveness(
 	// Filament should be in TLS as this routine should only be called
 	// from within a test routine.
 	//
-	Hr = CfixpGetCurrentFilament( &Filament );
+	Hr = CfixpGetCurrentFilament( 
+		&Filament, 
+		&FilamentDerivedFromDefaultFilament );
 	if ( FAILED( Hr ) )
 	{
 		WCHAR Buffer[ 200 ] = { 0 };
@@ -431,15 +467,26 @@ CFIXAPI VOID CFIXCALLTYPE CfixPeReportInconclusiveness(
 		&ThreadId,
 		&Event.Base );
 
-	//
-	// Throw exception to abort testcase. Will be catched by 
-	// CfixpExceptionFilter installed a few frames deeper.
-	//
-	RaiseException(
-		EXCEPTION_TESTCASE_INCONCLUSIVE,
-		0,
-		0,
-		NULL );
+	if ( ! FilamentDerivedFromDefaultFilament )
+	{
+		//
+		// Throw exception to abort testcase. Will be catched by 
+		// CfixpExceptionFilter installed a few frames deeper.
+		//
+		RaiseException(
+			EXCEPTION_TESTCASE_INCONCLUSIVE,
+			0,
+			0,
+			NULL );
+	}
+	else
+	{
+		//
+		// No CfixpExceptionFilter installed as this is 
+		// an anonymous thread that has been auto-registered.
+		//
+		ExitThread( CFIX_EXIT_THREAD_ABORTED );
+	}
 
 	ASSERT( !"Will not make it here" );
 }
@@ -486,7 +533,7 @@ static CFIXAPI VOID CfixsPeReportLog(
 	// Filament should be in TLS as this routine should only be called
 	// from within a test routine.
 	//
-	Hr = CfixpGetCurrentFilament( &Filament );
+	Hr = CfixpGetCurrentFilament( &Filament, NULL );
 	if ( FAILED( Hr ) )
 	{
 		WCHAR Buffer[ 200 ] = { 0 };

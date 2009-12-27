@@ -148,7 +148,7 @@ HANDLE CfixCreateThread2(
 	//
 	// The current filament is inherited to the new thread.
 	//
-	Hr = CfixpGetCurrentFilament( &Filament );
+	Hr = CfixpGetCurrentFilament( &Filament, NULL );
 	if ( FAILED( Hr ) )
 	{
 		SetLastError( Hr );

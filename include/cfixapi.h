@@ -289,7 +289,13 @@ typedef struct _CFIX_EXECUTION_CONTEXT
 //
 // Capture stack backtraces for failed reports.
 //
-#define CFIX_TEST_FLAG_CAPTURE_STACK_TRACES 1
+#define CFIX_TEST_FLAG_CAPTURE_STACK_TRACES		1
+
+//
+// Register current filament as default filament for 
+// anonymous threads.
+//
+#define CFIX_TEST_FLAG_PROVIDE_DEFAULT_FILAMENT 2
 
 /*++
 	Description:
@@ -382,6 +388,11 @@ typedef struct _CFIX_FIXTURE
 	CFIX_API_TYPE ApiType;
 
 	//
+	// CFIX_FIXTURE_USES_* flags.
+	//
+	ULONG Flags;
+
+	//
 	// Backpointer to enclosing module.
 	//
 	struct _CFIX_TEST_MODULE *Module;
@@ -389,7 +400,7 @@ typedef struct _CFIX_FIXTURE
 	//
 	// # of elements in TestCases array.
 	//
-	UINT TestCaseCount;
+	ULONG TestCaseCount;
 	CFIX_TEST_CASE TestCases[ ANYSIZE_ARRAY ];
 } CFIX_FIXTURE, *PCFIX_FIXTURE;
 

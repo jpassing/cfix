@@ -167,6 +167,7 @@ typedef struct _CFIXP_FILAMENT
 	// Capture stack backtraces for failed reports.
 	//
 	#define CFIXP_FILAMENT_FLAG_CAPTURE_STACK_TRACES	1
+	#define CFIXP_FILAMENT_FLAG_DEFAULT_FILAMENT		2
 
 	ULONG Flags;
 
@@ -225,10 +226,13 @@ HRESULT CfixpSetCurrentFilament(
 		wrapper functions is preferred.
 
 	Parameters:
-		Filament	- current filament.
+		Filament			- current filament.
+		DerivedFromDefault	- indicates whether filament is a result
+							  of auto-registering/using default filament.
 --*/
 HRESULT CfixpGetCurrentFilament(
-	__out PCFIXP_FILAMENT *Filament
+	__out PCFIXP_FILAMENT *Filament,
+	__out_opt PBOOL DerivedFromDefault
 	);
 
 /*++
@@ -239,6 +243,26 @@ HRESULT CfixpJoinChildThreadsFilament(
 	__in PCFIXP_FILAMENT Filament,
 	__in ULONG Timeout
 	);
+
+/*++
+	Routine Description:
+		Provide an (optional) default filament to use for 'anonymous'
+		threads. 
+
+	The default filament must be revoked by setting it to NULL.
+--*/
+HRESULT CfixpSetDefaultFilament(
+	__in_opt PCFIXP_FILAMENT Filament
+	);
+
+/*++
+	Routine Description:
+		Cleanup filament resources for a thread that is about to
+		be detahced.
+
+		Only to be called from DllMain.
+--*/
+VOID CfixpCleanupLeakedFilamentForDetachingThread();
 
 /*++
 	Routine Description:

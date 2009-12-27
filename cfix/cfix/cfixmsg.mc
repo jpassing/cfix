@@ -212,3 +212,26 @@ SymbolicName	= CFIX_E_FILAMENT_JOIN_TIMEOUT
 Language		= English
 At least one child thread did not complete within the alotted time.
 .
+
+MessageId		= 0x8017
+Severity		= Warning
+Facility		= Interface
+SymbolicName	= CFIX_E_DEFAULT_FILAMENT_CONFLICT
+Language		= English
+Cannot register more than one default filament.
+.
+
+MessageId		= 0x8018
+Severity		= Warning
+Facility		= Interface
+SymbolicName	= CFIX_E_INVALID_FIXTURE_FLAG
+Language		= English
+Invalid flag specified for fixture.
+.
+MessageId		= 0x8019
+Severity		= Warning
+Facility		= Interface
+SymbolicName	= CFIX_E_UNSUPPORTED_FIXTURE_REVISION
+Language		= English
+Fixture revision not supported.
+.

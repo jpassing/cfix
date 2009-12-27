@@ -232,6 +232,7 @@ static HRESULT CfixklsCreateFixture(
 	NewFixture->Module			= &Module->Base;
 	NewFixture->TestCaseCount	= TestCaseCount;
 	NewFixture->ApiType			= CfixApiTypeBase;
+	NewFixture->Flags			= 0;	// Not supported for KM.
 
 	//
 	// Iterate over entries and create setup/teardown/testcases.

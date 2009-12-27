@@ -157,7 +157,11 @@ static NTSTATUS CfixkrsInitializeFixture(
 		return STATUS_DRIVER_UNABLE_TO_LOAD;
 	}
 
-	if ( TestDef->ApiVersion != CFIX_PE_API_VERSION )
+	//
+	// N.B. Using legacy ApiVersion -- no alternate API types or
+	// flags supported.
+	//
+	if ( TestDef->Head.ApiVersion != CFIX_PE_API_VERSION )
 	{
 		//
 		// TODO: Log to event log.

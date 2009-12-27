@@ -74,7 +74,7 @@ DWORD ThrowThreadProc( PVOID Unused )
 	return 0;
 }
 
-void AssertOnAnonThread()
+void TestAssertOnAnonThreadAbortsAnonThread()
 {
 	DWORD ExCode;
 	HANDLE Thr = CreateThread(
@@ -93,7 +93,7 @@ void AssertOnAnonThread()
 	CFIX_ASSERT( CloseHandle( Thr ) );
 }
 
-void LogOnAnonThread()
+void TestLogOnAnonThreadAbortsAnonThread()
 {
 	DWORD ExCode;
 	HANDLE Thr = CreateThread(
@@ -112,7 +112,7 @@ void LogOnAnonThread()
 	CFIX_ASSERT( CloseHandle( Thr ) );
 }
 
-void InconclusiveOnAnonThread()
+void TestInconclusiveOnAnonThreadAbortsAnonThread()
 {
 	DWORD ExCode;
 	HANDLE Thr = CreateThread(
@@ -132,7 +132,7 @@ void InconclusiveOnAnonThread()
 }
 
 CFIX_BEGIN_FIXTURE(AnonymousThreads)
-	CFIX_FIXTURE_ENTRY(AssertOnAnonThread)
-	CFIX_FIXTURE_ENTRY(LogOnAnonThread)
-	CFIX_FIXTURE_ENTRY(InconclusiveOnAnonThread)
+	CFIX_FIXTURE_ENTRY(TestAssertOnAnonThreadAbortsAnonThread)
+	CFIX_FIXTURE_ENTRY(TestLogOnAnonThreadAbortsAnonThread)
+	CFIX_FIXTURE_ENTRY(TestInconclusiveOnAnonThreadAbortsAnonThread)
 CFIX_END_FIXTURE()

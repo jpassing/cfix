@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section id="FixtureDefCcAPI">
+<section id="FixtureDefAPI">
 		<title>Fixture definition (C and C++)</title>
 
 		<para>
@@ -16,7 +16,7 @@ void __stdcall After()    { ... }
 void __stdcall Test1()    { ... }
 void __stdcall Test2()    { ... }
 
-CFIX_BEGIN_FIXTURE( SuiteName )
+CFIX_BEGIN_FIXTURE( FixtureName )
 	CFIX_FIXTURE_SETUP( Setup )
 	CFIX_FIXTURE_TEARDOWN( Teardown )
 	CFIX_FIXTURE_BEFORE( Before )
@@ -46,21 +46,120 @@ CFIX_END_FIXTURE()
 				of the fixture.
 				</para>
 				<para>
-				SuiteName defines the name of the fixture. It must be unique across
+				FixtureName defines the name of the fixture. It must be unique across
 				all fixtures of the same test module (i.e. DLL). The same restrictions as for naming
 				routines apply, i.e. no spaces, no special characters etc.
+				</para>
+				<para>
+					See <link linkend="FixtureDefAPI">here</link> for an example of a complete fixture definition.
 				</para>
 			</simplesect>
 			
 			<simplesect>
 				<title>Declaration</title>
 				<programlisting>
-CFIX_BEGIN_FIXTURE( SuiteName )
+CFIX_BEGIN_FIXTURE( FixtureName )
 				</programlisting>
-				<note>Do not put quotes around the suite name.</note>
+				<note>Do not put quotes around the fixture name.</note>
 			</simplesect>
 			
 			&TestDefDefaultRequirements;
+		</section>
+		
+		<section id="CFIX_BEGIN_FIXTURE_EX">
+			<title>CFIX_BEGIN_FIXTURE_EX</title>
+			<indexterm><primary>CFIX_BEGIN_FIXTURE_EX</primary></indexterm>
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+					CFIX_BEGIN_FIXTURE_EX defines the start of a fixture definition. It is also used to specify the name
+					of the fixture.
+				</para>
+				<para>
+					CFIX_BEGIN_FIXTURE_EX behaves like <link linkend="CFIX_BEGIN_FIXTURE">CFIX_BEGIN_FIXTURE</link>,
+					but additionally allows flags to be specified. Flags can be used to enable/disable certain features
+					for this specific fixture.
+				</para>
+				<para>
+					See <link linkend="FixtureDefAPI">here</link> for an example of a complete fixture definition.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+CFIX_BEGIN_FIXTURE_EX( FixtureName, ULONG Flags )
+				</programlisting>
+				<note>Do not put quotes around the fixture name.</note>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+					<emphasis>FixtureName</emphasis>: defines the name of the fixture. It must be unique across
+					all fixtures of the same test module (i.e. DLL). The same restrictions as for naming
+					routines apply, i.e. no spaces, no special characters etc.
+				</para>
+				<para>
+					<emphasis>Flags</emphasis>: Flags for enabling/disabling certain features. The following flags
+					are currently availale:
+					
+					<table frame="all" tocentry="0">
+						<tgroup cols="2" align="left" colsep="1" rowsep="1">
+							<thead>
+								<row>
+								  <entry>Flag</entry>
+								  <entry>Description</entry>
+								</row>
+							</thead>
+							<tbody>
+								<row>
+									<entry>CFIX_FIXTURE_USES_ANONYMOUS_THREADS</entry>
+									<entry>
+										Enable <link linkend="AnonymousThreadsAutoRegistration">Anonymous Thread Auto-Registration</link>
+										for this fixture. 
+									</entry>
+								</row>
+							</tbody>
+						</tgroup>
+					</table>
+					If Flags is set to 0, CFIX_BEGIN_FIXTURE_EX is equivalent to 
+					<link linkend="CFIX_BEGIN_FIXTURE">CFIX_BEGIN_FIXTURE</link>.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Requirements</title>
+		
+				<table frame="all" tocentry="0">
+					<tgroup cols="3" align="left" colsep="1" rowsep="1">
+						<thead>
+							<row>
+							  <entry></entry>
+							  <entry>User Mode</entry>
+							  <entry>Kernel Mode</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row>
+							  <entry>Available since</entry>
+							  <entry>1.6</entry>
+							  <entry>Not supported</entry>
+							</row>
+							<row>
+							  <entry>Header</entry>
+							  <entry>Declared in cfix.h</entry>
+							  <entry>Not supported</entry>
+							</row>
+							<row>
+							  <entry>IRQL</entry>
+							  <entry>N/A</entry>
+							  <entry>N/A</entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</table>
+			</simplesect>
 		</section>
 		
 		<section id="CFIX_END_FIXTURE">
@@ -70,6 +169,9 @@ CFIX_BEGIN_FIXTURE( SuiteName )
 				<title>Synopsis</title>
 				<para>
 				CFIX_END_FIXTURE defines the end of a fixture definition. 
+				</para>
+				<para>
+					See <link linkend="FixtureDefAPI">here</link> for an example of a complete fixture definition.
 				</para>
 			</simplesect>
 			
@@ -94,6 +196,9 @@ CFIX_BEGIN_FIXTURE()
 				</para>
 				<para>
 				Specifying CFIX_FIXTURE_SETUP is optional. Note, however, that CFIX_FIXTURE_SETUP may be used at most once per fixture definition.
+				</para>
+				<para>
+					See <link linkend="FixtureDefAPI">here</link> for an example of a complete fixture definition.
 				</para>
 			</simplesect>
 			
@@ -136,6 +241,9 @@ void __stdcall SetupRoutine()
 				</para>
 				<para>
 				Specifying CFIX_FIXTURE_TEARDOWN is optional. Note, however, that CFIX_FIXTURE_TEARDOWN may be used at most once per fixture definition.
+				</para>
+				<para>
+					See <link linkend="FixtureDefAPI">here</link> for an example of a complete fixture definition.
 				</para>
 			</simplesect>
 			
@@ -185,6 +293,9 @@ void __stdcall TeardownRoutine()
 				<para>
 				Specifying CFIX_FIXTURE_BEFORE is optional. Note, however, that CFIX_FIXTURE_BEFORE may be used at most once per fixture definition.
 				</para>
+				<para>
+					See <link linkend="FixtureDefAPI">here</link> for an example of a complete fixture definition.
+				</para>
 			</simplesect>
 			
 			<simplesect>
@@ -228,6 +339,9 @@ void __stdcall BeforeRoutine()
 				</para>
 				<para>
 				Specifying CFIX_FIXTURE_AFTER is optional. Note, however, that CFIX_FIXTURE_AFTER may be used at most once per fixture definition.
+				</para>
+				<para>
+					See <link linkend="FixtureDefAPI">here</link> for an example of a complete fixture definition.
 				</para>
 			</simplesect>
 			

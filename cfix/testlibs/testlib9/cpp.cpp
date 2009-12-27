@@ -1,5 +1,3 @@
-#pragma once
-
 /*----------------------------------------------------------------------
  * Copyright:
  *		Johannes Passing (johannes.passing@googlemail.com)
@@ -22,28 +20,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with cfix.  If not, see <http://www.gnu.org/licenses/>.
  */
-				
+#include <cfixcc.h>
 
-#include <stdio.h>
-#include <tchar.h>
-#include <crtdbg.h>
-#include <shlwapi.h>
+class CppFixtureWithFlags : public cfixcc::TestFixture
+{
+public:
+	void Method01() 
+	{
+	}
+};
 
-#pragma warning( push )
-#pragma warning( disable: 6011; disable: 6387 )
-#include <strsafe.h>
-#pragma warning( pop )
-
-#include <cfix.h>
-#include <cfixapi.h>
-
-#define TEST CFIX_ASSERT
-#define TEST_HR( expr ) CFIX_ASSERT_EQUALS_DWORD( S_OK, ( expr ) )
-#define TEST_RETURN( Expected, Expr ) \
-	CFIX_ASSERT_EQUALS_DWORD( ( DWORD ) Expected, ( DWORD ) ( Expr ) )
-#define TEST_EQ CFIX_ASSERT_EQUALS_DWORD
-
-//
-// Handle to this module.
-//
-extern HMODULE ModuleHandle;
+CFIXCC_BEGIN_CLASS_EX( CppFixtureWithFlags, CFIX_FIXTURE_USES_ANONYMOUS_THREADS )
+	CFIXCC_METHOD( Method01 )
+CFIXCC_END_CLASS()

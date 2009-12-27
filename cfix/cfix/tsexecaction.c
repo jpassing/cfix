@@ -84,6 +84,13 @@ static ULONG CfixsGetTestFlagsFixtureExecutionAction(
 		Flags |= CFIX_TEST_FLAG_CAPTURE_STACK_TRACES;
 	}
 
+	if ( CfixpFlagOn(
+		Action->Fixture->Flags,
+		CFIX_FIXTURE_USES_ANONYMOUS_THREADS ) )
+	{
+		Flags |= CFIX_TEST_FLAG_PROVIDE_DEFAULT_FILAMENT;
+	}
+
 	return Flags;
 }
 

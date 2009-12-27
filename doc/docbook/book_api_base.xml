@@ -657,7 +657,7 @@ CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread(
 				<title>Remarks</title>
 				<para>
 				This routine has been superseded by <link linkend="CfixCreateThread2">CfixCreateThread2</link>. 
-				Calling CfixCreateThread is eqivalent to calling CfixCreateThread2 with parameter 
+				Calling CfixCreateThread is equivalent to calling CfixCreateThread2 with parameter 
 				<emphasis>Flags</emphasis> set to 0.
 				</para>
 			</simplesect>
@@ -890,6 +890,95 @@ NTSTATUS CFIXCALLTYPE CfixCreateSystemThread(
 							  <entry>IRQL</entry>
 							  <entry>N/A</entry>
 							  <entry>Callable at PASSIVE_LEVEL</entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</table>
+			</simplesect>
+		</section>
+		
+		<section id="CfixRegisterThread">
+			<title>CfixRegisterThread</title>
+			<indexterm><primary>CfixRegisterThread</primary></indexterm>
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+					When using <link linkend="AnonymousThreadsAutoRegistration">Anonymous Thread Auto-Registration</link>, 
+					calling CfixRegisterThread on a child thread not created using <link linkend="CfixCreateThread">CfixCreateThread</link>
+					causes the thread to be	auto-registered.
+				</para>
+				<para>
+					Calling CfixRegisterThread is optional and usually not required. The only situation where 
+					calling CfixRegisterThread can be beneficial is if you would like to make use of 
+					<link linkend="Multithreading">Auto Joining</link>.
+				</para>
+				<para>
+					Please refer to the section <link linkend="AnonymousThreadsAutoRegistration">Anonymous Thread Auto-Registration</link>
+					for more information.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+HRESULT CfixRegisterThread( 
+	__reserved PVOID Reserved 
+	);
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+				<emphasis>Reserved</emphasis>: Reserved, must be NULL.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Remarks</title>
+				<para>
+					If CfixRegisterThread is called on a thread created using <link linkend="CfixCreateThread">CfixCreateThread</link>,
+					E_UNEXPECTED will be returned as it is unecessary to call CfixRegisterThread on such a thread.
+				</para>
+				<para>
+					If CfixRegisterThread is called and <link linkend="AnonymousThreadsAutoRegistration">Anonymous Thread Auto-Registration</link>
+					has not been enabled, E_UNEXPECTED will be returned.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Requirements</title>
+		
+				<table frame="all" tocentry="0">
+					<tgroup cols="3" align="left" colsep="1" rowsep="1">
+						<thead>
+							<row>
+							  <entry></entry>
+							  <entry>User Mode</entry>
+							  <entry>Kernel Mode</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row>
+							  <entry>Available since</entry>
+							  <entry>1.6</entry>
+							  <entry>Not supported</entry>
+							</row>
+							<row>
+							  <entry>Header</entry>
+							  <entry>Declared in cfix.h</entry>
+							  <entry>Not supported</entry>
+							</row>
+							<row>
+							  <entry>Library</entry>
+							  <entry>Link to cfix.lib</entry>
+							  <entry>Not supported</entry>
+							</row>
+							<row>
+							  <entry>IRQL</entry>
+							  <entry>N/A</entry>
+							  <entry>N/A</entry>
 							</row>
 						</tbody>
 					</tgroup>

@@ -178,6 +178,61 @@ static void TestDllWithValidFixture()
 	Mod->Routines.Dereference( Mod );
 }
 
+static void TestApiVersionMacros()
+{
+	TEST_EQ( 0xBBBB000A, CFIX_PE_API_MAKEAPIVERSION( 0xAAAA, 0xBBBB ) );
+	TEST_EQ( 0xBBBBCCCA, CFIX_PE_API_MAKEAPIVERSION_EX( 0xAAAA, 0xBBBB, 0xCCCC ) );
+}
+
+static void TestDllWithValidFixtureFlags()
+{
+	PCFIX_TEST_MODULE Mod;
+	WCHAR Path[ MAX_PATH ];
+
+	TEST( GetModuleFileName( ModuleHandle, Path, _countof( Path ) ) );
+	TEST( PathRemoveFileSpec( Path ) );
+	TEST( PathAppend( Path, L"testlib9.dll" ) );
+
+	TEST_HR( CfixCreateTestModuleFromPeImage( Path, &Mod ) );
+	TEST( 0 == _wcsicmp( Mod->Name,  L"testlib9" ) );
+	TEST( 3 == Mod->FixtureCount );
+	
+	TEST( 0 == _wcsicmp( Mod->Fixtures[ 0 ]->Name, L"CppFixtureWithFlags" ) );
+	TEST( Mod->Fixtures[ 0 ]->ApiType == CfixApiTypeCc );
+	TEST( Mod->Fixtures[ 0 ]->Flags == CFIX_FIXTURE_USES_ANONYMOUS_THREADS );
+	TEST( Mod->Fixtures[ 0 ]->TestCaseCount == 1 );
+	TEST( 0 == _wcsicmp( Mod->Fixtures[ 0 ]->TestCases[ 0 ].Name, L"Method01" ) );
+
+	TEST( 0 == _wcsicmp( Mod->Fixtures[ 1 ]->Name, L"FixtureWithFlags" ) );
+	TEST( Mod->Fixtures[ 1 ]->ApiType == CfixApiTypeBase );
+	TEST( Mod->Fixtures[ 1 ]->Flags == CFIX_FIXTURE_USES_ANONYMOUS_THREADS );
+	TEST( Mod->Fixtures[ 1 ]->TestCaseCount == 1 );
+	TEST( 0 == _wcsicmp( Mod->Fixtures[ 1 ]->TestCases[ 0 ].Name, L"Test01" ) );
+
+	TEST( 0 == _wcsicmp( Mod->Fixtures[ 2 ]->Name, L"FixtureWithNoFlags" ) );
+	TEST( Mod->Fixtures[ 2 ]->ApiType == CfixApiTypeBase );
+	TEST( Mod->Fixtures[ 2 ]->Flags == 0 );
+	TEST( Mod->Fixtures[ 2 ]->TestCaseCount == 1 );
+	TEST( 0 == _wcsicmp( Mod->Fixtures[ 2 ]->TestCases[ 0 ].Name, L"Test01" ) );
+
+	Mod->Routines.Dereference( Mod );
+}
+
+
+static void TestDllWithInvalidFlagsCausesLoadFailure()
+{
+	PCFIX_TEST_MODULE Mod;
+	WCHAR Path[ MAX_PATH ];
+
+	TEST( GetModuleFileName( ModuleHandle, Path, _countof( Path ) ) );
+	TEST( PathRemoveFileSpec( Path ) );
+	TEST( PathAppend( Path, L"testlib10.dll" ) );
+
+	CFIX_ASSERT_HRESULT( 
+		CFIX_E_INVALID_FIXTURE_FLAG, 
+		CfixCreateTestModuleFromPeImage( Path, &Mod ) );
+}
+
 CFIX_BEGIN_FIXTURE(PeLoading)
 	CFIX_FIXTURE_ENTRY(TestNonExistingDll)
 	CFIX_FIXTURE_ENTRY(TestDllWithNoTestExports)
@@ -189,4 +244,7 @@ CFIX_BEGIN_FIXTURE(PeLoading)
 	CFIX_FIXTURE_ENTRY(TestDllWithValidFixture)
 	CFIX_FIXTURE_ENTRY(TestDllWithDuplicateBefore)
 	CFIX_FIXTURE_ENTRY(TestDllWithDuplicateAfter)
+	CFIX_FIXTURE_ENTRY(TestApiVersionMacros)
+	CFIX_FIXTURE_ENTRY(TestDllWithValidFixtureFlags)
+	CFIX_FIXTURE_ENTRY(TestDllWithInvalidFlagsCausesLoadFailure)
 CFIX_END_FIXTURE()

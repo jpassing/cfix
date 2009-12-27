@@ -60,6 +60,11 @@ BOOL APIENTRY DllMain(
 		CfixpTeardownStackTraceCapturing();
 		return CfixpTeardownFilamentTls();
 	}
+	else if ( Reason == DLL_THREAD_DETACH )
+	{
+		CfixpCleanupLeakedFilamentForDetachingThread();
+		return TRUE;
+	}
 	else
 	{
 		return TRUE;

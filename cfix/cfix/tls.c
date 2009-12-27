@@ -40,7 +40,7 @@ CFIXAPI VOID CfixPeSetValue(
 	PCFIXP_FILAMENT Filament;
 	HRESULT Hr;
 	
-	Hr = CfixpGetCurrentFilament( &Filament );
+	Hr = CfixpGetCurrentFilament( &Filament, NULL );
 	if ( SUCCEEDED( Hr ) )
 	{
 		if ( Tag == CFIX_TAG_RESERVED_FOR_CC )
@@ -71,7 +71,7 @@ CFIXAPI PVOID CfixPeGetValue(
 	PCFIXP_FILAMENT Filament;
 	HRESULT Hr;
 	
-	Hr = CfixpGetCurrentFilament( &Filament );
+	Hr = CfixpGetCurrentFilament( &Filament, NULL );
 	if ( SUCCEEDED( Hr ) )
 	{
 		if ( Tag == CFIX_TAG_RESERVED_FOR_CC )

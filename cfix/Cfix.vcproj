@@ -29,7 +29,7 @@
 				BuildCommandLine="ddkbuild -WNETW2K checked $(SolutionDir)"
 				ReBuildCommandLine="ddkbuild -WNETW2K checked $(SolutionDir) -cZ "
 				CleanCommandLine=""
-				Output=""
+				Output="D:\dev\wdev\cfix\bin\chk\i386\testapi.dll"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -247,7 +247,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\testapi\testmisc.cpp"
+					RelativePath=".\testapi\testmisc.c"
 					>
 				</File>
 				<File
@@ -395,6 +395,42 @@
 					</File>
 					<File
 						RelativePath=".\testlibs\testlib8\testlib8.def"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="testlib9"
+					>
+					<File
+						RelativePath=".\testlibs\testlib9\cpp.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\testlibs\testlib9\SOURCES"
+						>
+					</File>
+					<File
+						RelativePath=".\testlibs\testlib9\suite.c"
+						>
+					</File>
+					<File
+						RelativePath=".\testlibs\testlib9\testlib9.def"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="testlib10"
+					>
+					<File
+						RelativePath=".\testlibs\testlib10\SOURCES"
+						>
+					</File>
+					<File
+						RelativePath=".\testlibs\testlib10\suite.c"
+						>
+					</File>
+					<File
+						RelativePath=".\testlibs\testlib10\testlib10.def"
 						>
 					</File>
 				</Filter>

@@ -247,3 +247,30 @@
 //
 #define CFIX_E_FILAMENT_JOIN_TIMEOUT     ((HRESULT)0x80048016L)
 
+//
+// MessageId: CFIX_E_DEFAULT_FILAMENT_CONFLICT
+//
+// MessageText:
+//
+// Cannot register more than one default filament.
+//
+#define CFIX_E_DEFAULT_FILAMENT_CONFLICT ((HRESULT)0x80048017L)
+
+//
+// MessageId: CFIX_E_INVALID_FIXTURE_FLAG
+//
+// MessageText:
+//
+// Invalid flag specified for fixture.
+//
+#define CFIX_E_INVALID_FIXTURE_FLAG      ((HRESULT)0x80048018L)
+
+//
+// MessageId: CFIX_E_UNSUPPORTED_FIXTURE_REVISION
+//
+// MessageText:
+//
+// Fixture revision not supported.
+//
+#define CFIX_E_UNSUPPORTED_FIXTURE_REVISION ((HRESULT)0x80048019L)
+

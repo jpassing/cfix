@@ -39,7 +39,7 @@
   <title>cfix</title>
 
   <bookinfo>
-    <releaseinfo>Release 1.5</releaseinfo>
+    <releaseinfo>Release 1.6</releaseinfo>
     <author>Johannes Passing</author>
   </bookinfo>
 
@@ -206,6 +206,7 @@
 	<section id="Platforms">
 		<title>Supported Platforms<indexterm><primary>Platforms</primary></indexterm></title>
 		<para>
+			cfix has been tested to work on the following platforms:
 			<table frame="all"><title>Supported Platforms</title>
 				<tgroup cols="4" align="left" colsep="1" rowsep="1">
 					<thead>
@@ -218,46 +219,56 @@
 					</thead>
 					<tbody>
 						<row>
+						  <entry>Windows Server 2008 R2</entry>
+						  <entry>Supported</entry>
+						  <entry>Supported</entry>
+						  <entry>-</entry>
+						</row>
+						<row>
+						  <entry>Windows 7</entry>
+						  <entry>Supported</entry>
+						  <entry>Supported</entry>
+						  <entry>-</entry>
+						</row>
+						<row>
 						  <entry>Windows Server 2008</entry>
 						  <entry>Supported</entry>
 						  <entry>Supported</entry>
-						  <entry>See remark [1]</entry>
+						  <entry>-</entry>
 						</row>
 						<row>
 						  <entry>Windows Vista</entry>
 						  <entry>Supported</entry>
 						  <entry>Supported</entry>
-						  <entry>See remark [1]</entry>
+						  <entry>-</entry>
 						</row>
 						<row>
 						  <entry>Windows Server 2003</entry>
 						  <entry>Supported</entry>
 						  <entry>Supported</entry>
-						  <entry>See remark [1]</entry>
+						  <entry>-</entry>
 						</row>
 						<row>
 						  <entry>Windows XP</entry>
 						  <entry>Supported</entry>
 						  <entry>Supported</entry>
-						  <entry>See remark [1]</entry>
+						  <entry>-</entry>
 						</row>
 						<row>
 						  <entry>Windows 2000</entry>
 						  <entry>Supported</entry>
 						  <entry>N/A</entry>
-						  <entry>See remark [1]</entry>
+						  <entry>-</entry>
 						</row>
 					</tbody>
 				</tgroup>
 			</table>
 		</para>
-		
-		<itemizedlist>
-			<listitem>
-				[1] Itanium: cfix <emphasis>should</emphasis> run on IA64. However, short of an Itanium machine, no tests have been performed on this platform and therefore, no binaries are provided. 
-			</listitem>
-		</itemizedlist>	
-		
+
+		<para>
+		  Note on Itanium: The cfix package currently does not include binaries for the Itanium platform. 
+		  Please contact the author if you are interested in Itanium support.
+		</para>
 		<para>
 			Older NT platforms (3.x, 4.0) as well as all consumer Windows releases (95, 98, ME) are not supported.
 		</para>
@@ -270,6 +281,7 @@
 		</para>
 		<simplesect>
 			<title>Visual Studio</title>
+			<indexterm><primary>Visual Studio</primary></indexterm>
 			<para>
 				cfix supports and has been tested with Visual Studio 2003 (i.e. cl version 13.10) onward. Note, however,
 				that a small amount of features is not supported for cl 13.00/Visual Studio 2003 and is only available
@@ -278,93 +290,330 @@
 		</simplesect>
 		<simplesect>
 			<title>WDK</title>
+			<indexterm><primary>WDK</primary></indexterm>
 			<para>
 				For development with the WDK, use at least WDK 6000. Although older DDKs (3790, 3790.1830) work, they
 				are outdated and may require certain build settings to be adjusted.
 			</para>
+			<note>
+				<indexterm><primary>LTCG</primary></indexterm>
+				<indexterm><primary>Link Time Code Generation</primary></indexterm>
+				<indexterm><primary>C1047</primary></indexterm>
+				<para>
+					When using WDK 7600 to build kernel mode unit test binaries for the amd64 architecture
+					using the WIN7 build environment, you may suffer from the following linker error:
+				</para>
+				<para>
+					<emphasis>
+						error fatal error C1047: The object or library file ‘…\lib\amd64\cfixkdrv.lib’ was created 
+						with an older compiler than other objects; rebuild old objects and libraries
+					</emphasis>
+				</para>
+				<para>
+					The reason for this is that the WIN7/amd64 build environment, unlike other build environments and
+					those of older WDKs, makes use of <emphasis>Link Time Code Generation</emphasis> (LTCG). 
+					LTCG, however, requires that all binaries that are to be linked (in particular: static libraries
+					such as cfixkdrv.lib) also be built using LTCG and the same compiler version. Because cfix also 
+					targets downlevel WDKs, this is currently not the case for cfixkdrv.lib. To resolve this issue, 
+					disable LTCG by specifying
+					<programlisting>
+USER_C_FLAGS=/GL-
+					</programlisting>
+					in your SOURCES file.
+				</para>
+				<para>
+					For more information, please refer to the post
+					<ulink url="http://jpassing.com/2009/10/21/ltcg-issues-with-the-win7amd64-environment-of-wdk-7600/">
+					LTCG issues with the WIN7/amd64 environment of WDK 7600</ulink> on Johannes Passing's blog.
+				</para>
+			</note>
 		</simplesect>
 	</section>
 	<section id="TestRun">
-		<title>Test Run<indexterm><primary>Test Run</primary></indexterm></title>
+		<title>Test Run <indexterm><primary>Test Run</primary></indexterm></title>
+		<indexterm><primary>Before Routine</primary></indexterm>
+		<indexterm><primary>After Routine</primary></indexterm>
+		<indexterm><primary>Teardown Routine</primary></indexterm>
+		<indexterm><primary>Setup Routine</primary></indexterm>
+		
 		<para>
-		Provided one or more test modules, cfix can be requested to run certain fixtures<indexterm><primary>Fixture</primary></indexterm>. Fixtures
-		are exeuted in the following sequence:
+			A test run can comprise the execution of multiple tests. Depending on the choice of
+			command line parameters, a single test, all tests of a specific fixture, all fixtures of
+			a specific module, or all fixtures of a set of modules are run.
+		</para>
 		
-		<itemizedlist>
-		<listitem>
-			<para>
-			First, the setup routine<indexterm><primary>Setup Routine</primary></indexterm> (if one has been provided) is run. In case
-			an assertion fails or an unhandled exception is thrown from within the setup routine, the routine is aborted. As the 
-			setup routine is considered to play a vital role for successful execution of a fixture, the entire fixture
-			is aborted as well.
-			</para>
-		</listitem>
-		<listitem>
-			<para>
-			Next, the test cases of the fixture are run one after another. In case of failed assertions or unhandled exceptions, the
-			test case is immediately aborted and execution is resumed at the next test case.
-			</para>
-		</listitem>
-		<listitem>
-			<para>
-			Finally, after all test cases have completed, the teardown routine is run. Teardown routines, like setup routines,
-			are optional, so this step does not apply to all fixtures. Again, failed assertions and unhandled exceptions
-			lead to the abortion of the routine.
-			</para>
-		</listitem>
-		</itemizedlist>
-		
-		<note>
-		Fixtures are always run	in their entirety -- it is not possible to run a single test case only.
-		</note>
-		
-		What exactly does abortion of a routine mean? All failures are first reported so that the user is informed about the
-		situation. By using Windows Structured Exception Handling, cfix then causes the affected routine to be aborted, i.e.
-		no further statements of the routine are executed. 
+		<para>
+			Example 1: Running a specific test (<emphasis>SomeTest</emphasis>) which is part of fixture 
+			<emphasis>SomeFixture</emphasis> and defined in module <emphasis>somemodule.dll</emphasis>:
+			<programlisting>
+cfix32.exe -n SomeFixture.SomeTest somemodule.dll
+			</programlisting>
 		</para>
 		<para>
-		It is notable that the exact behaviour in the event of a failure differs on the context. As such, cfix is aware
-		of the presence of a debugger and adapts its behaviour appropriately. As an example, if a debugger is present and an
-		assertion fails, the test case is not aborted -- instead a brealpoint is issued so that the debugger breaks in
-		on the affected line of code.
+			Example 2: Running all tests of all fixtures found in all modules located in directory
+			c:\foo:
+			<programlisting>
+cfix32.exe -r c:\foo
+			</programlisting>			
 		</para>
 		<para>
-		Moreover, by specifying appropriate command line options, the behaviour can be further adjusted. This includes changing the way
-		cfix deals with unhandled exceptions or specifying that the test run should be aborted as soon as the first failure
-		occurs.
+			Within a single module, fixtures are run in alphabetic order. Within a fixture, tests are run
+			in the order they have been specified in the <link linkend="CFIX_BEGIN_FIXTURE">CFIX_BEGIN_FIXTURE</link>/
+			<link linkend="CFIX_END_FIXTURE">CFIX_END_FIXTURE</link> map with the following additional rules
+			applying:
+		
+			<itemizedlist>
+				<listitem>
+					<para>
+					First, the <emphasis>setup routine</emphasis> (if one has been provided) is run. In case
+					an assertion fails or an unhandled exception is thrown from within the setup routine, the routine is aborted. As the 
+					setup routine is considered to play a vital role for successful execution of a fixture, the entire fixture
+					is aborted as well, i.e. no further routines will be invoked.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+					Next, the test cases of the fixture are run one after another. Running a test case comprises (1)
+					invoking the <emphasis>before routine</emphasis> (if one has been provided), (2) invoking the test
+					routine itself, and (3) invoking the <emphasis>after routine</emphasis> (if one has been provided).
+					</para>
+					<para>
+					In case of failed assertions or unhandled exceptions, the
+					test case is immediately aborted and execution is resumed at the next test case.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+					Finally, after all test cases have completed, the <emphasis>teardown routine</emphasis> 
+					(if one has been provided) is run. Teardown routines, like setup routines, are optional, 
+					so this step does not apply to all fixtures. Again, failed assertions and unhandled exceptions
+					lead to the abortion of the routine.
+					</para>
+				</listitem>
+			</itemizedlist>
+		
+			What exactly does abortion of a routine mean? All failures are first reported so that the user is informed about the
+			situation. By using Windows Structured Exception Handling, cfix then causes the affected routine to be aborted, i.e.
+			no further statements of the routine are executed. 
 		</para>
 		<para>
-		As indicated before, all events -- be it the successful completion of a test case, failed assertions, log messages or 
-		unhandled exceptions are reported. Depending on the options chosen by the user, the information
-		is displayed on the console or logged to a text file.
+			It is notable that the exact behaviour in the event of a failure depends on the context: cfix is aware
+			of the presence of a debugger and adapts its behaviour appropriately. As an example, if a debugger is present and an
+			assertion fails, the test case is not aborted immediately -- instead a brealpoint is issued so that the debugger 
+			breaks in on the affected line of code. As soon as the use requests the debugger to resume execution, the test
+			case is aborted.
+		</para>
+		<para>
+			Moreover, by specifying appropriate command line options, this behaviour can be further adjusted. 
+			This includes changing the way cfix deals with unhandled exceptions or specifying that the test run 
+			should be aborted as soon as the first failure occurs.
+		</para>
+		<para>
+			As indicated before, all events -- be it the successful completion of a test case, failed assertions, log messages or 
+			unhandled exceptions are reported. Depending on the options chosen by the user, the information
+			is displayed on the console or logged to a text file.
+		</para>
+		<para>
+			Please note that test cases may spawn additional threads. The <link linkend="Multithreading">next section</link>
+			will cover multithreading in more detail.
 		</para>
 	</section>
 	<section id="Multithreading">
-		<title>Multithreading<indexterm><primary>Multithreading</primary></indexterm></title>
+		<title>Multithreading</title>
+		<indexterm><primary>Multithreading</primary></indexterm>
+		<indexterm><primary>child thread</primary></indexterm>
+		<indexterm><primary>Auto Joining</primary></indexterm>
 		<para>
-		cfix has been implemented in a threadsafe manner. Furthermore, test cases are explicily allowed to make use
-		of multithreading as long as they use the wrapper function 
-		<link linkend="CfixCreateThread">CfixCreateThread</link>/<link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link> 
-		rather than the Win32 CreateThread function.
+			cfix test cases can make use of multithreading. Multithreading, however, introduces a set of 
+			challenges for cfix: In particular, any assertions and log statements executed on such
+			<emphasis>child threads</emphasis> must be associated with the respective test case the child
+			thread has been spawned by.
 		</para>
 		<para>
-		The motivation behind this is as follows: To allow future releases of the framework to execute multiple
-		tests in parallel within the same process, cfix has to maintain a proper correlation between events (assertions) 
-		and threads. To allow such correlation to be maintained as well for threads that are spawned by individual test cases,
-		these thread spawns need to be made explicit by using <link linkend="CfixCreateThread">CfixCreateThread</link> (User Mode)
-		or <link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link> (Kernel Mode): cfix will relate threads spawned
-		in this manner with the spawning test case and will correlate all assertions accordingly.
+			To allow such association, developers have to follow a few simple rules:
+			
+			<itemizedlist>
+				<listitem>
+					<para>
+						When a test case spawns a thread and this thread will call cfix API routines
+						such as <link linkend="CFIX_ASSERT">CFIX_ASSERT</link> or <link linkend="CFIX_LOG">CFIX_LOG</link>,
+						then <link linkend="CfixCreateThread">CfixCreateThread</link> (for user mode code)
+						or <link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link> (for kernel mode code)
+						should be used to create this thread. Direct usage of CreateThread and CreateSystemThread is discouraged.
+					</para>
+					<para>
+						<link linkend="CfixCreateThread">CfixCreateThread</link> and 
+						<link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link> behave like their 
+						counterparts CreateThread and CreateSystemThread, but additionally register the thread with
+						cfix.
+					</para>
+					<note>
+						If a thread <emphasis>not</emphasis> created using <link linkend="CfixCreateThread">CfixCreateThread</link> or 
+						<link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link> calls the cfix API and, for example,
+						causes an assertion to fail, a message will be printed on the debugger console and the thread
+						will be terminated by cfix. The failure message <emphasis>will not</emphasis> be output
+						on the console and no debugger break-in will be triggered. Moreover, the failed assertion will
+						not cause the enclosing test case to be reported as having failed.
+					</note>
+				</listitem>
+				<listitem>
+					<para>
+						Child threads should terminate before the enclosing test case completes. 
+					</para>
+					<para>
+						As of cfix 1.5, this behavior is automatically enforced: After a test case ends, 
+						cfix will check the status of all child threads (i.e. all threads created using 
+						<link linkend="CfixCreateThread">CfixCreateThread</link> or 
+						<link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link>)
+						and will wait for their termination. Not before all threads have terminated will
+						the test case complete.
+					</para>
+					<para>
+						This feature is referred to as <emphasis>Auto Joining</emphasis>.
+					</para>
+					<note>
+						Any non-cfix related threads such as threads spawned by the code under test are
+						not regarded by Auto Joining. Make sure that all these threads are stopped before
+						the test case completes.
+					</note>
+				</listitem>
+				<listitem>
+					<para>
+						In some situations, using <link linkend="CfixCreateThread">CfixCreateThread</link> or
+						<link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link> may not be feasible
+						because of special constraints: For example, a thread may have to be started using the
+						boost library or using AfxCreateThread.
+					</para>
+					<para>
+						As of cfix 1.6, you can make use of the <link linkend="AnonymousThreadsAutoRegistration">
+						Anonymous Thread Auto-Registration</link> feature in
+						such situations in order to still allow APIs like <link linkend="CFIX_ASSERT">CFIX_ASSERT</link> or 
+						<link linkend="CFIX_LOG">CFIX_LOG</link> to be used on such threads.
+					</para>
+				</listitem>
+			</itemizedlist>
+		</para>
+		<para>
+			When assertions fail or unhandled exceptions occur on registered child threads, these events
+			are reported in the same manner they would be reported if they occured on the main thread.
+		</para>
+		<para>
+			It is crucial to notice, however, that a failed assertion or unhandled exception occuring
+			on a registered child thread will not abort the entire enclosing test case -- rather, only the child thread
+			is terminated, while the main thread as well as any other child threads will resume execution. 
+		</para>
+		<para>
+			Regardless of whether further failed asseretions or unhandled exceptions will occur on the main 
+			thread, however, the enclosing test case will be reported as having failed.
+		</para>
 		
-		<note>
-			When creating threads from within a test case and these threads make use of the cfix API (CFIX_ASSERT, CFIX_LOG etc), 
-			make sure to use <link linkend="CfixCreateThread">CfixCreateThread</link> (User Mode)
-			or <link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link> (Kernel Mode) rather than CreateThread. 
-			Threads not using the cfix API (worker threads etc) are not affected by this requirement.
-		</note>
-		</para>
+		<section id="AnonymousThreadsAutoRegistration">
+			<title>Anonymous Thread Auto-Registration</title>
+			<indexterm><primary>Anonymous Thread Auto-Registration</primary></indexterm>
+			
+			<para>
+				Although using <link linkend="CfixCreateThread">CfixCreateThread</link> or
+				<link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link> is the preferred
+				way to create child threads, there may be situation where doing so is not possible.
+			</para>
+			<para>
+				Child threads <emphasis>not</emphasis> created using 
+				<link linkend="CfixCreateThread">CfixCreateThread</link> or 
+				<link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link> are referred to
+				as <emphasis>Anonymous Threads</emphasis>. 
+			</para>
+			<para>
+				By default, anonymous threads can make only <link linkend="Multithreading">
+				very limited use of the cfix API</link> and there is no explicit way to "promote"
+				an anonymous thread to a fully-registered thread equivalent to a thread created
+				using  <link linkend="CfixCreateThread">CfixCreateThread</link> or
+				<link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link>.
+			</para>
+			<para>
+				By enabling <emphasis>Anonymous Thread Auto-Registration</emphasis>, however, cfix
+				can be instructed to automatically register anonymous threads. Although not equivalent
+				to a fully-registered thread created
+				using <link linkend="CfixCreateThread">CfixCreateThread</link> or
+				<link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link>, such an auto-registered
+				thread is then allowed to make use of the entire cfix API. In particular, any failed assertions
+				or log messages will be properly handled by cfix.
+			</para>
+			<para>
+				Anonymous Thread Auto-Registration is not enabled by default -- rather, developers can
+				opt-in to this behavior on a per-fixture basis by using the CFIX_FIXTURE_USES_ANONYMOUS_THREADS
+				flag.
+			</para>
+			<para>
+				Example for an ordinary fixture declaration:
+				<programlisting>
+CFIX_BEGIN_FIXTURE( SomeFixture )
+  CFIX_FIXTURE_ENTRY( SomeTestCase )
+CFIX_END_FIXTURE()
+				</programlisting>
+				To enable Anonymous Thread Auto-Registration, this declaration has to be changed as
+				follows (Note the usage of the _EX macro):
+				<programlisting>
+CFIX_BEGIN_FIXTURE_EX( SomeFixture, CFIX_FIXTURE_USES_ANONYMOUS_THREADS )
+  CFIX_FIXTURE_ENTRY( SomeTestCase )
+CFIX_END_FIXTURE()
+				</programlisting>
+			</para>
+			<para>
+				Once this change has been made,  Anonymous Thread Auto-Registration is enabled for this
+				specific fixture and any threads spawned by its tests will benefit from auto-registration.
+			</para>
+			<simplesect>
+				<title>Limitations</title>
+				<indexterm><primary>Unhandled Exceptions</primary></indexterm>
+			
+				<para>
+					Compared to the usage of <link linkend="CfixCreateThread">CfixCreateThread</link> or
+					<link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link>, relying on 
+					auto-registration of anonymous threads suffers from the following limitations:
+					
+					<itemizedlist>
+						<listitem>
+							<para>
+								Unhandled Exceptions occuring on auto-registered child threads are not
+								intercepted by cfix. This means that they are not reported and that they
+								usually (unless a custom or unhandled exception filter is used) will lead
+								to termination of the child thread.
+							</para>
+						</listitem>
+						<listitem>
+							<para>
+								An anonymous child thread is not auto-registered until an assertion
+								has failed, <link linkend="CFIX_LOG">CFIX_LOG</link> has been called, or
+								<link linkend="CfixRegisterThread">CfixRegisterThread</link> has been called.
+							</para>
+							<para>
+								As a consequence of this, anonymous threads may not necessarily benefit from
+								<emphasis>Auto Joining</emphasis>: Any anonymous thread that has not been
+								auto-registered yet will not be waited for.
+							</para>
+							<para>
+								By explicitly calling <link linkend="CfixRegisterThread">CfixRegisterThread</link>
+								early in the child thread's lifecycle, developers can ensure that the thread
+								will be regarded by Auto Joining. Note, however, that there is a potential
+								race condition here: The enclosing test case may already have completed before the
+								child thread is given the chance to call <link linkend="CfixRegisterThread">CfixRegisterThread</link>.
+							</para>
+						</listitem>
+						<listitem>
+							<para>
+								The feature is only available for user mode code; kernel mode tests have
+								to use <link linkend="CfixCreateSystemThread">CfixCreateSystemThread</link>
+								to create threads.
+							</para>
+						</listitem>
+					</itemizedlist>
+				</para>
+			</simplesect>
+		</section>
 	</section>
 	<section id="ExeTargets">
-		<title>EXE targets<indexterm><primary>EXE targets</primary></indexterm></title>
+		<title>EXE targets</title>
+		<indexterm><primary>EXE targets</primary></indexterm>
 		
 		<para>
 			Previous to cfix 1.5, the framework only supported tests compiled and linked into a DLL file.
@@ -1691,6 +1940,27 @@ f9fc50fe cc              int     3
 			</itemizedlist>	
 		</para>
 		</simplesect>
+		
+		<simplesect>
+		<title>What's new in cfix 1.6</title>
+		<para>
+			<itemizedlist>
+				<listitem>
+					<link linkend="AnonymousThreadsAutoRegistration">Anonymous Thread Auto-Registration</link>
+				</listitem>
+				<listitem>
+					<link linkend="CfixRegisterThread">CfixRegisterThread</link>
+				</listitem>
+				<listitem>
+					<link linkend="CFIX_BEGIN_FIXTURE_EX">CFIX_BEGIN_FIXTURE_EX</link>
+				</listitem>
+				<listitem>
+					<link linkend="CFIXCC_BEGIN_CLASS_EX">CFIXCC_BEGIN_CLASS_EX</link>
+				</listitem>
+			</itemizedlist>	
+		</para>
+		</simplesect>
+		
 	</section>
 	
 	<section id="TestAPI">

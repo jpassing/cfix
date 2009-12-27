@@ -160,9 +160,9 @@ namespace cfixwu
 			//
 			// Base structure.
 			//
-			this->Definition->Header.ApiVersion	= 
+			this->Definition->Header.Head.ApiVersion = 
 				CFIX_PE_API_MAKEAPIVERSION( CfixApiTypeWinUnitFixture, 0 );
-			this->Definition->Header.Entries	= this->Definition->Entries;
+			this->Definition->Header.Entries		 = this->Definition->Entries;
 
 			//
 			// Copy entries.
