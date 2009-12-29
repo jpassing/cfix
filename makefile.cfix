@@ -310,6 +310,7 @@ installer: docs
 #----------------------------------------------------------------------
 
 release: build installer srcrelease
+	copy installer\cfix_$(VERSION).msi rtm\
 
 srcrelease: cleantemps
 	if exist rtm\cfix-src rd /S /Q rtm\cfix-src
@@ -336,6 +337,15 @@ srcrelease: cleantemps
 	xcopy /S /Y /I  samples rtm\cfix-src-$(VERSION)\samples
 	copy /Y COPYING rtm\cfix-src-$(VERSION)
 	copy /Y srcrel-readme.txt rtm\cfix-src-$(VERSION)\readme.txt
+	
+	rd /S /Q  rtm\cfix-src-$(VERSION)\samples\bin
+	rd /S /Q  rtm\cfix-src-$(VERSION)\samples\vsbin
+	rd /S /Q  rtm\cfix-src-$(VERSION)\samples\UserC\Debug
+	rd /S /Q  rtm\cfix-src-$(VERSION)\samples\UserC\Release
+	rd /S /Q  rtm\cfix-src-$(VERSION)\samples\UserC\x64
+	rd /S /Q  rtm\cfix-src-$(VERSION)\samples\UserCc\Debug
+	rd /S /Q  rtm\cfix-src-$(VERSION)\samples\UserCc\Release
+	rd /S /Q  rtm\cfix-src-$(VERSION)\samples\UserCc\x64
 	
 	cd rtm\cfix-src-$(VERSION)\jpht
 	cmd.exe /C clean.cmd
