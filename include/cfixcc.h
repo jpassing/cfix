@@ -39,6 +39,11 @@
 #include <sstream>
 #pragma warning( pop )
 
+//
+// STLport requires explicitly including string.
+//
+#include <string>
+
 #ifndef CFIXCC_FLOAT_COMPARE_MAX_ULPS 
 #define CFIXCC_FLOAT_COMPARE_MAX_ULPS 10
 #endif
