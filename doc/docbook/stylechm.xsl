@@ -1,6 +1,6 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   version="1.0">
-  <xsl:import href="D:/prog/docbook-xsl-1.73.2/htmlhelp/htmlhelp.xsl"/>
+  <xsl:import href="D:/prog/docbook-xsl-1.75.2/htmlhelp/htmlhelp.xsl"/>
   <xsl:param name="admon.graphics" select="1"/>
   <xsl:param name="html.stylesheet" select="'stylechm.css'"/>
   <xsl:param name="htmlhelp.chm" select="'cfix.chm'"/>
