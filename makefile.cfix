@@ -182,7 +182,7 @@ debug:
 #
 #----------------------------------------------------------------------
 
-# helper macro, invoked indirectly
+# helper target, invoked indirectly
 __cfixtests:
 	-1100 sc stop cfixkr
 	-1100 sc delete cfixkr
@@ -204,7 +204,7 @@ __cfixtests:
 	$(CFIX_CMD) $(CFIX_FLAGS) testwusampleliba.dll
 	$(CFIX_CMD) $(CFIX_FLAGS) testwusamplelibw.dll
 
-# helper macro, invoked indirectly
+# helper target, invoked indirectly
 __sampletests:
 	-1100 sc delete cfixkr
 	-1100 sc delete cfixkr_kern
@@ -213,7 +213,7 @@ __sampletests:
 	$(CFIX_CMD) $(CFIX_FLAGS) usercc.dll
 	$(CFIX_CMD) -kern $(CFIX_FLAGS) ..\$(ARCH)\kern.sys
 
-# helper macro, invoked indirectly	
+# helper target, invoked indirectly	
 __vssampletests:
 	-1100 sc delete cfixkr
 	-1100 sc delete cfixkr_kern
