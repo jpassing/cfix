@@ -1,0 +1,14 @@
+#
+# setup VisualC++ source browsing
+#
+#BROWSER_INFO=1
+BSCMAKE_FLAGS=$(BSCMAKE_FLAGS) /n
+
+MSC_WARNING_LEVEL=/W4 /WX /Wp64
+
+INCLUDES=..\include
+
+TARGETNAME=jpht
+TARGETPATH=..\bin\$(DDKBUILDENV)
+TARGETTYPE=LIBRARY
+SOURCES=hashtable.c
