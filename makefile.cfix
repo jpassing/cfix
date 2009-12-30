@@ -311,6 +311,8 @@ installer: docs
 
 release: build installer srcrelease
 	copy installer\cfix_$(VERSION).msi rtm\
+	
+	codesign.cmd "cfix Installer" rtm\cfix_$(VERSION).msi
 
 srcrelease: cleantemps
 	if exist rtm\cfix-src rd /S /Q rtm\cfix-src
