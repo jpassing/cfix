@@ -18,10 +18,21 @@
 # along with cfix.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+!if ( "$(CFIX_HOME)" == "" )
+# Only applies when entire source tree is build and cfix has not been installed yet.
+CFIX_INC_PATH=..\..\include
+CFIX_LIB_PATH=$(MAKEDIR)\..\..\bin\$(DDKBUILDENV)\$(TARGET_DIRECTORY)
+
+!else
+# cfix installed.
+CFIX_INC_PATH=$(CFIX_HOME)\include
+CFIX_LIB_PATH=$(CFIX_HOME)\lib\$(TARGET_DIRECTORY)
+!endif
+
 #
 # The cfix include directory is required.
 #
-INCLUDES=$(CFIX_HOME)\include;$(DDK_INC_PATH)
+INCLUDES=$(CFIX_INC_PATH);$(DDK_INC_PATH)
 
 MSC_WARNING_LEVEL=/W4 /WX /Wp64
 
@@ -30,7 +41,7 @@ USE_LIBCMT=1
 USE_STL=1
 
 TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
-		   $(MAKEDIR)\..\..\bin\$(DDKBUILDENV)\$(TARGET_DIRECTORY)\cfix.lib
+		   $(CFIX_LIB_PATH)\cfix.lib
 
 TARGETNAME=userc
 TARGETPATH=..\bin\$(DDKBUILDENV)
