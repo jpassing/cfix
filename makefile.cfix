@@ -49,6 +49,8 @@ CFIX_CLAGS=-f -z -kern
 
 build: chk fre symadd
 
+ci: chk fre
+
 symadd:
 	symstore add /r /f bin\chk\i386\c*.pdb  /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
 	symstore add /r /f bin\chk\amd64\c*.pdb  /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
@@ -56,29 +58,29 @@ symadd:
 	symstore add /r /f bin\fre\amd64\c*.pdb  /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
 	
 version:
-	rcstamp cfix\Cfix\cfix.rc $(VERSION)
-	rcstamp cfix\cfixcmd\runtest.rc $(VERSION)
-	rcstamp cfix\cfixemb\cfixemb.rc $(VERSION)
-	rcstamp cdiag\cdiag\cdiag.rc $(VERSION)
-	rcstamp cfixctl\cfixctl\cfixctl.rc $(VERSION)
-	rcstamp cfixkern\Cfixkl\cfixkl.rc $(VERSION)
-	rcstamp cfixkern\Cfixkr\cfixkr.rc $(VERSION)
+	tools\rcstamp cfix\Cfix\cfix.rc $(VERSION)
+	tools\rcstamp cfix\cfixcmd\runtest.rc $(VERSION)
+	tools\rcstamp cfix\cfixemb\cfixemb.rc $(VERSION)
+	tools\rcstamp cdiag\cdiag\cdiag.rc $(VERSION)
+	tools\rcstamp cfixctl\cfixctl\cfixctl.rc $(VERSION)
+	tools\rcstamp cfixkern\Cfixkl\cfixkl.rc $(VERSION)
+	tools\rcstamp cfixkern\Cfixkr\cfixkr.rc $(VERSION)
 	
 i386chk: version
-	cmd /C ddkbuild -WNETW2K checked . -cZ
+	cmd /C tools\ddkbuild -WNETW2K checked . -cZ
 	devenv samples\UserC\ExampleVs2005.sln /rebuild "Debug|Win32"
 	devenv samples\UserCc\ExampleCcVs2005.sln /rebuild "Debug|Win32"
 	
 i386fre: version
-	cmd /C ddkbuild -WNETW2K free . -cZ
+	cmd /C tools\ddkbuild -WNETW2K free . -cZ
 	devenv samples\UserC\ExampleVs2005.sln /rebuild "Release|Win32"
 	devenv samples\UserCc\ExampleCcVs2005.sln /rebuild "Release|Win32"
 	
 amd64chk: version
-	cmd /C ddkbuild -WLHNETA64 checked . -cZ
+	cmd /C tools\ddkbuild -WLHNETA64 checked . -cZ
 	
 amd64fre: version
-	cmd /C ddkbuild -WLHNETA64 free . -cZ	
+	cmd /C tools\ddkbuild -WLHNETA64 free . -cZ	
 	
 chk: i386chk amd64chk
 
