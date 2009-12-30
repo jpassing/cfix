@@ -310,6 +310,7 @@ installer: docs
 #----------------------------------------------------------------------
 
 release: build installer srcrelease
+	if not exist rtm md rtm
 	copy installer\cfix_$(VERSION).msi rtm\
 	
 	codesign.cmd "cfix Installer" rtm\cfix_$(VERSION).msi
