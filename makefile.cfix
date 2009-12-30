@@ -47,9 +47,9 @@ CFIX_CLAGS=-f -z -kern
 #
 #----------------------------------------------------------------------
 
-build: chk fre symadd
+build: clean chk fre symadd
 
-ci: chk fre
+ci: clean chk fre
 
 symadd:
 	symstore add /r /f bin\chk\i386\c*.pdb  /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
@@ -196,6 +196,7 @@ __cfixtests:
 	-1100 sc delete testklib2
 	-1100 sc delete testklib7
 	
+	$(CFIX_CMD) $(CFIX_FLAGS) testjpht.dll
 	$(CFIX_CMD) $(CFIX_FLAGS) testapi.dll
 	$(CFIX_CMD) $(CFIX_FLAGS) testcpp.dll
 	$(CFIX_CMD) $(CFIX_FLAGS) testtsx.dll
@@ -333,7 +334,7 @@ srcrelease: cleantemps
 	xcopy /S /Y /I cfixkern rtm\cfix-src-$(VERSION)\cfix\cfixkern
 	xcopy /S /Y /I cdiag rtm\cfix-src-$(VERSION)\cfix\cdiag
 	xcopy /S /Y /I compat rtm\cfix-src-$(VERSION)\cfix\compat
-	xcopy /S /Y /I ..\jpht rtm\cfix-src-$(VERSION)\jpht
+	xcopy /S /Y /I jpht rtm\cfix-src-$(VERSION)\cfix\jpht
 	
 	copy /Y DIRS rtm\cfix-src-$(VERSION)\cfix
 #	copy /Y makefile.cfix rtm\cfix-src-$(VERSION)\cfix
@@ -352,12 +353,6 @@ srcrelease: cleantemps
 	rd /S /Q  rtm\cfix-src-$(VERSION)\samples\UserCc\Release
 	rd /S /Q  rtm\cfix-src-$(VERSION)\samples\UserCc\x64
 	
-	cd rtm\cfix-src-$(VERSION)\jpht
-	cmd.exe /C clean.cmd
-	del /S *.ncb
-	del /S *.user
-	cd ..\..\..
-
 	cd rtm\cfix-src-$(VERSION)
 	-1 for /f "delims=" %%i in ('dir /s/b __*.txt') do @del  %%i
 	-1 for /f "delims=" %%i in ('dir /s/b *.cmd') do @del  %%i

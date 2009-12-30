@@ -115,6 +115,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\jpht\SOURCES"
+					>
+				</File>
+				<File
 					RelativePath=".\jpht\stdafx.h"
 					>
 				</File>
@@ -122,6 +126,10 @@
 			<Filter
 				Name="test"
 				>
+				<File
+					RelativePath=".\test\SOURCES"
+					>
+				</File>
 				<File
 					RelativePath=".\test\test.c"
 					>

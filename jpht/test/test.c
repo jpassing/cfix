@@ -1,20 +1,8 @@
-#include <stdio.h>
-#include <tchar.h>
-#include <windows.h>
-#include <crtdbg.h>
+#include <cfix.h>
 #include <stdlib.h>
 #include "hashtable.h"
 
-#define ASSERT _ASSERTE
-
-#ifdef _DEBUG
-#define TEST( expr ) _ASSERTE( expr )
-#else
-#define TEST( expr ) ( ( !! ( expr ) ) || ( \
-	OutputDebugString( \
-		L"Test failed: " _CRT_WIDE( __FILE__ ) L" - " \
-		_CRT_WIDE( __FUNCTION__ ) L": " _CRT_WIDE( #expr ) L"\n" ), 0 ) )
-#endif
+#define TEST CFIX_ASSERT
 
 static VOID EnumCallback(
 	__in PJPHT_HASHTABLE Hashtable,
@@ -38,7 +26,7 @@ static VOID EnumRemoveCallback(
 	PJPHT_HASHTABLE_ENTRY OldEntry;
 	UNREFERENCED_PARAMETER( Context );
 	JphtRemoveEntryHashtable( Hashtable, Entry->Key, &OldEntry );
-	ASSERT( OldEntry == Entry );
+	CFIX_ASSERT( OldEntry == Entry );
 }
 
 
@@ -74,7 +62,7 @@ static BOOLEAN EqualsString (
 	return ( BOOLEAN ) ( 0 == wcscmp( Lhs, Rhs ) );
 }
 
-PVOID Allocate(
+static PVOID Allocate(
 	__in SIZE_T Size 
 	)
 {
@@ -98,16 +86,13 @@ typedef struct _TEST_ENTRY
 	PCWSTR Value;
 } TEST_ENTRY, *PTEST_ENTRY;
 
-int __cdecl wmain()
+static void TestHashtable()
 {
 	JPHT_HASHTABLE Ht;
 	PTEST_ENTRY Old;
 	TEST_ENTRY Foo;
 	TEST_ENTRY Bar;
 	ULONG HtSize;
-
-	_CrtSetDbgFlag( 
-		_CrtSetDbgFlag( _CRTDBG_REPORT_FLAG ) | _CRTDBG_LEAK_CHECK_DF );
 
 	Foo.Base.Key = ( ULONG_PTR ) L"Foo";
 	Foo.Value = L"Val(Foo)";
@@ -201,6 +186,8 @@ int __cdecl wmain()
 
 		JphtDeleteHashtable( &Ht );
 	}
-	return 0;
 }
 
+CFIX_BEGIN_FIXTURE( Hashtable )
+	CFIX_FIXTURE_ENTRY( TestHashtable )
+CFIX_END_FIXTURE()

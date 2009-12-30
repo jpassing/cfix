@@ -21,7 +21,7 @@ BSCMAKE_FLAGS=$(BSCMAKE_FLAGS) /n
 
 MSC_WARNING_LEVEL=/W4 /Wp64
 
-INCLUDES=..\..\include;..\..\..\Jpht\Include;$(SDK_INC_PATH)\..\mfc42
+INCLUDES=..\..\include;..\..\Jpht\Include;$(SDK_INC_PATH)\..\mfc42
 
 !if "$(TARGET_DIRECTORY)"=="i386"
 USER_C_FLAGS=/D_UNICODE /DUNICODE /analyze
@@ -42,7 +42,7 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
 		   $(SDK_LIB_PATH)\advapi32.lib \
 		   $(SDK_LIB_PATH)\shlwapi.lib \
 		   $(SDK_LIB_PATH)\version.lib \
-		   $(MAKEDIR)\..\..\..\Jpht\bin\$(DDKBUILDENV)\$(TARGET_DIRECTORY)\jpht.lib
+		   $(TARGETPATH)\$(TARGET_DIRECTORY)\jpht.lib
 
 TARGETNAME=cdiag
 TARGETPATH=..\..\bin\$(DDKBUILDENV)
