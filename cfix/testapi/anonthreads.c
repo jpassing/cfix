@@ -84,7 +84,7 @@ void TestAssertOnAnonThreadAbortsAnonThread()
 		NULL,
 		0,
 		NULL );
-	CFIX_ASSERT( Thr );
+	CFIX_ASSUME( Thr != NULL );
 
 	WaitForSingleObject( Thr, INFINITE );
 	
@@ -103,7 +103,7 @@ void TestLogOnAnonThreadAbortsAnonThread()
 		NULL,
 		0,
 		NULL );
-	CFIX_ASSERT( Thr );
+	CFIX_ASSUME( Thr != NULL );
 
 	WaitForSingleObject( Thr, INFINITE );
 	
@@ -122,7 +122,7 @@ void TestInconclusiveOnAnonThreadAbortsAnonThread()
 		NULL,
 		0,
 		NULL );
-	CFIX_ASSERT( Thr );
+	CFIX_ASSUME( Thr != NULL );
 
 	WaitForSingleObject( Thr, INFINITE );
 	

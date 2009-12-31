@@ -143,7 +143,7 @@ static VOID CdiagsDeleteRegisteredDllEntry(
 		(if Module is NULL)
 --*/
 static HRESULT CdiagsFormatMessage(
-	__in HMODULE Module,
+	__in_opt HMODULE Module,
 	__in DWORD MessageId,
 	__in BOOL UseInsertionStrings,
 	__in_opt PCTSTR* InsertionStrings,

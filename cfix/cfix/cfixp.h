@@ -214,7 +214,7 @@ VOID CfixpDestroyFilament(
 					  to stack/unstack contexts.
 --*/
 HRESULT CfixpSetCurrentFilament(
-	__in PCFIXP_FILAMENT Filament,
+	__in_opt PCFIXP_FILAMENT Filament,
 	__out_opt PCFIXP_FILAMENT *Prev
 	);
 

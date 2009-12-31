@@ -137,7 +137,7 @@ void AssertOnRegisteredThread()
 		0,
 		NULL,
 		CFIX_THREAD_FLAG_CRT );
-	CFIX_ASSERT( Thr );
+	CFIX_ASSUME( Thr != NULL );
 
 	WaitForSingleObject( Thr, INFINITE );
 	
@@ -157,7 +157,7 @@ void LogOnRegisteredThread()
 		0,
 		NULL,
 		CFIX_THREAD_FLAG_CRT );
-	CFIX_ASSERT( Thr );
+	CFIX_ASSUME( Thr != NULL );
 
 	WaitForSingleObject( Thr, INFINITE );
 	
@@ -177,7 +177,7 @@ void InconclusiveOnRegisteredThread()
 		NULL,
 		0,
 		NULL );
-	CFIX_ASSERT( Thr );
+	CFIX_ASSUME( Thr != NULL );
 
 	WaitForSingleObject( Thr, INFINITE );
 	
@@ -196,7 +196,7 @@ void ThrowOnRegisteredThread()
 		NULL,
 		0,
 		NULL );
-	CFIX_ASSERT( Thr );
+	CFIX_ASSUME( Thr != NULL );
 
 	WaitForSingleObject( Thr, INFINITE );
 	
@@ -235,7 +235,7 @@ void AssertOnAnonymousThread()
 		NULL,
 		0,
 		NULL );
-	CFIX_ASSERT( Thr );
+	CFIX_ASSUME( Thr != NULL );
 
 	WaitForSingleObject( Thr, INFINITE );
 	
@@ -254,7 +254,7 @@ void AssertOnAnonymousThreadWithoutJoin()
 		RegisteredEvent,
 		0,
 		NULL );
-	CFIX_ASSERT( Thr );
+	CFIX_ASSUME( Thr != NULL );
 
 	//
 	// Wait for event to ensure that CfixRegisterThread has been
@@ -276,7 +276,7 @@ void LogOnAnonymousThread()
 		NULL,
 		0,
 		NULL );
-	CFIX_ASSERT( Thr );
+	CFIX_ASSUME( Thr != NULL );
 
 	WaitForSingleObject( Thr, INFINITE );
 	
@@ -296,7 +296,7 @@ void InconclusiveOnAnonymousThread()
 		RegisteredEvent,
 		0,
 		NULL );
-	CFIX_ASSERT( Thr );
+	CFIX_ASSUME( Thr != NULL );
 
 	//
 	// Wait for event to ensure that CfixRegisterThread has been
@@ -318,7 +318,7 @@ void InconclusiveOnAnonymousThreadWithoutJoin()
 		NULL,
 		0,
 		NULL );
-	CFIX_ASSERT( Thr );
+	CFIX_ASSUME( Thr != NULL );
 
 	WaitForSingleObject( Thr, INFINITE );
 	
@@ -337,7 +337,7 @@ void ThrowOnAnonymousThread()
 		NULL,
 		0,
 		NULL );
-	CFIX_ASSERT( Thr );
+	CFIX_ASSUME( Thr != NULL );
 
 	WaitForSingleObject( Thr, INFINITE );
 	

@@ -194,6 +194,9 @@ static struct _PARAM_STORE
 
 static VOID TestCdiagCreateRegistryStore()
 {
+	HMODULE CdiagModule = GetModuleHandle( L"cdiag" );
+	CFIX_ASSUME( CdiagModule != NULL );
+
 	_ASSERTE( wcslen( String256 ) == 256 - 1 );
 	_ASSERTE( wcslen( String257 ) == 257 - 1 );
 	for ( struct _PARAM_BASEKEYNAME *keyName = ParamBaseKeyName;
@@ -205,7 +208,7 @@ static VOID TestCdiagCreateRegistryStore()
 			  mode++ )
 		{
 			TEST_HR( PatchIat(
-				GetModuleHandle( L"cdiag" ),
+				CdiagModule,
 				"advapi32.dll",
 				"RegCreateKeyExW",
 			 	mode->RegCreateKeyExProc,
@@ -243,7 +246,7 @@ static VOID TestCdiagCreateRegistryStore()
 	}
 
 	TEST_HR( PatchIat(
-		GetModuleHandle( L"cdiag" ),
+		CdiagModule,
 		"advapi32.dll",
 		"RegCreateKeyExW",
 	 	RegCreateKeyExW,

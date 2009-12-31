@@ -50,7 +50,7 @@ static VOID TestCreateAndCloseSession()
 	// No fmt/resv.
 	//
 	TEST_HR( CdiagCreateSession( NULL, NULL, &Ssn ) );
-	TEST( Ssn );
+	CFIX_ASSUME( Ssn != NULL );
 
 	TEST_HR( CdiagQueryInformationSession(
 		Ssn,
@@ -105,13 +105,11 @@ static VOID TestCreateAndCloseSession()
 	TEST_HR( CdiagDereferenceSession( Ssn ) );
 
 
-
-
 	//
 	// Resv only.
 	//
 	TEST_HR( CdiagCreateSession( NULL, Resv, &Ssn ) );
-	TEST( Ssn );
+	CFIX_ASSUME( Ssn != NULL );
 
 	TEST_HR( CdiagQueryInformationSession(
 		Ssn,
@@ -129,17 +127,15 @@ static VOID TestCreateAndCloseSession()
 		( PVOID* ) &ActualResv ) );
 	TEST( ActualResv == Resv );
 	ActualResv->Dereference( ActualResv );
-	
+
 	TEST_HR( CdiagDereferenceSession( Ssn ) );
-
-
 
 
 	//
 	// Resv and fmt.
 	//
 	TEST_HR( CdiagCreateSession( Fmt, Resv, &Ssn ) );
-	TEST( Ssn );
+	CFIX_ASSUME( Ssn != NULL );
 
 	TEST_HR( CdiagQueryInformationSession(
 		Ssn,
@@ -193,7 +189,7 @@ static VOID TestHandling()
 		&Pkt );
 
 	TEST_HR( CdiagCreateSession( NULL, NULL, &Ssn ) );
-	TEST( Ssn );
+	CFIX_ASSUME( Ssn );
 
 	TEST_HR( CdiagQueryInformationSession( 
 		Ssn,

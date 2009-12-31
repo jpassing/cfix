@@ -48,9 +48,12 @@ static void TestDllWithNoTestExports()
 
 static void TestCurrentExecutable()
 {
+	HMODULE CurModule = GetModuleHandle( NULL );
 	PCFIX_TEST_MODULE Mod;
 
-	TEST_HR( CfixCreateTestModule( GetModuleHandle( NULL ), &Mod ) );
+	CFIX_ASSUME( CurModule != NULL );
+
+	TEST_HR( CfixCreateTestModule( CurModule, &Mod ) );
 
 	TEST( 0 == Mod->FixtureCount );
 

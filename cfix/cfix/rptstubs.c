@@ -166,8 +166,8 @@ CFIXAPI VOID CFIXCALLTYPE CfixPeFail()
 }
 
 CFIXAPI CFIX_REPORT_DISPOSITION CFIXCALLTYPE CfixPeReportFailedAssertion(
-	__in PCWSTR File,
-	__in PCWSTR Routine,
+	__in_opt PCWSTR File,
+	__in_opt PCWSTR Routine,
 	__in ULONG Line,
 	__in PCWSTR Expression
 	)
@@ -293,7 +293,7 @@ CFIXAPI CFIX_REPORT_DISPOSITION __cdecl CfixPeReportFailedAssertionFormatW(
 	__in PCWSTR File,
 	__in PCWSTR Routine,
 	__in ULONG Line,
-	__in __format_string PCWSTR Format,
+	__in_opt __format_string PCWSTR Format,
 	...
 	)
 {
@@ -322,7 +322,7 @@ CFIXAPI CFIX_REPORT_DISPOSITION __cdecl CfixPeReportFailedAssertionFormatA(
 	__in PCWSTR File,
 	__in PCWSTR Routine,
 	__in ULONG Line,
-	__in __format_string PCSTR Format,
+	__in_opt __format_string PCSTR Format,
 	...
 	)
 {
@@ -574,7 +574,7 @@ static CFIXAPI VOID CfixsPeReportLog(
 }
 
 CFIXAPI VOID __cdecl CfixPeReportLog(
-	__in __format_string PCWSTR Format,
+	__in_opt __format_string PCWSTR Format,
 	...
 	)
 {
@@ -599,7 +599,7 @@ CFIXAPI VOID __cdecl CfixPeReportLog(
 }
 
 CFIXAPI VOID __cdecl CfixPeReportLogA(
-	__in __format_string PCSTR Format,
+	__in_opt __format_string PCSTR Format,
 	...
 	)
 {

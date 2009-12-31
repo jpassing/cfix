@@ -95,7 +95,7 @@ static PULONGLONG CfixklsGetTlsValuePtr()
 }
 
 static VOID CfixklsSetTlsValuePtr( 
-	__in PULONGLONG Ptr
+	__in_opt PULONGLONG Ptr
 	)
 {
 	TlsSetValue( CfixklsTlsSlot, Ptr );
@@ -690,6 +690,7 @@ static HRESULT CfixklsRunTeardownRoutine(
 	//
 	TlsValuePtr = CfixklsGetTlsValuePtr();
 	ASSERT( TlsValuePtr != NULL );
+	__assume( TlsValuePtr != NULL );
 
 	TlsValueCopy = *TlsValuePtr;
 
@@ -885,6 +886,7 @@ static HRESULT CfixklsRunTestCaseRoutine(
 
 	TlsValuePtr = CfixklsGetTlsValuePtr();
 	ASSERT( TlsValuePtr != NULL );
+	__assume( TlsValuePtr != NULL );
 
 	Hr = CfixklpCallRoutine(
 		Module->ReflectorHandle,

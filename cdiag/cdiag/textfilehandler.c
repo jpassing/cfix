@@ -137,7 +137,10 @@ static HRESULT CdiagsTextFileHandle(
 	//
 	// Effective size.
 	//
+#pragma warning( push )
+#pragma warning( disable: 6054 )
 	BufferCch = ( DWORD ) wcslen( Buffer );
+#pragma warning( pop )
 
 	////
 	//// Strip CR, LF, TAB within text.

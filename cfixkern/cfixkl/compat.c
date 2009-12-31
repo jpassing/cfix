@@ -43,6 +43,7 @@ VOID CFIXCALLTYPE CfixklGetNativeSystemInfo(
 	
 	Kernel32Module = GetModuleHandle( L"kernel32" );
 	ASSERT( Kernel32Module != NULL );
+	__assume( Kernel32Module != NULL );
 
 	Routine = ( GETNATIVESYSTEMINFO_ROUTINE ) GetProcAddress( 
 		Kernel32Module,
@@ -75,6 +76,7 @@ BOOL CFIXCALLTYPE CfixklIsWow64Process(
 	
 	Kernel32Module = GetModuleHandle( L"kernel32" );
 	ASSERT( Kernel32Module != NULL );
+	__assume( Kernel32Module != NULL );
 
 	Routine = ( ISWOW64PROCESS_ROUTINE ) GetProcAddress( 
 		Kernel32Module,

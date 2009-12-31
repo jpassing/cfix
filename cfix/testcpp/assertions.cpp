@@ -329,21 +329,24 @@ void ExpectFailure()
 	PVOID OldReportFailedAssertion;
 	PVOID OldReportFailedAssertionFormatA;
 	PVOID OldReportFailedAssertionFormatW;
+	HMODULE TestcppHandle = GetModuleHandleW( L"testcpp" );
+
+	CFIX_ASSUME( TestcppHandle != NULL );
 	
 	CFIX_ASSERT( S_OK == PatchIat(
-		GetModuleHandleW( L"testcpp" ),
+		TestcppHandle,
 		"cfix.dll",
 		"CfixPeReportFailedAssertion",
 		( PVOID ) ExpectReportFailedAssertion,
 		&OldReportFailedAssertion ) );
 	CFIX_ASSERT( S_OK == PatchIat(
-		GetModuleHandleW( L"testcpp" ),
+		TestcppHandle,
 		"cfix.dll",
 		"CfixPeReportFailedAssertionFormatA",
 		( PVOID ) ExpectReportFailedAssertionFormatA,
 		&OldReportFailedAssertionFormatA ) );
 	CFIX_ASSERT( S_OK == PatchIat(
-		GetModuleHandleW( L"testcpp" ),
+		TestcppHandle,
 		"cfix.dll",
 		"CfixPeReportFailedAssertionFormatW",
 		( PVOID ) ExpectReportFailedAssertionFormatW,
@@ -357,19 +360,19 @@ void ExpectFailure()
 	__finally
 	{
 		CFIX_ASSERT( S_OK == PatchIat(
-			GetModuleHandleW( L"testcpp" ),
+			TestcppHandle,
 			"cfix.dll",
 			"CfixPeReportFailedAssertion",
 			OldReportFailedAssertion,
 			NULL ) );
 		CFIX_ASSERT( S_OK == PatchIat(
-			GetModuleHandleW( L"testcpp" ),
+			TestcppHandle,
 			"cfix.dll",
 			"CfixPeReportFailedAssertionFormatA",
 			OldReportFailedAssertionFormatA,
 			NULL ) );
 		CFIX_ASSERT( S_OK == PatchIat(
-			GetModuleHandleW( L"testcpp" ),
+			TestcppHandle,
 			"cfix.dll",
 			"CfixPeReportFailedAssertionFormatW",
 			OldReportFailedAssertionFormatW,

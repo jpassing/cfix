@@ -303,7 +303,11 @@ static VOID CdiagsTranslateTimestamp(
 	}
 	else
 	{
-		CdiagpFree( Buffer );
+		if ( Buffer )
+		{
+			CdiagpFree( Buffer );
+		}
+
 		*Translated = 0;
 		*MustBeFreed = FALSE;
 	}

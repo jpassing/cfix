@@ -51,7 +51,7 @@ VOID InitializeEventPacket(
 	__in DWORD ThreadId,
 	__in PFILETIME Timestamp,
 	__in DWORD Code,
-	__in PCWSTR Message,
+	__in_opt PCWSTR Message,
 	__in BOOL ProvideDebugInfo,
 	__in PCWSTR Module,
 	__in PCWSTR Function,

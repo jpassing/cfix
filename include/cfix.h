@@ -93,7 +93,7 @@
 --*/
 CFIXREPORTAPI VOID CFIXCALLTYPE CfixPeSetValue(
 	__in ULONG Reserved,
-	__in PVOID Value
+	__in_opt PVOID Value
 	);
 
 /*++
@@ -121,8 +121,8 @@ CFIXREPORTAPI VOID CFIXCALLTYPE CfixPeFail();
 		Only for use from within a testcase.
 --*/
 CFIXREPORTAPI CFIX_REPORT_DISPOSITION CFIXCALLTYPE CfixPeReportFailedAssertion(
-	__in PCWSTR File,
-	__in PCWSTR Routine,
+	__in_opt PCWSTR File,
+	__in_opt PCWSTR Routine,
 	__in ULONG Line,
 	__in PCWSTR Expression
 	);
@@ -138,7 +138,7 @@ CFIXREPORTAPI CFIX_REPORT_DISPOSITION __cdecl CfixPeReportFailedAssertionFormatW
 	__in PCWSTR File,
 	__in PCWSTR Routine,
 	__in ULONG Line,
-	__in __format_string PCWSTR Format,
+	__in_opt __format_string PCWSTR Format,
 	...
 	);
 
@@ -146,7 +146,7 @@ CFIXREPORTAPI CFIX_REPORT_DISPOSITION __cdecl CfixPeReportFailedAssertionFormatA
 	__in PCWSTR File,
 	__in PCWSTR Routine,
 	__in ULONG Line,
-	__in __format_string PCSTR Format,
+	__in_opt __format_string PCSTR Format,
 	...
 	);
 
@@ -193,12 +193,12 @@ CFIXREPORTAPI VOID CFIXCALLTYPE CfixPeReportInconclusivenessA(
 		Only for use from within a testcase.
 --*/
 CFIXREPORTAPI VOID __cdecl CfixPeReportLog(
-	__in __format_string PCWSTR Format,
+	__in_opt __format_string PCWSTR Format,
 	...
 	);
 
 CFIXREPORTAPI VOID __cdecl CfixPeReportLogA(
-	__in PCSTR Format,
+	__in_opt PCSTR Format,
 	...
 	);
 
@@ -331,10 +331,10 @@ CFIXREPORTAPI VOID __cdecl CfixPeReportLogA(
 		See MSDN.
 --*/
 CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread(
-	__in PSECURITY_ATTRIBUTES ThreadAttributes,
+	__in_opt PSECURITY_ATTRIBUTES ThreadAttributes,
 	__in SIZE_T StackSize,
 	__in PTHREAD_START_ROUTINE StartAddress,
-	__in PVOID Parameter,
+	__in_opt PVOID Parameter,
 	__in DWORD CreationFlags,
 	__out_opt PDWORD ThreadId
 	);
@@ -356,10 +356,10 @@ CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread(
 
 --*/
 CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread2(
-	__in PSECURITY_ATTRIBUTES ThreadAttributes,
+	__in_opt PSECURITY_ATTRIBUTES ThreadAttributes,
 	__in SIZE_T StackSize,
 	__in PTHREAD_START_ROUTINE StartAddress,
-	__in PVOID Parameter,
+	__in_opt PVOID Parameter,
 	__in DWORD CreationFlags,
 	__out_opt PDWORD ThreadId,
 	__in ULONG Flags
@@ -416,7 +416,7 @@ NTSTATUS CFIXCALLTYPE CfixCreateSystemThread(
     __in_opt HANDLE ProcessHandle,
     __out_opt PCLIENT_ID ClientId,
     __in PKSTART_ROUTINE StartRoutine,
-    __in PVOID StartContext,
+    __in_opt PVOID StartContext,
 	__in ULONG Flags
     );
 #endif // CFIX_KERNELMODE

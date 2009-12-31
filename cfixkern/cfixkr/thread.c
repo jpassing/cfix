@@ -82,7 +82,10 @@ static VOID CfixkrsThreadStart(
 	ASSERT( FilamentRegistry );
 	ASSERT( StartAddress );
 	ASSERT( Filament );
+	ASSERT( FilamentRegistry );
+
 	__assume( Filament );
+	__assume( FilamentRegistry );
 
 	CfixkrpInitializeThreadId( 
 		&ThreadId,

@@ -434,8 +434,11 @@ template< CFIX_PE_TESTCASE_ROUTINE RoutineT >
 static void ExpectFailure()
 {
 	PVOID OldProc;
+	HMODULE Module = GetModuleHandleW( L"testwu" );
+	CFIX_ASSUME( Module != NULL );
+
 	CFIX_ASSERT( S_OK == PatchIat(
-		GetModuleHandleW( L"testwu" ),
+		Module,
 		"cfix.dll",
 		"CfixPeReportFailedAssertion",
 		( PVOID ) ExpectReportFailedAssertion,
@@ -449,7 +452,7 @@ static void ExpectFailure()
 	__finally
 	{
 		CFIX_ASSERT( S_OK == PatchIat(
-			GetModuleHandleW( L"testwu" ),
+			Module,
 			"cfix.dll",
 			"CfixPeReportFailedAssertion",
 			OldProc,

@@ -34,7 +34,7 @@
 
 CFIXAPI VOID CfixPeSetValue(
 	__in ULONG Tag,
-	__in PVOID Value
+	__in_opt PVOID Value
 	)
 {
 	PCFIXP_FILAMENT Filament;

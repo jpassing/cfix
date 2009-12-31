@@ -151,7 +151,7 @@ static void CfixsGetTlsFilament(
 }
 
 static void CfixsSetTlsFilamant(
-	__in PCFIXP_FILAMENT Filament,
+	__in_opt PCFIXP_FILAMENT Filament,
 	__in BOOL DerivedFromDefaultFilament
 	)
 {
@@ -239,7 +239,7 @@ static HRESULT CfixsGetCurrentFilament(
 }
 
 static HRESULT CfixsSetCurrentFilament(
-	__in PCFIXP_FILAMENT NewFilament,
+	__in_opt PCFIXP_FILAMENT NewFilament,
 	__in BOOL DerivedFromDefaultFilament,
 	__out_opt PCFIXP_FILAMENT *Prev
 	)
@@ -421,7 +421,7 @@ VOID CfixpDestroyFilament(
 }
 
 HRESULT CfixpSetCurrentFilament(
-	__in PCFIXP_FILAMENT NewFilament,
+	__in_opt PCFIXP_FILAMENT NewFilament,
 	__out_opt PCFIXP_FILAMENT *Prev
 	)
 {

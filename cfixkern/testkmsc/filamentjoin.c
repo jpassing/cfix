@@ -104,7 +104,7 @@ static void SpawnAndAutoJoin()
 		ThreadProc,
 		NULL,
 		0 ) );
-	CFIX_ASSERT( Thread );
+	CFIX_ASSUME( Thread != NULL );
 	CFIX_ASSERT( NT_SUCCESS( ZwClose( Thread ) ) );
 }
 
@@ -161,7 +161,7 @@ static void SpawnAndAutoJoinLotsOfThreadsUsingSystemContext()
 			ThreadProc,
 			NULL,
 			CFIX_SYSTEM_THREAD_FLAG_SYSTEM_CONTEXT ) );
-		CFIX_ASSERT( Thread );
+		CFIX_ASSUME( Thread != NULL );
 		CFIX_ASSERT( NT_SUCCESS( ZwClose( Thread ) ) );
 	}
 

@@ -43,7 +43,7 @@ static void SpawnAndJoinPolitely()
 		0,
 		NULL,
 		CFIX_THREAD_FLAG_CRT );
-	CFIX_ASSERT( Thread );
+	CFIX_ASSUME( Thread != NULL );
 
 	CFIX_ASSERT( WAIT_OBJECT_0 == WaitForSingleObject( Thread, INFINITE ) );
 

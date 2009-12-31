@@ -124,10 +124,10 @@ static DWORD CfixsThreadStart(
 }
 
 HANDLE CfixCreateThread2(
-	__in PSECURITY_ATTRIBUTES ThreadAttributes,
+	__in_opt PSECURITY_ATTRIBUTES ThreadAttributes,
 	__in SIZE_T StackSize,
 	__in PTHREAD_START_ROUTINE StartAddress,
-	__in PVOID UserParameter,
+	__in_opt PVOID UserParameter,
 	__in DWORD CreationFlags,
 	__out_opt PDWORD ChildThreadId,
 	__in ULONG Flags
@@ -242,10 +242,10 @@ HANDLE CfixCreateThread2(
 }
 
 HANDLE CfixCreateThread(
-	__in PSECURITY_ATTRIBUTES ThreadAttributes,
+	__in_opt PSECURITY_ATTRIBUTES ThreadAttributes,
 	__in SIZE_T StackSize,
 	__in PTHREAD_START_ROUTINE StartAddress,
-	__in PVOID UserParameter,
+	__in_opt PVOID UserParameter,
 	__in DWORD CreationFlags,
 	__out_opt PDWORD ThreadId
 	)

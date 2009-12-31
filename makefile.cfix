@@ -49,12 +49,13 @@ CFIX_CLAGS=-f -z -kern
 
 build: clean chk fre symadd
 
-ci: clean chk fre
+# N.B. Omitting vssample targets.
+ci: clean i386chk amd64chk i386fre amd64fre
 
 symadd:
-	symstore add /r /f bin\chk\i386\c*.pdb  /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
+	symstore add /r /f bin\chk\i386\c*.pdb   /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
 	symstore add /r /f bin\chk\amd64\c*.pdb  /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
-	symstore add /r /f bin\fre\i386\c*.pdb  /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
+	symstore add /r /f bin\fre\i386\c*.pdb   /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
 	symstore add /r /f bin\fre\amd64\c*.pdb  /s "$(CUSTOMSYMSTORE)" /t cfix /v $(VERSION)	
 	
 version:
@@ -68,25 +69,29 @@ version:
 	
 i386chk: version
 	cmd /C tools\ddkbuild -WNETW2K checked . -cZ
-	devenv samples\UserC\ExampleVs2005.sln /rebuild "Debug|Win32"
-	devenv samples\UserCc\ExampleCcVs2005.sln /rebuild "Debug|Win32"
-	
+
 i386fre: version
 	cmd /C tools\ddkbuild -WNETW2K free . -cZ
-	devenv samples\UserC\ExampleVs2005.sln /rebuild "Release|Win32"
-	devenv samples\UserCc\ExampleCcVs2005.sln /rebuild "Release|Win32"
-	
+
 amd64chk: version
 	cmd /C tools\ddkbuild -WLHNETA64 checked . -cZ
 	
 amd64fre: version
 	cmd /C tools\ddkbuild -WLHNETA64 free . -cZ	
 	
-chk: i386chk amd64chk
+vssamples_i386chk: version
+	devenv samples\UserC\ExampleVs2005.sln /rebuild "Debug|Win32"
+	devenv samples\UserCc\ExampleCcVs2005.sln /rebuild "Debug|Win32"
+	
+vssamples_i386fre: version
+	devenv samples\UserC\ExampleVs2005.sln /rebuild "Release|Win32"
+	devenv samples\UserCc\ExampleCcVs2005.sln /rebuild "Release|Win32"
+	
+chk: i386chk amd64chk vssamples_i386chk
 
-fre: i386fre amd64fre
+fre: i386fre amd64fre vssamples_i386fre
 
-i386: i386chk i386fre
+i386: i386chk i386fre vssamples_i386chk vssamples_i386fre
 
 amd64: amd64chk amd64fre
 

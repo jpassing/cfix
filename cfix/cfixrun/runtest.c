@@ -212,10 +212,14 @@ static HRESULT CfixrunsCreateSequenceActionForCurrentExecutable(
 	)
 {
 	HRESULT Hr;
+	HMODULE Module = GetModuleHandle( NULL );
 	PCFIX_TEST_MODULE TestModule;
 
+	ASSERT( Module != NULL );
+	__assume( Module != NULL );
+
 	Hr = CfixCreateTestModule(
-		GetModuleHandle( NULL ),
+		Module,
 		&TestModule );
 	if ( FAILED( Hr ) )
 	{

@@ -146,6 +146,7 @@ static LONG VirtRegOpenKeyEx(
 HRESULT EnableRegistryRedirection(
 	__in PCWSTR TempPath )
 {
+	HMODULE CdiagModule;
 	HRESULT hr = StringCchPrintf(
 		RedirectPathHklm, 
 		_countof( RedirectPathHklm ),
@@ -166,8 +167,11 @@ HRESULT EnableRegistryRedirection(
 		return hr;
 	}
 
+	CdiagModule = GetModuleHandle( L"cdiag" );
+	CFIX_ASSUME( CdiagModule != NULL );
+
 	hr = PatchIat(
-		GetModuleHandle( L"cdiag" ),
+		CdiagModule,
 		"advapi32.dll",
 		"RegCreateKeyExW",
 	 	( PVOID ) VirtRegCreateKeyEx,
@@ -178,7 +182,7 @@ HRESULT EnableRegistryRedirection(
 	}
 
 	hr = PatchIat(
-		GetModuleHandle( L"cdiag" ),
+		CdiagModule,
 		"advapi32.dll",
 		"RegOpenKeyExW",
 	 	( PVOID ) VirtRegOpenKeyEx,
@@ -197,8 +201,13 @@ HRESULT EnableRegistryRedirection(
 --*/
 HRESULT DisableRegistryRedirection()
 {
-	HRESULT hr = PatchIat(
-		GetModuleHandle( L"cdiag" ),
+	HMODULE CdiagModule = GetModuleHandle( L"cdiag" );
+	HRESULT hr;
+
+	CFIX_ASSUME( CdiagModule != NULL );
+
+	hr = PatchIat(
+		CdiagModule,
 		"advapi32.dll",
 		"RegCreateKeyExW",
 	 	( PVOID ) RegCreateKeyExW,
@@ -209,7 +218,7 @@ HRESULT DisableRegistryRedirection()
 	}
 
 	hr = PatchIat(
-		GetModuleHandle( L"cdiag" ),
+		CdiagModule,
 		"advapi32.dll",
 		"RegOpenKeyExW",
 	 	( PVOID ) RegOpenKeyExW,

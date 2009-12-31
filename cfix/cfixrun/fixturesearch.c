@@ -136,6 +136,7 @@ static HRESULT CfixrunsAddFixturesOfDllToSequenceAction(
 	PCFIX_TEST_MODULE TestModule;
 
 	ASSERT( CfixIsValidAction( SearchCtx->SequenceAction ) );
+	__assume( SearchCtx->SequenceAction != NULL );
 	
 	if ( Type == CfixrunSys )
 	{

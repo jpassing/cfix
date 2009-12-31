@@ -70,7 +70,7 @@ DWORD LoadDriver(
 	}
 
 	ScMgr = OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS  );
-	TEST( ScMgr != NULL );
+	CFIX_ASSUME( ScMgr != NULL );
 
 	TEST( GetFullPathName( DriverPath, _countof( FullPath ), FullPath, &FilePart ) );
 
@@ -149,10 +149,10 @@ void UnloadDriver(
 	SERVICE_STATUS Status;
 
 	ScMgr = OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS );
-	TEST( ScMgr );
+	CFIX_ASSUME( ScMgr );
 
 	Service = OpenService( ScMgr, Name, SERVICE_ALL_ACCESS );
-	TEST( Service );
+	CFIX_ASSUME( Service );
 
 	TEST( ControlService( Service, SERVICE_CONTROL_STOP, &Status ) );
 
@@ -168,7 +168,7 @@ BOOL IsDriverInstalled(
 	SC_HANDLE ScMgr, Service;
 
 	ScMgr = OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS );
-	TEST( ScMgr );
+	CFIX_ASSUME( ScMgr );
 
 	Service = OpenService( ScMgr, Name, SERVICE_ALL_ACCESS );
 	Installed = ( Service != NULL );
@@ -192,7 +192,7 @@ BOOL IsDriverLoaded(
 	SERVICE_STATUS Status;
 
 	ScMgr = OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS );
-	TEST( ScMgr );
+	CFIX_ASSUME( ScMgr );
 
 	Service = OpenService( ScMgr, Name, SERVICE_ALL_ACCESS );
 	TEST( Service != NULL || GetLastError() == ERROR_SERVICE_DOES_NOT_EXIST );

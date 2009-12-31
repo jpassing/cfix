@@ -153,11 +153,11 @@ static void TestCdiagCreateRegistryStoreCallback()
 
 		HANDLE AlterThread = CreateThread( 
 			NULL, 0, AlterCallbackThreadProc, Store, 0, NULL );
-		TEST( AlterThread );
+		CFIX_ASSUME( AlterThread != NULL );
 
 		HANDLE TriggerThread = CreateThread( 
 			NULL, 0, TriggerUpdatesThreadProc, Store, 0, NULL );
-		TEST( TriggerThread );
+		CFIX_ASSUME( TriggerThread != NULL );
 
 		HANDLE handles[] = { AlterThread, TriggerThread };
 		WaitForMultipleObjects( _countof( handles ), handles, TRUE, INFINITE );

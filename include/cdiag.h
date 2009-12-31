@@ -788,7 +788,7 @@ typedef struct _CDIAG_FORMATTER
 		__in struct _CDIAG_FORMATTER *This,
 		__in CONST PCDIAG_EVENT_PACKET EventPkt,
 		__in SIZE_T BufferSizeInChars,
-		__out_ecount(BufferSizeInChars) PWSTR Buffer
+		__out_ecount_z(BufferSizeInChars) PWSTR Buffer
 		);
 
 	/*++

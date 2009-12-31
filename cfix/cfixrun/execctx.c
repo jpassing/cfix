@@ -548,6 +548,9 @@ VOID CfixrunsExecCtxBeforeChildThreadStart(
 	UNREFERENCED_PARAMETER( ThreadId );
 	UNREFERENCED_PARAMETER( This );
 	ASSERT( CfixIsValidContext( This ) );
+
+	ASSERT( ParentState != NULL );
+	__assume( ParentState != NULL );
 	
 	//
 	// AddRef state as it will be shared by 2 threads.

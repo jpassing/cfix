@@ -604,8 +604,8 @@ namespace cfixcc
 	public:
 		template< typename ValueT >
 		static CFIX_REPORT_DISPOSITION Relate(
-			__in const ValueT& Lhs,
-			__in const ValueT& Rhs,
+			__in_opt const ValueT& Lhs,
+			__in_opt const ValueT& Rhs,
 			__in PCWSTR ExpressionLhs,
 			__in PCWSTR ExpressionRhs,
 			__in const Message& Msg,
@@ -634,8 +634,8 @@ namespace cfixcc
 
 		template< typename ValueLhsT, typename ValueRhsT >
 		static CFIX_REPORT_DISPOSITION RelateCompatible(
-			__in const ValueLhsT& Lhs,
-			__in const ValueRhsT& Rhs,
+			__in_opt const ValueLhsT& Lhs,
+			__in_opt const ValueRhsT& Rhs,
 			__in PCWSTR ExpressionLhs,
 			__in PCWSTR ExpressionRhs,
 			__in const Message& Msg,
@@ -663,8 +663,8 @@ namespace cfixcc
 		}
 
 		static CFIX_REPORT_DISPOSITION Relate(
-			__in PCWSTR Lhs,
-			__in PCWSTR Rhs,
+			__in_opt PCWSTR Lhs,
+			__in_opt PCWSTR Rhs,
 			__in PCWSTR ExpressionLhs,
 			__in PCWSTR ExpressionRhs,
 			__in const Message& Msg,
@@ -698,8 +698,8 @@ namespace cfixcc
 		}
 
 		static CFIX_REPORT_DISPOSITION Relate(
-			__in PCSTR Lhs,
-			__in PCSTR Rhs,
+			__in_opt PCSTR Lhs,
+			__in_opt PCSTR Rhs,
 			__in PCWSTR ExpressionLhs,
 			__in PCWSTR ExpressionRhs,
 			__in const Message& Msg,
@@ -732,8 +732,8 @@ namespace cfixcc
 		}
 
 		static CFIX_REPORT_DISPOSITION RelateStrings(
-			__in PCWSTR Lhs,
-			__in PCWSTR Rhs,
+			__in_opt PCWSTR Lhs,
+			__in_opt PCWSTR Rhs,
 			__in PCWSTR ExpressionLhs,
 			__in PCWSTR ExpressionRhs,
 			__in const Message& Msg,
@@ -754,8 +754,8 @@ namespace cfixcc
 		}
 
 		static CFIX_REPORT_DISPOSITION RelateStrings(
-			__in PCSTR Lhs,
-			__in PCSTR Rhs,
+			__in_opt PCSTR Lhs,
+			__in_opt PCSTR Rhs,
 			__in PCWSTR ExpressionLhs,
 			__in PCWSTR ExpressionRhs,
 			__in const Message& Msg,
@@ -776,8 +776,8 @@ namespace cfixcc
 		}
 
 		static CFIX_REPORT_DISPOSITION Relate(
-			__in PWSTR Lhs,
-			__in PWSTR Rhs,
+			__in_opt PWSTR Lhs,
+			__in_opt PWSTR Rhs,
 			__in PCWSTR ExpressionLhs,
 			__in PCWSTR ExpressionRhs,
 			__in const Message& Msg,
@@ -798,8 +798,8 @@ namespace cfixcc
 		}
 
 		static CFIX_REPORT_DISPOSITION Relate(
-			__in PSTR Lhs,
-			__in PSTR Rhs,
+			__in_opt PSTR Lhs,
+			__in_opt PSTR Rhs,
 			__in PCWSTR ExpressionLhs,
 			__in PCWSTR ExpressionRhs,
 			__in const Message& Msg,

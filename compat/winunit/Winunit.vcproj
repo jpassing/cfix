@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="9,00"
 	Name="Winunit"
 	ProjectGUID="{0863C80F-B68A-457E-9F08-F0C814438266}"
 	RootNamespace="Jpht"
 	Keyword="MakeFileProj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform

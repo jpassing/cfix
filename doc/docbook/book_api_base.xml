@@ -597,7 +597,7 @@ CFIX_END_FIXTURE()
 				<programlisting>
 VOID CfixPeSetValue(
 	__in ULONG Reserved,
-	__in PVOID Value
+	__in_opt PVOID Value
 	);
 				</programlisting>
 			</simplesect>
@@ -643,7 +643,7 @@ VOID CfixPeSetValue(
 				<title>Declaration</title>
 				<programlisting>
 CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread(
-	__in PSECURITY_ATTRIBUTES ThreadAttributes,
+	__in_opt PSECURITY_ATTRIBUTES ThreadAttributes,
 	__in SIZE_T StackSize,
 	__in PTHREAD_START_ROUTINE StartAddress,
 	__in_opt PVOID Parameter,
@@ -723,7 +723,7 @@ CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread(
 				<title>Declaration</title>
 				<programlisting>
 CFIXAPI HANDLE CFIXCALLTYPE CfixCreateThread2(
-	__in PSECURITY_ATTRIBUTES ThreadAttributes,
+	__in_opt PSECURITY_ATTRIBUTES ThreadAttributes,
 	__in SIZE_T StackSize,
 	__in PTHREAD_START_ROUTINE StartAddress,
 	__in_opt PVOID Parameter,

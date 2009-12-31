@@ -353,7 +353,7 @@ NTSTATUS CFIXCALLTYPE CfixCreateSystemThread(
     __in_opt HANDLE ProcessHandle,
     __out_opt PCLIENT_ID ClientId,
     __in PKSTART_ROUTINE StartRoutine,
-    __in PVOID StartContext,
+    __in_opt PVOID StartContext,
 	__in ULONG Flags
     )
 {
