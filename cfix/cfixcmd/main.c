@@ -45,7 +45,7 @@ static VOID CfixcmdsPrintBanner()
 	{
 		wprintf( 
 			L"cfix version %d.%d.%d.%d (" __CFIX_WIDE( DDKBUILDENV ) L")\n"
-			L"(C) 2008-2009 - Johannes Passing - http://www.cfix-testing.org/\n",
+			L"(C) 2008-2010 - Johannes Passing - http://www.cfix-testing.org/\n",
 			Version.Major, 
 			Version.Minor,
 			Version.Revision,
