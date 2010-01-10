@@ -1,0 +1,97 @@
+<?xml version="1.0" ?>
+<XML_DIZ_INFO>
+	<MASTER_PAD_VERSION_INFO>
+		<MASTER_PAD_VERSION>3.10</MASTER_PAD_VERSION>
+		<MASTER_PAD_EDITOR>PADGen 3.1.0.41 http://www.padgen.org</MASTER_PAD_EDITOR>
+		<MASTER_PAD_INFO>Portable Application Description, or PAD for short, is a data set that is used by shareware authors to disseminate information to anyone interested in their software products. To find out more go to http://www.asp-shareware.org/pad</MASTER_PAD_INFO>
+	</MASTER_PAD_VERSION_INFO>
+	<Company_Info>
+		<Company_Name>Johannes Passing</Company_Name>
+		<Address_1 />
+		<Address_2 />
+		<City_Town>Berlin</City_Town>
+		<State_Province />
+		<Zip_Postal_Code />
+		<Country>Germany</Country>
+		<Company_WebSite_URL>http://jpassing.com/</Company_WebSite_URL>
+		<Contact_Info>
+			<Author_First_Name>Johannes</Author_First_Name>
+			<Author_Last_Name>Passing</Author_Last_Name>
+			<Author_Email>passing@users.sourceforge.net</Author_Email>
+			<Contact_First_Name>Johannes</Contact_First_Name>
+			<Contact_Last_Name>Passing</Contact_Last_Name>
+			<Contact_Email>passing@users.sourceforge.net</Contact_Email>
+		</Contact_Info>
+		<Support_Info>
+			<Sales_Email>passing@users.sourceforge.net</Sales_Email>
+			<Support_Email>passing@users.sourceforge.net</Support_Email>
+			<General_Email>passing@users.sourceforge.net</General_Email>
+			<Sales_Phone />
+			<Support_Phone />
+			<General_Phone />
+			<Fax_Phone />
+		</Support_Info>
+	</Company_Info>
+	<Program_Info>
+		<Program_Name>cfix</Program_Name>
+		<Program_Version>__VERSION__</Program_Version>
+		<Program_Release_Month>__MONTH__</Program_Release_Month>
+		<Program_Release_Day>__DAY__</Program_Release_Day>
+		<Program_Release_Year>__YEAR__</Program_Release_Year>
+		<Program_Cost_Dollars />
+		<Program_Cost_Other_Code />
+		<Program_Cost_Other />
+		<Program_Type>Freeware</Program_Type>
+		<Program_Release_Status>Minor Update</Program_Release_Status>
+		<Program_Install_Support>No Install Support</Program_Install_Support>
+		<Program_OS_Support>Win2000,Win7 x32,Win7 x64,WinServer,WinVista,WinVista x64,WinXP</Program_OS_Support>
+		<Program_Language>English</Program_Language>
+		<Program_Change_Info />
+		<Program_Specific_Category>Development Tools</Program_Specific_Category>
+		<Program_Category_Class>Development::C / C++ / C#</Program_Category_Class>
+		<Program_System_Requirements />
+		<File_Info>
+			<File_Size_Bytes>5242880</File_Size_Bytes>
+			<File_Size_K>5120</File_Size_K>
+			<File_Size_MB>5</File_Size_MB>
+		</File_Info>
+		<Expire_Info>
+			<Has_Expire_Info>N</Has_Expire_Info>
+			<Expire_Count />
+			<Expire_Based_On>Days</Expire_Based_On>
+			<Expire_Other_Info />
+			<Expire_Month />
+			<Expire_Day />
+			<Expire_Year />
+		</Expire_Info>
+	</Program_Info>
+	<Program_Descriptions>
+		<English>
+			<Keywords>testing, unit testing, qa, test driven design</Keywords>
+			<Char_Desc_45>Unit Testing Framework for C/C++ on Win32</Char_Desc_45>
+			<Char_Desc_80>Open Source Unit Testing Framework for on Win32 and NT kernel mode (C/C++)</Char_Desc_80>
+			<Char_Desc_250>The only open source unit testing framework fully dedicated to Windows development in C/C++. cfix supports both user mode and kernel mode unit tests.</Char_Desc_250>
+			<Char_Desc_450>cfix is an xUnit testing framework for C/C++, fully specialized for Win32 (32/64 bit) and NT kernel mode development. Execution and behaviour in case of failing testcases can be highly customized. Moreover, cfix has been designed to work well in conjunction with the Windows Debuggers (Visual Studio, WinDBG). Licensed under the GNU Lesser Public License 3.0.</Char_Desc_450>
+			<Char_Desc_2000>cfix is an xUnit testing framework for C/C++, fully specialized for Win32 (32/64 bit) development. cfix requires only little effort to author unit tests, which are compiled and linked into a DLL. The testrunner application provided by cfix allows selectively running tests of one or more of such test-DLLs. Execution and behaviour in case of failing testcases can be highly customized. Moreover, cfix has been designed to work well in conjunction with the Windows Debuggers (Visual Studio, WinDBG). Licensed under the GNU Lesser Public License 3.0.</Char_Desc_2000>
+		</English>
+	</Program_Descriptions>
+	<Web_Info>
+		<Application_URLs>
+			<Application_Info_URL>http://www.cfix-testing.org/</Application_Info_URL>
+			<Application_Order_URL />
+			<Application_Screenshot_URL>http://www.cfix-testing.org/unit-testing-framework/windows/doc/cfix-arch-user.png</Application_Screenshot_URL>
+			<Application_Icon_URL>http://www.cfix-testing.org/cfix-tick.png</Application_Icon_URL>
+			<Application_XML_File_URL>http://www.cfix-testing.org/pad.xml</Application_XML_File_URL>
+		</Application_URLs>
+		<Download_URLs>
+			<Primary_Download_URL>http://sourceforge.net/projects/cfix/files/cfix/?__.exe</Primary_Download_URL>
+			<Secondary_Download_URL />
+			<Additional_Download_URL_1 />
+			<Additional_Download_URL_2 />
+		</Download_URLs>
+	</Web_Info>
+	<Permissions>
+		<Distribution_Permissions />
+		<EULA />
+	</Permissions>
+</XML_DIZ_INFO>

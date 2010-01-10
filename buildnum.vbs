@@ -21,3 +21,7 @@ for each objCompSys in colCompSys
 next
 
 wscript.echo "BUILDNUMBER = " & datediff("d", #2000/1/1#, now()) & vbcrlf & vbcrlf
+
+wscript.echo "NOW_DAY = " & day(date())
+wscript.echo "NOW_MONTH = " & month(date())
+wscript.echo "NOW_YEAR = " & year(date())
