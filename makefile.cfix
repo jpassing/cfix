@@ -306,7 +306,10 @@ docs:
 # Installer.
 #
 #----------------------------------------------------------------------
-installer: docs
+signbinaries:
+	codesign.cmd cfix bin\fre\i386\cfix32.exe bin\fre\amd64\cfix64.exe
+	
+installer: signbinaries docs
 	cd installer
 	$(MAKE) clean cfix.msi
 	cd ..

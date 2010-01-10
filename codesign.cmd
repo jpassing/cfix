@@ -13,14 +13,20 @@ echo File: %FILENAME%
 
 set /P PASSWORD=Enter Password for code signing certificate:
 
+:sign
+echo Signing %FILENAME%...
 %SDKBASE%\bin\signtool sign /f %CODESIGNINGCERT% /p %PASSWORD% /t http://timestamp.comodoca.com/authenticode /d %DESCRIPTION% %FILENAME%
+
+shift
+set FILENAME=%2%
+if '%FILENAME%' NEQ '' goto sign
 
 goto exit
 
 :usage
 echo.
 echo Usage:
-echo   %0 description file
+echo   %0 description files...
 echo.
 goto exit
 
