@@ -10,7 +10,7 @@ chmdoc:
 	cd docbook\chm
 	copy ..\stylechm.css .
 
-	xsltproc --param buildnumber $(BUILDNUMBER) ..\stylechm.xsl ..\book.xml	
+	xsltproc --novalid --param buildnumber $(BUILDNUMBER) ..\stylechm.xsl ..\book.xml	
 	-1 "$(HH_HOME)\hhc" htmlhelp.hhp	
 	move cfix.chm ..
 
@@ -23,7 +23,7 @@ webdoc:
 	copy ..\..\styleweb.css ..
 	-3 robocopy ..\..\..\assets ..\assets /MIR /XD .svn /XX /NJH /NJS
 	
-	xsltproc --param buildnumber $(BUILDNUMBER) ..\..\styleweb.xsl ..\..\book.xml
+	xsltproc --novalid --param buildnumber $(BUILDNUMBER) ..\..\styleweb.xsl ..\..\book.xml
 
 	copy /Y ..\..\chm\*.gif .
 	copy /Y ..\..\chm\*.png .
