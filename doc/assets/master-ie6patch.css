@@ -1,4 +1,15 @@
+body
+{
+	background-image: none;
+	background-color: #D4E6EA;
+}
+	
 #tab
+{ 
+	margin-bottom: -10px;
+}
+
+#topborder
 { 
 	margin-bottom: -10px;
 }
