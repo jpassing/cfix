@@ -52,7 +52,7 @@
 //
 // Maximum length of a fixture name, including NULL terminator.
 //
-#define CFIX_MAX_FIXTURE_NAME_CCH 64
+#define CFIX_MAX_FIXTURE_NAME_CCH 128
 
 #define CFIX_SYSTEM_THREAD_FLAG_SYSTEM_CONTEXT	1
 
