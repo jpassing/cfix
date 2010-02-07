@@ -222,18 +222,23 @@ namespace cfixwu
 	Macro Description:
 		Created an accumulator along with an appropriate cfix export that
 		serves as the basis for a fixture definition.
+
+		N.B. Usage of __declspec(noinline) inline is required to allow 
+		fixtures to be spread over multiple objects with the FIXTURE
+		begin defined in a shared header file.
 --*/
 #define FIXTURE( FixtureName )											\
-	static cfixwu::DynamicFixture& __GetDefinition##FixtureName()		\
+	__declspec(noinline) inline											\
+	cfixwu::DynamicFixture& __GetDefinition##FixtureName()				\
 	{																	\
 		static cfixwu::DynamicFixture Fixture;							\
 		return Fixture;													\
 	}																	\
-	EXTERN_C __declspec(dllexport)										\
+	EXTERN_C __declspec(dllexport) __declspec(noinline) inline			\
 	PCFIX_TEST_PE_DEFINITION CFIXCALLTYPE __CfixFixturePe##FixtureName()\
 	{																	\
 		CFIX_CALL_CRT_INIT_EMBEDDING_REGISTRATION();					\
-		return __GetDefinition##FixtureName##().GetDefinition();								\
+		return __GetDefinition##FixtureName##().GetDefinition();		\
 	}																	
 
 /*++

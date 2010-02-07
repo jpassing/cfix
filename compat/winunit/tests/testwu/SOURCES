@@ -32,6 +32,8 @@ SOURCES=\
 	Simple.cpp \
 	Fixture.cpp \
 	Bugfixes.cpp \
+	BugfixesPartialFixture1.cpp \
+	BugfixesPartialFixture2.cpp \
 	Assertions.cpp \
 	Messages.cpp \
 	NameConflicts.cpp \

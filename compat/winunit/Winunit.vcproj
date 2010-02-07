@@ -146,6 +146,18 @@
 							>
 						</File>
 						<File
+							RelativePath=".\tests\testwu\BugfixesPartialFixture.h"
+							>
+						</File>
+						<File
+							RelativePath=".\tests\testwu\BugfixesPartialFixture1.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\tests\testwu\BugfixesPartialFixture2.cpp"
+							>
+						</File>
+						<File
 							RelativePath=".\tests\testwu\Fixture.cpp"
 							>
 						</File>
