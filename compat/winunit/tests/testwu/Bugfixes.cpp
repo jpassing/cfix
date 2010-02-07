@@ -21,6 +21,7 @@
  */
 
 #include <WinUnit.h>
+#include <Wincrypt.h>
 
 BEGIN_TEST( TestIssue_345_AcceptPointerInAssertZero )
 {
@@ -32,5 +33,12 @@ BEGIN_TEST( TestIssue_345_AcceptPointerInAssertZero )
 	WIN_ASSERT_NOT_ZERO( ULONG_MAX );
 	WIN_ASSERT_NOT_ZERO( LONG_MIN );
     WIN_ASSERT_NOT_ZERO( PtrNonZero );
+}
+END_TEST
+
+BEGIN_TEST( TestIssue_362_AssertNullOnConstTypedefStruct )
+{
+	PCCERT_CONTEXT pCert = NULL;
+	WIN_ASSERT_NOT_NULL(pCert);
 }
 END_TEST

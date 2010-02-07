@@ -406,7 +406,7 @@ namespace cfixwu
 		( __debugbreak(), CfixPeFail(), 0 ) ) )	
 
 #define WIN_ASSERT_NULL( NullExpression, ... ) 							\
-	( void ) ( ( CfixBreak != cfixcc::Assertion< cfixcc::Equal >::Relate< PVOID >(	\
+	( void ) ( ( CfixBreak != cfixcc::Assertion< cfixcc::Equal >::Relate< void const * >(	\
 			NULL,														\
 			( NullExpression ),											\
 			L"(NULL)",													\
@@ -418,7 +418,7 @@ namespace cfixwu
 		( __debugbreak(), CfixPeFail(), 0 ) ) )	
 
 #define WIN_ASSERT_NOT_NULL( NotNullExpression, ... )  					\
-	( void ) ( ( CfixBreak != cfixcc::Assertion< cfixcc::NotEqual >::Relate< PVOID >(	\
+	( void ) ( ( CfixBreak != cfixcc::Assertion< cfixcc::NotEqual >::Relate< void const * >(	\
 			NULL,														\
 			( NotNullExpression ),										\
 			L"(NULL)",													\
