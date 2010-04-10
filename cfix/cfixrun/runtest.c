@@ -204,7 +204,6 @@ static BOOL CfixrunsFilterFixtureByName(
 }
 
 static HRESULT CfixrunsCreateSequenceActionForCurrentExecutable( 
-	__in CDIAG_SESSION_HANDLE LogSession,
 	__in CFIXRUNP_FILTER_FIXTURE_ROUTINE FilterCallback,
 	__in CFIXRUNP_CREATE_ACTION_ROUTINE CreateActionCallback,
 	__in PVOID CallbackContext,
@@ -228,7 +227,6 @@ static HRESULT CfixrunsCreateSequenceActionForCurrentExecutable(
 
 	Hr = CfixrunpCreateSequenceAction(
 		TestModule,
-		LogSession,
 		FilterCallback,
 		CreateActionCallback,
 		CallbackContext,
@@ -259,7 +257,6 @@ HRESULT CfixrunpAssembleExecutionAction(
 			State->Options->InputFile,
 			State->Options->RecursiveSearch,
 			State->Options->EnableKernelFeatures,
-			State->LogSession,
 			CfixrunsFilterFixtureByName,
 			CfixrunsCreateTsExecAction,
 			&Context,
@@ -268,7 +265,6 @@ HRESULT CfixrunpAssembleExecutionAction(
 	else
 	{
 		Hr = CfixrunsCreateSequenceActionForCurrentExecutable(
-			State->LogSession,
 			CfixrunsFilterFixtureByName,
 			CfixrunsCreateTsExecAction,
 			&Context,
@@ -300,7 +296,6 @@ HRESULT CfixrunpAssembleDisplayAction(
 			State->Options->InputFile,
 			State->Options->RecursiveSearch,
 			State->Options->EnableKernelFeatures,
-			State->LogSession,
 			CfixrunsFilterFixtureByName,
 			CfixrunsCreateDisplayAction,
 			&Context,
@@ -309,7 +304,6 @@ HRESULT CfixrunpAssembleDisplayAction(
 	else
 	{
 		Hr = CfixrunsCreateSequenceActionForCurrentExecutable(
-			State->LogSession,
 			CfixrunsFilterFixtureByName,
 			CfixrunsCreateDisplayAction,
 			&Context,

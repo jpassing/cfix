@@ -36,49 +36,6 @@ typedef enum
 	StateExpectAny
 } PARSE_STATE;
 
-static BOOL CfixrunsSetOutputTarget(
-	__in PCWSTR Name,
-	__in BOOL ProvideDefault,
-	__out CFIXRUN_OUTPUT_TARGET *Target
-	)
-{
-	if ( Name )
-	{
-		if ( 0 == wcscmp( Name, L"console" ) )
-		{
-			*Target = CfixrunTargetConsole;
-		}
-		else if ( 0 == wcscmp( Name, L"debug" ) )
-		{
-			*Target = CfixrunTargetDebug;
-		}
-		else
-		{
-			//
-			// Must be a file.
-			//
-			*Target = CfixrunTargetFile;
-		}
-	}
-	else if ( ProvideDefault )
-	{
-		if ( IsDebuggerPresent() )
-		{
-			*Target = CfixrunTargetDebug;
-		}
-		else
-		{
-			*Target = CfixrunTargetConsole;
-		}
-	}
-	else 
-	{
-		*Target = CfixrunTargetNone;
-	}
-
-	return TRUE;
-}
-
 static int CfixcmdsPrintConsoleAndDebug(
 	__in_z __format_string PCWSTR Format, 
 	... 
@@ -109,6 +66,8 @@ BOOL CfixrunParseCommandLine(
 	PARSE_STATE State = StateExpectAny;
 	PCWSTR *Value = NULL;
 	UINT ArgIndex;
+	WCHAR Trash[ 100 ];
+	PCWSTR TrashValue = Trash;
 
 	ASSERT( Options->PrintConsole == NULL );
 
@@ -251,12 +210,24 @@ BOOL CfixrunParseCommandLine(
 			//
 			else if ( 0 == wcscmp( FlagName, L"out" ) )
 			{
-				Value = &Options->ProgressOutputTargetName;
+				Options->PrintConsole( L"Warning: Option -out has been removed and will be ignored.\n" );
+				Value = &TrashValue;
 				State = StateExpectValue;
 			}
 			else if ( 0 == wcscmp( FlagName, L"log" ) )
 			{
-				Value = &Options->LogOutputTargetName;
+				Options->PrintConsole( L"Warning: Option -log has been removed and will be ignored.\n" );
+				Value = &TrashValue;
+				State = StateExpectValue;
+			}
+			else if ( 0 == wcscmp( FlagName, L"eventdll" ) )
+			{
+				Value = &Options->EventDll;
+				State = StateExpectValue;
+			}
+			else if ( 0 == wcscmp( FlagName, L"eventdlloptions" ) )
+			{
+				Value = &Options->EventDllOptions;
 				State = StateExpectValue;
 			}
 			else if ( 0 == wcscmp( FlagName, L"nologo" ) )
@@ -320,22 +291,6 @@ BOOL CfixrunParseCommandLine(
 			Options->PrintConsole( L"-exe is only applicable for .exe files\n" );
 			return FALSE;
 		}
-	}
-
-	if ( ! CfixrunsSetOutputTarget( 
-		Options->LogOutputTargetName,
-		FALSE,
-		&Options->LogOutputTarget ) )
-	{
-		return FALSE;
-	}
-	
-	if ( ! CfixrunsSetOutputTarget( 
-		Options->ProgressOutputTargetName,
-		TRUE,
-		&Options->ProgressOutputTarget ) )
-	{
-		return FALSE;
 	}
 
 	return TRUE;	

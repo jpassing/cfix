@@ -22,30 +22,16 @@
  */
 #include "cfixrun.h"
 #include <cdiag.h>
+#include <cfixutil.h>
 
 typedef struct _CFIXRUN_STATE
 {
 	PCFIXRUN_OPTIONS Options;
 
 	//
-	// Custom formatter for all output.
-	//
-	PCDIAG_FORMATTER Formatter;
-
-	//
 	// Message resolver - used both internally and by sessions.
 	//
 	PCDIAG_MESSAGE_RESOLVER Resolver;
-
-	//
-	// Session for logging output.
-	//
-	CDIAG_SESSION_HANDLE LogSession;
-
-	//
-	// Session for process output.
-	//
-	CDIAG_SESSION_HANDLE ProgressSession;
 } CFIXRUN_STATE, *PCFIXRUN_STATE;
 
 /*++
@@ -77,92 +63,6 @@ HRESULT __cdecl CfixrunpOutputLogMessage(
 	__in CDIAG_SEVERITY_LEVEL Severity,
 	__in PCWSTR Format,
 	...
-	);
-
-#define CFIXRUNP_FORMATTER_SHOW_STACKTRACE_SOURCE_INFORMATION 1
-
-/*++
-	Routine Description:
-		Create formatter for proper output formatting.
---*/
-HRESULT CfixrunpCreateFormatter(
-	__in PCDIAG_MESSAGE_RESOLVER Resolver,
-	__in DWORD Flags,
-	__out PCDIAG_FORMATTER *Formatter
-	);
-
-//
-// Subtype as required by cdiag event packet.
-//
-#define CFIXRUN_TEST_EVENT_PACKET_SUBTYPE 1
-
-typedef enum
-{
-	CfixrunTestSuccess,
-	CfixrunTestFailure,
-	CfixrunTestInconclusive,
-	CfixrunLog
-} CFIXRUNS_EVENT_TYPE;
-
-typedef struct _CFIXRUN_SOURCE_INFO
-{
-	WCHAR ModuleName[ 64 ];
-	WCHAR FunctionName[ 100 ];
-	WCHAR SourceFile[ 100 ];
-	ULONG SourceLine;
-} CFIXRUN_SOURCE_INFO, *PCFIXRUN_SOURCE_INFO;
-
-typedef struct _CFIXRUN_TEST_EVENT_DEBUG_INFO
-{
-	CDIAG_DEBUG_INFO Base;
-	CFIXRUN_SOURCE_INFO Source;
-} CFIXRUN_TEST_EVENT_DEBUG_INFO;
-
-typedef struct _CFIXRUN_TEST_EVENT_STACKFRAME
-{
-	CFIXRUN_SOURCE_INFO Source;
-	UINT Displacement;
-} CFIXRUN_TEST_EVENT_STACKFRAME, *PCFIXRUN_TEST_EVENT_STACKFRAME;
-
-typedef struct _CFIXRUN_TEST_EVENT_PACKET
-{
-	CDIAG_EVENT_PACKET Base;
-	CFIXRUN_TEST_EVENT_DEBUG_INFO DebugInfo;
-
-	CFIXRUNS_EVENT_TYPE EventType;
-
-	WCHAR FixtureName[ 64 ];
-	WCHAR TestCaseName[ 64 ];
-
-	WCHAR Details[ 1024 ];
-
-	DWORD LastError;
-
-	struct
-	{
-		UINT FrameCount;
-		CFIXRUN_TEST_EVENT_STACKFRAME Frames[ ANYSIZE_ARRAY ];
-	} StackTrace;
-} CFIXRUN_TEST_EVENT_PACKET, *PCFIXRUN_TEST_EVENT_PACKET;
-
-/*++
-	Routine Description:
-		Create and Output a test event vis cdiag.
---*/
-HRESULT CfixrunpOutputTestEvent(
-	__in CDIAG_SESSION_HANDLE Session,
-	__in CFIXRUNS_EVENT_TYPE EventType,
-	__in PCWSTR FixtureName,
-	__in PCWSTR TestCaseName,
-	__in_opt PCWSTR Details,
-	__in_opt PCWSTR ModuleName,
-	__in_opt PCWSTR FunctionName,
-	__in_opt PCWSTR SourceFile,
-	__in UINT SourceLine,
-	__in DWORD LastError,
-	__in PCFIX_THREAD_ID ThreadId,
-	__in_opt PCFIX_STACKTRACE StackTrace,
-	__in_opt CFIX_GET_INFORMATION_STACKFRAME_ROUTINE GetInfoStackFrameRoutine
 	);
 
 /*++
@@ -249,7 +149,6 @@ typedef BOOL ( CFIXCALLTYPE * CFIXRUNP_FILTER_FIXTURE_ROUTINE ) (
 		DllOrDirectory	Path to search.
 		RecursiveSearch	Recurse into subdirs?
 		IncludeKernelM	Include kernel tests.
-		LogSession		Session for diagnostic output.
 		Callback		Callback for creating an action for each 
 						fixture encountered.
 		CallbackContext Context passed to callback.
@@ -259,7 +158,6 @@ HRESULT CfixrunpSearchFixturesAndCreateSequenceAction(
 	__in PCWSTR DllOrDirectory,
 	__in BOOL RecursiveSearch,
 	__in BOOL IncludeKernelModules,
-	__in CDIAG_SESSION_HANDLE LogSession,
 	__in CFIXRUNP_FILTER_FIXTURE_ROUTINE FilterCallback,
 	__in CFIXRUNP_CREATE_ACTION_ROUTINE CreateActionCallback,
 	__in PVOID CallbackContext,
@@ -272,7 +170,6 @@ HRESULT CfixrunpSearchFixturesAndCreateSequenceAction(
 
 	Parameters:
 		TestModule		Module to use.
-		LogSession		Session for diagnostic output.
 		Callback		Callback for creating an action for each 
 						fixture encountered.
 		CallbackContext Context passed to callback.
@@ -280,7 +177,6 @@ HRESULT CfixrunpSearchFixturesAndCreateSequenceAction(
 --*/
 HRESULT CfixrunpCreateSequenceAction( 
 	__in PCFIX_TEST_MODULE TestModule,
-	__in CDIAG_SESSION_HANDLE LogSession,
 	__in CFIXRUNP_FILTER_FIXTURE_ROUTINE FilterCallback,
 	__in CFIXRUNP_CREATE_ACTION_ROUTINE CreateActionCallback,
 	__in PVOID CallbackContext,

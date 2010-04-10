@@ -22,6 +22,7 @@
  */
 #include <shlwapi.h>
 #include <cfixapi.h>
+#include <cfixutil.h>
 #include <crtdbg.h>
 
 #define ASSERT _ASSERTE

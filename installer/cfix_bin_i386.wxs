@@ -71,6 +71,20 @@
     KeyPath="no"/>
 
   <File
+    Id="FileI386CfixconsDll"
+    Name="cfixcons.dll"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\i386\cfixcons.dll"
+    Vital="yes"/>
+  <File
+    Id="FileI386CfixconsPdb"
+    Name="cfixcons.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\i386\cfixcons.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
     Id="FileI386Cfixkr32Sys"
     Name="cfixkr32.sys"
     DiskId="1"

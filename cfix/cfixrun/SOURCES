@@ -45,8 +45,6 @@ SOURCES=\
 	cmdline.c \
 	main.c \
 	displayaction.c \
-	output.c \
-	formatter.c \
 	execctx.c \
 	runtest.c \
 	dllsearch.c \

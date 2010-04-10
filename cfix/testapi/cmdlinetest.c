@@ -37,16 +37,6 @@ static BOOL ParseCommandLine(
 void TestCmdLineParser()
 {
 	CFIXRUN_OPTIONS Options;
-	CFIXRUN_OUTPUT_TARGET DefOutputProgress;
-
-	if ( IsDebuggerPresent() )
-	{
-		DefOutputProgress = CfixrunTargetDebug;
-	}
-	else
-	{
-		DefOutputProgress = CfixrunTargetConsole;
-	}
 
 	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 	TEST( ParseCommandLine( L"runtest foo.dll", &Options ) );
@@ -66,9 +56,6 @@ void TestCmdLineParser()
 	TEST( Options.NoLogo );
 	TEST( ! Options.DisableStackTraces );
 
-	TEST( DefOutputProgress == Options.ProgressOutputTarget );
-	TEST( CfixrunTargetNone == Options.LogOutputTarget );
-
 	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 	TEST( ! ParseCommandLine( L"runtest -exe -out debug /td foo.dll", &Options ) );
 
@@ -85,8 +72,6 @@ void TestCmdLineParser()
 	TEST( ParseCommandLine( L"runtest -exe -out debug /td -log \"console\" foo.exe", &Options ) );
 	TEST( CfixrunInputRequiresSpawn == Options.InputFileType );
 	TEST( 0 == wcscmp( Options.InputFile, L"foo.exe" ) );
-	TEST( 0 == wcscmp( Options.ProgressOutputTargetName, L"debug" ) );
-	TEST( 0 == wcscmp( Options.LogOutputTargetName, L"console" ) );
 	TEST( ! Options.EnableKernelFeatures );
 	TEST( Options.InputFileType == CfixrunInputRequiresSpawn );
 	TEST( Options.DisableStackTraces );
@@ -95,12 +80,12 @@ void TestCmdLineParser()
 	TEST( ParseCommandLine( L"runtest -kern -fsr -fss -out debug -out b foo.dll", &Options ) );
 	TEST( CfixrunInputDynamicallyLoadable == Options.InputFileType );
 	TEST( 0 == wcscmp( Options.InputFile, L"foo.dll" ) );
-	TEST( Options.ProgressOutputTarget == CfixrunTargetFile );
-	TEST( 0 == wcscmp( Options.ProgressOutputTargetName, L"b" ) );
 	TEST( ! Options.OmitSourceInfoInStackTrace );
 	TEST( Options.EnableKernelFeatures );
 	TEST( Options.ShortCircuitRunOnFailure );
 	TEST( Options.ShortCircuitRunOnSetupFailure );
+	TEST( Options.EventDll == NULL );
+	TEST( Options.EventDllOptions == NULL );
 
 	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 	TEST( ParseCommandLine( L"runtest -Y -ts -r -n a /fsf -p b foo.dll", &Options ) );
@@ -125,6 +110,18 @@ void TestCmdLineParser()
 
 	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 	TEST ( ! ParseCommandLine( L"runtest -out -r foo.dll", &Options ) );
+
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
+	TEST( ParseCommandLine( L"runtest -eventdll ev.dll foo.dll", &Options ) );
+	TEST( 0 == wcscmp( Options.InputFile, L"foo.dll" ) );
+	TEST( 0 == wcscmp( Options.EventDll, L"ev.dll" ) );
+	TEST( Options.EventDllOptions == NULL );
+
+	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
+	TEST( ParseCommandLine( L"runtest -eventdll ev.dll -eventdlloptions \"a b\" foo.dll", &Options ) );
+	TEST( 0 == wcscmp( Options.InputFile, L"foo.dll" ) );
+	TEST( 0 == wcscmp( Options.EventDll, L"ev.dll" ) );
+	TEST( 0 == wcscmp( Options.EventDllOptions, L"a b" ) );
 }
 
 CFIX_BEGIN_FIXTURE(CmdLineParser)

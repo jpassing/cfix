@@ -17,25 +17,5 @@
 ; along with cfix.  If not, see <http://www.gnu.org/licenses/>.
  
 EXPORTS
-	CfixCreateTestModule
-	CfixCreateTestModuleFromPeImage
-	CfixPeReportFailedAssertion
-	CfixPeReportFailedAssertionFormatA
-	CfixPeReportFailedAssertionFormatW
-	CfixPeReportInconclusiveness
-	CfixPeReportInconclusivenessA
-	CfixPeReportLog
-	CfixPeReportLogA
-	CfixCreateFixtureExecutionAction
-	CfixCreateSequenceAction
-	CfixAddEntrySequenceAction
-	CfixCreateThread
-	CfixCreateThread2
-	CfixPeAssertEqualsUlong
-	CfixPeAssertEqualsDword = CfixPeAssertEqualsUlong
-	CfixPeFail
-	CfixPeSetValue
-	CfixPeGetValue
-	CfixQueryPeImage
-	CfixRegisterThread
-	CfixCreateEventEmittingExecutionContextProxy
+	CreateEventSink
+	

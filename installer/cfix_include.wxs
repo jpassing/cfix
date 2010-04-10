@@ -11,4 +11,5 @@
   <!-- <File Id="FileCfixKrioH" Name="cfixkrio.h" Source="$(var.CFIX_TREE)\include\cfixkrio.h"  Vital="yes"/>-->
   <File Id="FileCfixMsgH" Name="cfixmsg.h" Source="$(var.CFIX_TREE)\include\cfixmsg.h"  Vital="yes"/>
   <File Id="FileCfixPeH" Name="cfixpe.h" Source="$(var.CFIX_TREE)\include\cfixpe.h"  Vital="yes"/>
+  <File Id="FileCfixEventH" Name="cfixevnt.h" Source="$(var.CFIX_TREE)\include\cfixevnt.h"  Vital="yes"/>
 </Include>

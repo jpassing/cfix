@@ -317,6 +317,7 @@ HRESULT CfixpCaptureStackTrace(
 #endif
 
 	StackTrace->FrameCount = 0;
+	StackTrace->GetInformationStackFrame = CfixpGetInformationStackframe;
 
 	//
 	// Dbghelp is is singlethreaded.

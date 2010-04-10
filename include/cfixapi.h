@@ -346,22 +346,6 @@ typedef VOID ( CFIXCALLTYPE * CFIX_ADJ_REFERENCES_ROUTINE ) (
 	__in struct _CFIX_TEST_MODULE *TestModule
 	);
 
-/*++
-	Routine Description:
-		Retrieve information about a stackframe.
---*/
-typedef HRESULT ( CFIXCALLTYPE * CFIX_GET_INFORMATION_STACKFRAME_ROUTINE ) (
-	__in ULONGLONG Frame,
-	__in SIZE_T ModuleNameCch,
-	__out_ecount_z(ModuleNameCch) PWSTR ModuleName,
-	__in SIZE_T FunctionNameCch,
-	__out_ecount_z(FunctionNameCch) PWSTR FunctionName,
-	__out PDWORD Displacement,
-	__in SIZE_T SourceFileCch,
-	__out_ecount_z(SourceFileCch) PWSTR SourceFile,
-	__out PDWORD SourceLine 
-	);
-
 typedef struct _CFIX_TEST_CASE
 {
 	PCWSTR Name;
@@ -656,59 +640,4 @@ typedef struct _CFIX_MODULE_INFO
 CFIXAPI HRESULT CFIXCALLTYPE CfixQueryPeImage(
 	__in PCWSTR Path,
 	__out PCFIX_MODULE_INFO Info
-	);
-
-
-/*----------------------------------------------------------------------
- *
- * Utility API.
- *
- */
-
-typedef enum CFIXUTIL_VISIT_TYPE
-{
-	CfixutilEnterDirectory,
-	CfixutilLeaveDirectory,
-	CfixutilFile
-} CFIXUTIL_VISIT_TYPE;
-
-/*++
-	Routine Description:
-		Callback for CfixutilSearch
-
-	Parameters:
-		Path			Path of module found.
-		Type			Type of module.
-		Context			Caller supplied context
-		SearchPerformed	Specifies whether an actual search was
-						performed (FALSE when an exact file path
-						was passed to CfixutilSearch)
-
-	Return Value:
-		S_OK on success
-		failure HRESULT on failure. Search will be aborted and
-			return value is propagated to caller.
---*/
-typedef HRESULT ( CFIXCALLTYPE * CFIXUTIL_VISIT_ROUTINE ) (
-	__in PCWSTR Path,
-	__in CFIXUTIL_VISIT_TYPE Type,
-	__in_opt PVOID Context,
-	__in BOOL SearchPerformed
-	);
-
-/*++
-	Routine Description:
-		Search for files in a directory.
-
-	Parameters:
-		Path			Path to a file or directory.
-		Recursive		Search recursively?
-		Routine			Callback.
-		Context			Callback context argument.
---*/
-EXTERN_C HRESULT CFIXCALLTYPE CfixutilSearch(
-	__in PCWSTR Path,
-	__in BOOL Recursive,
-	__in CFIXUTIL_VISIT_ROUTINE Routine,
-	__in_opt PVOID Context
 	);

@@ -47,14 +47,6 @@
 
 typedef enum
 {
-	CfixrunTargetConsole,
-	CfixrunTargetDebug,
-	CfixrunTargetFile,
-	CfixrunTargetNone
-} CFIXRUN_OUTPUT_TARGET;
-
-typedef enum
-{
 	//
 	// Input file can be loaded into/is already present in current
 	// process.
@@ -99,15 +91,13 @@ typedef struct _CFIXRUN_OPTIONS
 	//
 	// Output Options.
 	//
-	PCWSTR ProgressOutputTargetName;
-	PCWSTR LogOutputTargetName;
 	BOOL NoLogo;
 	BOOL DisableStackTraces;
 	BOOL OmitSourceInfoInStackTrace;
-	
-	CFIXRUN_OUTPUT_TARGET ProgressOutputTarget;
-	CFIXRUN_OUTPUT_TARGET LogOutputTarget;
 
+	PCWSTR EventDll;
+	PCWSTR EventDllOptions;
+	
 	int ( __cdecl * PrintConsole )(
 		__in_z __format_string const wchar_t * _Format, 
 		... 

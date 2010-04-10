@@ -1,6 +1,6 @@
 #
 # Copyright:
-#		2008, Johannes Passing (passing at users.sourceforge.net)
+#		2008-2009, Johannes Passing (passing at users.sourceforge.net)
 #
 # This file is part of cfix.
 #
@@ -17,30 +17,40 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with cfix.  If not, see <http://www.gnu.org/licenses/>.
 #
+ 
 BSCMAKE_FLAGS=$(BSCMAKE_FLAGS) /n
 
-MSC_WARNING_LEVEL=/W4 /WX /Wp64
+MSC_WARNING_LEVEL=/W4 /Wp64
 
-INCLUDES=..\..\include
+INCLUDES=$(SDKBASE)\Include;..\..\include;$(SDK_INC_PATH)\..\mfc42
 
-!if "$(TARGET_DIRECTORY)"=="i386"
-USER_C_FLAGS=/D_UNICODE /DUNICODE /analyze
-!else
-USER_C_FLAGS=/D_UNICODE /DUNICODE
-!endif
+C_DEFINES=/D_UNICODE /DUNICODE
 
 !if "$(DDKBUILDENV)"=="chk"
 DEBUG_CRTS=1
 C_DEFINES = $(C_DEFINES) /D_DEBUG
 !endif
 
-UMTYPE=console
-UMENTRY=wmain
+!if "$(TARGET_DIRECTORY)"=="i386"
+USER_C_FLAGS=/analyze
+LINKER_FLAGS=/nxcompat /dynamicbase /SafeSEH
+!else
+LINKER_FLAGS=/nxcompat /dynamicbase
+!endif
+
 USE_LIBCMT=1
 
-TARGETNAME=cfixutil
+TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
+		   $(SDK_LIB_PATH)\shlwapi.lib \
+		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cdiag.lib \
+		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cfix.lib
+
+TARGETNAME=cfixcons
 TARGETPATH=..\..\bin\$(DDKBUILDENV)
-TARGETTYPE=LIBRARY
+TARGETTYPE=DYNLINK
+
 SOURCES=\
-	search.c \
-	eventdllload.c
+	eventsink.c \
+	cfixcons.rc 
+	
+DLLBASE=0x61050000

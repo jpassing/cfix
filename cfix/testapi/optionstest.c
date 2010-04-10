@@ -42,20 +42,6 @@ static struct
 
 static struct 
 {
-	CFIXRUN_OUTPUT_TARGET Target;
-	PCWSTR TargetName;
-	DWORD ExpectedExitCode;
-} OutputNames[] = 
-{
-	{ CfixrunTargetDebug,	L"debug",		CFIXRUN_EXIT_ALL_SUCCEEDED },
-	{ CfixrunTargetConsole, L"console",		CFIXRUN_EXIT_ALL_SUCCEEDED },
-	{ CfixrunTargetNone,	NULL,			CFIXRUN_EXIT_USAGE_FAILURE },
-	{ CfixrunTargetDebug,	L"asd",			CFIXRUN_EXIT_USAGE_FAILURE },
-	{ CfixrunTargetNone,	L"",			CFIXRUN_EXIT_USAGE_FAILURE },
-};
-
-static struct 
-{
 	PCWSTR FixtureName;
 	PCWSTR FixturePrefix;
 	DWORD ExpectedExitCode;
@@ -81,7 +67,7 @@ static int __cdecl PrintNop(
 void TestOptions()
 {
 	CFIXRUN_OPTIONS Options;
-	UINT DllIndex, ProOutputIndex, LogOutputIndex, FixtureIndex;
+	UINT DllIndex, FixtureIndex;
 
 	// 
 	// Construct path to some DLL.
@@ -94,8 +80,6 @@ void TestOptions()
 	TEST( PathAppend( SampleTestDllPath, L"testlib4.dll" ) );
 
 	for ( DllIndex = 0; DllIndex < _countof( DllOrDirectory ); DllIndex++ )
-	for ( ProOutputIndex = 0; ProOutputIndex < _countof( OutputNames ); ProOutputIndex++ )
-	for ( LogOutputIndex = 0; LogOutputIndex < _countof( OutputNames ); LogOutputIndex++ )
 	for ( FixtureIndex = 0; FixtureIndex < _countof( FixtureNames ); FixtureIndex++ )
 	{
 		DWORD Exit;
@@ -107,12 +91,6 @@ void TestOptions()
 		Options.Fixture			= FixtureNames[ FixtureIndex ].FixtureName;
 		Options.FixturePrefix	= FixtureNames[ FixtureIndex ].FixturePrefix;
 
-		Options.ProgressOutputTarget	 = OutputNames[ ProOutputIndex ].Target;
-		Options.ProgressOutputTargetName = OutputNames[ ProOutputIndex ].TargetName;
-		
-		Options.LogOutputTarget			 = OutputNames[ LogOutputIndex ].Target;
-		Options.LogOutputTargetName		 = OutputNames[ LogOutputIndex ].TargetName;
-		
 		Options.RecursiveSearch					= TRUE;
 		Options.AbortOnFirstFailure				= TRUE;
 		Options.DoNotCatchUnhandledExceptions	= TRUE;
@@ -123,9 +101,7 @@ void TestOptions()
 		Exit = CfixrunMain( &Options );
 
 		TEST( Exit == DllOrDirectory[ DllIndex ].ExpectedExitCode ||
-			  Exit == FixtureNames[ FixtureIndex ].ExpectedExitCode ||
-			  Exit == OutputNames[ ProOutputIndex ].ExpectedExitCode ||
-			  Exit == OutputNames[ LogOutputIndex ].ExpectedExitCode );
+			  Exit == FixtureNames[ FixtureIndex ].ExpectedExitCode );
 	}
 	
 }

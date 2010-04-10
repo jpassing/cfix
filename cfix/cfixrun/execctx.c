@@ -45,16 +45,11 @@ typedef struct _EXEC_THREAD_STATE
 	LONG FailureCount;
 	LONG InconclusiveCount;
 	
-	PCFIX_TEST_CASE CurrentTestCase;
-	PCFIX_FIXTURE CurrentFixture;
-
 	//
 	// States are shared among threads if a testcase spawns child
 	// threads - thus it is reference counted.
 	//
 	LONG ReferenceCount;
-
-	BOOL FirstTestCaseBegun;
 } EXEC_THREAD_STATE, *PEXEC_THREAD_STATE;
 
 typedef struct _EXEC_CONTEXT
@@ -226,151 +221,14 @@ static CFIX_REPORT_DISPOSITION CfixrunsExecCtxReportEvent(
 	PEXEC_CONTEXT Context = ( PEXEC_CONTEXT ) This;
 	PEXEC_THREAD_STATE CurrentState = CfixrunsGetCurrentExecutionState( FALSE );
 
-	PCWSTR FixtureName;
-	PCWSTR ModuleName;
-	PCWSTR TestCaseName;
-
-	WCHAR Buffer[ 256 ] = { 0 };
-
 	UNREFERENCED_PARAMETER( ThreadId );
 
 	ASSERT( CurrentState );
 	if ( ! CurrentState )
 	{
-		CfixrunpOutputLogMessage(
-			Context->State->LogSession,
-			CdiagFatalSeverity,
+		Context->State->Options->PrintConsole(
 			L"Unable to create current execution context state. Aborting" );
 		return CfixAbort;
-	}
-
-	//
-	// The fixture must have already been set when the first
-	// report comes in.
-	//
-	ASSERT( CurrentState->CurrentFixture );
-	if ( ! CurrentState->CurrentFixture )
-	{
-		CfixrunpOutputLogMessage(
-			Context->State->LogSession,
-			CdiagFatalSeverity,
-			L"Internal inconsistency detected. Aborting." );
-		return CfixAbort;
-	}
-
-	FixtureName  = CurrentState->CurrentFixture->Name;
-	ModuleName   = CurrentState->CurrentFixture->Module->Name;
-
-	//
-	// A testcase may not be available if Setup/Teardown is currently
-	// being done.
-	//
-	if ( CurrentState->CurrentTestCase )
-	{
-		TestCaseName = CurrentState->CurrentTestCase->Name;
-	}
-	else if ( CurrentState->FirstTestCaseBegun )
-	{
-		TestCaseName = L"[Teardown]";
-	}
-	else
-	{
-		//
-		// Implicit Assumption here: The suite has at least one testcase.
-		//
-		TestCaseName = L"[Setup]";
-	}
-
-	switch ( Event->Type )
-	{
-	case CfixEventFailedAssertion:
-		CfixrunpOutputTestEvent(
-			Context->State->ProgressSession,
-			CfixrunTestFailure,
-			FixtureName,
-			TestCaseName,
-			Event->Info.FailedAssertion.Expression,
-			ModuleName,
-			Event->Info.FailedAssertion.Routine,
-			Event->Info.FailedAssertion.File,
-			Event->Info.FailedAssertion.Line,
-			Event->Info.FailedAssertion.LastError,
-			ThreadId,
-			&Event->StackTrace,
-			CurrentState->CurrentFixture
-				? CurrentState->CurrentFixture->Module->Routines.GetInformationStackFrame 
-				: NULL );
-
-		InterlockedIncrement( &CurrentState->FailureCount );
-		break;
-
-	case CfixEventUncaughtException:
-		( VOID ) StringCchPrintf(
-			Buffer,
-			_countof( Buffer ),
-			L"Unhandled Exception 0x%08X at %p",
-			Event->Info.UncaughtException.ExceptionRecord.ExceptionCode,
-			Event->Info.UncaughtException.ExceptionRecord.ExceptionAddress );
-
-		InterlockedIncrement( &CurrentState->FailureCount );
-
-		CfixrunpOutputTestEvent(
-			Context->State->ProgressSession,
-			CfixrunTestFailure,
-			FixtureName,
-			TestCaseName,
-			Buffer,
-			ModuleName,
-			NULL,
-			NULL,
-			0,
-			0,
-			ThreadId,
-			&Event->StackTrace,
-			CurrentState->CurrentFixture
-				? CurrentState->CurrentFixture->Module->Routines.GetInformationStackFrame 
-				: NULL );
-		break;
-
-	case CfixEventInconclusiveness:	
-		CfixrunpOutputTestEvent(
-			Context->State->ProgressSession,
-			CfixrunTestInconclusive,
-			FixtureName,
-			TestCaseName,
-			Event->Info.Inconclusiveness.Message,
-			ModuleName,
-			NULL,
-			NULL,
-			0,
-			0,
-			ThreadId,
-			&Event->StackTrace,
-			CurrentState->CurrentFixture
-				? CurrentState->CurrentFixture->Module->Routines.GetInformationStackFrame 
-				: NULL );
-
-		InterlockedIncrement( &CurrentState->InconclusiveCount );
-		break;
-
-	case CfixEventLog:
-		CfixrunpOutputTestEvent(
-			Context->State->ProgressSession,
-			CfixrunLog,
-			FixtureName,
-			TestCaseName,
-			Event->Info.Log.Message,
-			ModuleName,
-			NULL,
-			NULL,
-			0,
-			0,
-			ThreadId,
-			&Event->StackTrace,
-			CurrentState->CurrentFixture
-				? CurrentState->CurrentFixture->Module->Routines.GetInformationStackFrame 
-				: NULL );
-		break;
 	}
 
 	return CfixrunsExecCtxQueryDefaultDisposition(
@@ -391,18 +249,16 @@ static HRESULT CfixrunsExecCtxBeforeFixtureStart(
 	PEXEC_THREAD_STATE CurrentState = CfixrunsGetCurrentExecutionState( TRUE );
 
 	UNREFERENCED_PARAMETER( ThreadId );
+	UNREFERENCED_PARAMETER( Fixture );
 
 	ASSERT( CurrentState );
 	if ( ! CurrentState )
 	{
-		CfixrunpOutputLogMessage(
-			Context->State->LogSession,
-			CdiagFatalSeverity,
+		Context->State->Options->PrintConsole(
 			L"Unable to create current execution context state." );
 		return E_UNEXPECTED;
 	}
 
-	CurrentState->CurrentFixture = Fixture;
 	return S_OK;
 }
 
@@ -416,19 +272,15 @@ static HRESULT CfixrunsExecCtxBeforeTestCaseStart(
 	PEXEC_THREAD_STATE CurrentState = CfixrunsGetCurrentExecutionState( FALSE );
 
 	UNREFERENCED_PARAMETER( ThreadId );
+	UNREFERENCED_PARAMETER( TestCase );
 
 	ASSERT( CurrentState );
 	if ( ! CurrentState )
 	{
-		CfixrunpOutputLogMessage(
-			Context->State->LogSession,
-			CdiagFatalSeverity,
+		Context->State->Options->PrintConsole(
 			L"Unable to create current execution context state." );
 		return E_UNEXPECTED;
 	}
-
-	CurrentState->CurrentTestCase		= TestCase;
-	CurrentState->FirstTestCaseBegun	= TRUE;
 
 	return S_OK;
 }
@@ -453,9 +305,7 @@ static VOID CfixrunsExecCtxAfterFixtureFinish(
 
 	if ( ! CurrentState )
 	{
-		CfixrunpOutputLogMessage(
-			Context->State->LogSession,
-			CdiagFatalSeverity,
+		Context->State->Options->PrintConsole(
 			L"Unable to obtain current execution context state." );
 		return;
 	}
@@ -483,9 +333,7 @@ static VOID CfixrunsExecCtxAfterTestCaseFinish(
 
 	if ( ! CurrentState )
 	{
-		CfixrunpOutputLogMessage(
-			Context->State->LogSession,
-			CdiagFatalSeverity,
+		Context->State->Options->PrintConsole(
 			L"Unable to obtain current execution context state." );
 		return;
 	}
@@ -496,23 +344,8 @@ static VOID CfixrunsExecCtxAfterTestCaseFinish(
 	if ( CurrentState->FailureCount == 0 && CurrentState->InconclusiveCount == 0 )
 	{
 		//
-		// Success -> report.
+		// Success.
 		//
-		CfixrunpOutputTestEvent(
-			Context->State->ProgressSession,
-			CfixrunTestSuccess,
-			CurrentState->CurrentFixture->Name,
-			CurrentState->CurrentTestCase->Name,
-			NULL,
-			CurrentState->CurrentFixture->Module->Name,
-			NULL,
-			NULL,
-			0,
-			0,
-			ThreadId,
-			NULL,
-			NULL );
-
 		InterlockedIncrement( &Context->Statistics.SucceededTestCases );
 	}
 	else if ( CurrentState->FailureCount > 0 )
@@ -534,7 +367,6 @@ static VOID CfixrunsExecCtxAfterTestCaseFinish(
 
 	CurrentState->InconclusiveCount = 0;
 	CurrentState->FailureCount		= 0;
-	CurrentState->CurrentTestCase	= NULL;
 }
 
 VOID CfixrunsExecCtxBeforeChildThreadStart(
@@ -587,12 +419,10 @@ static HRESULT CfixrunsExecCtxCreateChildThread(
 
 	UNREFERENCED_PARAMETER( ThreadId );
 	ASSERT( ContextForChild );
-	ASSERT( CurrentState && CurrentState->CurrentFixture );
-	if ( ! CurrentState || ! CurrentState->CurrentFixture )
+	ASSERT( CurrentState );
+	if ( ! CurrentState )
 	{
-		CfixrunpOutputLogMessage(
-			Context->State->LogSession,
-			CdiagFatalSeverity,
+		Context->State->Options->PrintConsole(
 			L"Unable to obtain current execution context state/test case." );
 		return CFIX_E_UNKNOWN_THREAD;
 	}

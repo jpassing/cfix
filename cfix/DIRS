@@ -1,1 +1,1 @@
-DIRS=cfix cfixutil cfixrun cfixemb cfixcmd testlibs testapi testcpp testmanu testtsx
+DIRS=cfix cfixutil cfixrun cfixemb cfixcons cfixcmd testlibs testapi testcpp testmanu testtsx

@@ -132,6 +132,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\cfix\eventemitter.c"
+					>
+				</File>
+				<File
 					RelativePath=".\cfix\list.h"
 					>
 				</File>
@@ -468,15 +472,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\cfixrun\formatter.c"
-					>
-				</File>
-				<File
 					RelativePath=".\cfixrun\main.c"
-					>
-				</File>
-				<File
-					RelativePath=".\cfixrun\output.c"
 					>
 				</File>
 				<File
@@ -596,6 +592,10 @@
 				Name="cfixutil"
 				>
 				<File
+					RelativePath=".\cfixutil\eventdllload.c"
+					>
+				</File>
+				<File
 					RelativePath=".\cfixutil\search.c"
 					>
 				</File>
@@ -628,6 +628,30 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="cfixcons"
+				>
+				<File
+					RelativePath=".\cfixcons\cfixcons.def"
+					>
+				</File>
+				<File
+					RelativePath=".\cfixcons\cfixcons.rc"
+					>
+				</File>
+				<File
+					RelativePath=".\cfixcons\eventsink.c"
+					>
+				</File>
+				<File
+					RelativePath=".\cfixcons\resource.h"
+					>
+				</File>
+				<File
+					RelativePath=".\cfixcons\SOURCES"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -648,6 +672,10 @@
 			</File>
 			<File
 				RelativePath="..\include\cfixcc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\cfixevnt.h"
 				>
 			</File>
 			<File

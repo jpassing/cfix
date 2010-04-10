@@ -71,6 +71,20 @@
     KeyPath="no"/>
 
   <File
+   Id="FileAmd64CfixconsDll"
+   Name="cfixcons.dll"
+   DiskId="1"
+   Source="$(var.CFIX_TREE)\bin\fre\amd64\cfixcons.dll"
+   Vital="yes"/>
+  <File
+    Id="FileAmd64CfixconsPdb"
+    Name="cfixcons.pdb"
+    DiskId="1"
+    Source="$(var.CFIX_TREE)\bin\fre\amd64\cfixcons.pdb"
+    Vital="yes"
+    KeyPath="no"/>
+
+  <File
     Id="FileAmd64Cfixkr64Sys"
     Name="cfixkr64.sys"
     DiskId="1"

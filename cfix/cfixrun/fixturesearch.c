@@ -30,8 +30,7 @@ static HRESULT CfixrunsAddFixturesOfModuleToSequenceAction(
 	__in CFIXRUNP_FILTER_FIXTURE_ROUTINE FilterCallback,
 	__in CFIXRUNP_CREATE_ACTION_ROUTINE CreateActionCallback,
 	__in PVOID CallbackContext,
-	__in PCFIX_ACTION SequenceAction,
-	__in CDIAG_SESSION_HANDLE LogSession
+	__in PCFIX_ACTION SequenceAction
 	)
 {
 	HRESULT Hr = S_OK;
@@ -78,9 +77,8 @@ static HRESULT CfixrunsAddFixturesOfModuleToSequenceAction(
 
 			if ( FAILED( Hr ) || FixtureAction == NULL )
 			{
-				CfixrunpOutputLogMessage(
-					LogSession,
-					CdiagErrorSeverity,
+				fwprintf(
+					stderr,
 					L"Failed to create fixture execution action: 0x%08X\n",
 					Hr );
 				break;
@@ -100,9 +98,8 @@ static HRESULT CfixrunsAddFixturesOfModuleToSequenceAction(
 
 				if ( FAILED( Hr ) )
 				{
-					CfixrunpOutputLogMessage(
-						LogSession,
-						CdiagErrorSeverity,
+					fwprintf(
+						stderr,
 						L"Failed to enqueue fixture execution action: 0x%08X\n",
 						Hr );
 					break;
@@ -117,7 +114,6 @@ static HRESULT CfixrunsAddFixturesOfModuleToSequenceAction(
 typedef struct _CFIXRUNP_SEARCH_CONTEXT
 {
 	PCFIX_ACTION SequenceAction;
-	CDIAG_SESSION_HANDLE LogSession;
 	CFIXRUNP_FILTER_FIXTURE_ROUTINE FilterCallback;
 	CFIXRUNP_CREATE_ACTION_ROUTINE CreateActionCallback;
 	PVOID CallbackContext;
@@ -154,9 +150,8 @@ static HRESULT CfixrunsAddFixturesOfDllToSequenceAction(
 			//
 			// Nevermind, this is probably just one of many DLLs.
 			//
-			CfixrunpOutputLogMessage(
-				SearchCtx->LogSession,
-				CdiagInfoSeverity,
+			fwprintf(
+				stderr,
 				L"Failed to load module %s: 0x%08X\n",
 				Path,
 				Hr );
@@ -171,19 +166,12 @@ static HRESULT CfixrunsAddFixturesOfDllToSequenceAction(
 		}
 	}
 
-	CfixrunpOutputLogMessage(
-		SearchCtx->LogSession,
-		CdiagInfoSeverity,
-		L"Loaded module %s\n",
-		Path );
-
 	Hr = CfixrunsAddFixturesOfModuleToSequenceAction(
 		TestModule,
 		SearchCtx->FilterCallback,
 		SearchCtx->CreateActionCallback,
 		SearchCtx->CallbackContext,
-		SearchCtx->SequenceAction,
-		SearchCtx->LogSession );
+		SearchCtx->SequenceAction );
 	
 	TestModule->Routines.Dereference( TestModule );
 
@@ -194,7 +182,6 @@ HRESULT CfixrunpSearchFixturesAndCreateSequenceAction(
 	__in PCWSTR DllOrDirectory,
 	__in BOOL RecursiveSearch,
 	__in BOOL IncludeKernelModules,
-	__in CDIAG_SESSION_HANDLE LogSession,
 	__in CFIXRUNP_FILTER_FIXTURE_ROUTINE FilterCallback,
 	__in CFIXRUNP_CREATE_ACTION_ROUTINE CreateActionCallback,
 	__in PVOID CallbackContext,
@@ -206,7 +193,6 @@ HRESULT CfixrunpSearchFixturesAndCreateSequenceAction(
 	HRESULT Hr;
 	
 	if ( ! DllOrDirectory || 
-		 ! LogSession || 
 		 ! FilterCallback || 
 		 ! CreateActionCallback || 
 		 ! SequenceAction )
@@ -219,9 +205,8 @@ HRESULT CfixrunpSearchFixturesAndCreateSequenceAction(
 	Hr = CfixCreateSequenceAction( SequenceAction );
 	if ( FAILED( Hr ) )
 	{
-		CfixrunpOutputLogMessage(
-			LogSession,
-			CdiagErrorSeverity,
+		fwprintf(
+			stderr,
 			L"Failed to create sequence action: 0x%08X\n",
 			Hr );
 		return Hr;
@@ -231,7 +216,6 @@ HRESULT CfixrunpSearchFixturesAndCreateSequenceAction(
 	// Search DLLs and and populate sequence.
 	//
 	SearchCtx.SequenceAction		= *SequenceAction;
-	SearchCtx.LogSession			= LogSession;
 	SearchCtx.FilterCallback		= FilterCallback;
 	SearchCtx.CreateActionCallback	= CreateActionCallback;
 	SearchCtx.CallbackContext		= CallbackContext;
@@ -257,7 +241,6 @@ HRESULT CfixrunpSearchFixturesAndCreateSequenceAction(
 
 HRESULT CfixrunpCreateSequenceAction( 
 	__in PCFIX_TEST_MODULE TestModule,
-	__in CDIAG_SESSION_HANDLE LogSession,
 	__in CFIXRUNP_FILTER_FIXTURE_ROUTINE FilterCallback,
 	__in CFIXRUNP_CREATE_ACTION_ROUTINE CreateActionCallback,
 	__in PVOID CallbackContext,
@@ -267,7 +250,6 @@ HRESULT CfixrunpCreateSequenceAction(
 	HRESULT Hr;
 	
 	if ( ! TestModule || 
-		 ! LogSession || 
 		 ! FilterCallback || 
 		 ! CreateActionCallback || 
 		 ! SequenceAction )
@@ -280,9 +262,8 @@ HRESULT CfixrunpCreateSequenceAction(
 	Hr = CfixCreateSequenceAction( SequenceAction );
 	if ( FAILED( Hr ) )
 	{
-		CfixrunpOutputLogMessage(
-			LogSession,
-			CdiagErrorSeverity,
+		fwprintf(
+			stderr,
 			L"Failed to create sequence action: 0x%08X\n",
 			Hr );
 		return Hr;
@@ -293,8 +274,7 @@ HRESULT CfixrunpCreateSequenceAction(
 		FilterCallback,
 		CreateActionCallback,
 		CallbackContext,
-		*SequenceAction,
-		LogSession );
+		*SequenceAction );
 
 	if ( SUCCEEDED( Hr ) )
 	{

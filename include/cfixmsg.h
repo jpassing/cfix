@@ -274,3 +274,30 @@
 //
 #define CFIX_E_UNSUPPORTED_FIXTURE_REVISION ((HRESULT)0x80048019L)
 
+//
+// MessageId: CFIX_E_UNSUPPORTED_EVENT_SINK_VERSION
+//
+// MessageText:
+//
+// Event sink revision not supported.
+//
+#define CFIX_E_UNSUPPORTED_EVENT_SINK_VERSION ((HRESULT)0x8004801AL)
+
+//
+// MessageId: CFIX_E_MISSING_EVENT_SINK_EXPORT
+//
+// MessageText:
+//
+// Event sink DLL does not export a sink creation routine. Check that you are using the correct DLL and that the exports are unmangled.
+//
+#define CFIX_E_MISSING_EVENT_SINK_EXPORT ((HRESULT)0x8004801BL)
+
+//
+// MessageId: CFIX_E_LOADING_EVENTDLL_FAILED
+//
+// MessageText:
+//
+// Loading Event DLL failed. Make sure that path and CPU architecture are correct.
+//
+#define CFIX_E_LOADING_EVENTDLL_FAILED   ((HRESULT)0x8004801CL)
+

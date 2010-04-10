@@ -30,6 +30,64 @@
 #include <strsafe.h>
 #pragma warning( pop )
 
+#define CFIXRUNP_DEFAULT_EVENT_DLL L"cfixcons.dll"
+
+static CfixrunsCreateExecutionContextAndEventSink(
+	__in ULONG SinkFlags,
+	__in PCFIXRUN_STATE State,
+	__out PCFIX_EXECUTION_CONTEXT *ExecContext,
+	__out PCFIX_EXECUTION_CONTEXT *InnerExecContext
+	)
+{
+	HRESULT Hr = S_OK;
+	PCFIX_EVENT_SINK Sink = NULL;
+	*InnerExecContext = NULL;
+
+	Hr = CfixrunpCreateExecutionContext(
+		State,
+		InnerExecContext );
+	if ( FAILED( Hr ) )
+	{
+		goto Cleanup;
+	}
+
+	Hr = CfixutilLoadEventSinkFromDll( 
+		State->Options->EventDll
+			? State->Options->EventDll
+			: CFIXRUNP_DEFAULT_EVENT_DLL, 
+		SinkFlags,
+		State->Options->EventDll
+			? State->Options->EventDllOptions
+			: NULL,
+		&Sink );
+	if ( FAILED( Hr ) )
+	{
+		goto Cleanup;
+	}
+
+	Hr = CfixCreateEventEmittingExecutionContextProxy(
+		*InnerExecContext,
+		Sink,
+		ExecContext );
+	if ( FAILED( Hr ) )
+	{
+		goto Cleanup;
+	}
+
+Cleanup:
+	if ( *InnerExecContext )
+	{
+		( *InnerExecContext )->Dereference( *InnerExecContext );
+	}
+
+	if ( Sink )
+	{
+		Sink->Dereference( Sink );
+	}
+
+	return Hr;
+}
+
 static HRESULT CfixrunsMainWorker(
 	__in PCFIXRUN_STATE State,
 	__out PDWORD ExitCode
@@ -83,8 +141,15 @@ static HRESULT CfixrunsMainWorker(
 	}
 	else
 	{
+		PCFIX_EXECUTION_CONTEXT InnerExecCtx;
 		PCFIX_EXECUTION_CONTEXT ExecCtx;
-		Hr = CfixrunpCreateExecutionContext( State, &ExecCtx );
+		Hr = CfixrunsCreateExecutionContextAndEventSink(
+			State->Options->OmitSourceInfoInStackTrace
+				? 0
+				: CFIX_EVENT_SINK_FLAG_SHOW_STACKTRACE_SOURCE_INFORMATION,
+			State,
+			&ExecCtx,
+			&InnerExecCtx );
 		if ( SUCCEEDED( Hr ) )
 		{
 			CFIXRUN_STATISTICS Statistics;
@@ -97,7 +162,7 @@ static HRESULT CfixrunsMainWorker(
 			//
 			// Fetch statistics.
 			//
-			CfixrunpGetStatisticsExecutionContext( ExecCtx, &Statistics );
+			CfixrunpGetStatisticsExecutionContext( InnerExecCtx, &Statistics );
 
 			if ( Statistics.TestCases == 0 )
 			{
@@ -152,52 +217,6 @@ static VOID CfixrunsOutputConsoleAndDebug(
 	OutputDebugString( Text );
 }
 
-static HRESULT CfixrunsCreateOutputHandler(
-	__in CDIAG_SESSION_HANDLE Session,
-	__in CFIXRUN_OUTPUT_TARGET Target,
-	__in PCWSTR FileName,
-	__out PCDIAG_HANDLER *Handler
-	)
-{
-	if ( Target == CfixrunTargetDebug ||
-		 Target == CfixrunTargetConsole )
-	{
-		CDIAG_OUTPUT_ROUTINE Routine;
-		if ( Target == CfixrunTargetDebug )
-		{
-			Routine = CfixrunsOutputConsoleAndDebug;
-		}
-		else
-		{
-			Routine = CfixrunsOutputConsole;
-		}
-
-		return CdiagCreateOutputHandler(
-			Session,
-			Routine,
-			Handler );
-	}
-	else if ( Target == CfixrunTargetFile )
-	{
-		//
-		// File.
-		//
-		return CdiagCreateTextFileHandler(
-			Session,
-			FileName,
-			CdiagEncodingUtf8,
-			Handler );
-	}
-	else
-	{
-		//
-		// No handler.
-		//
-		*Handler = NULL;
-		return S_OK;
-	}
-}
-
 DWORD CfixrunMain(
 	__in PCFIXRUN_OPTIONS Options
 	)
@@ -206,15 +225,12 @@ DWORD CfixrunMain(
 	// Initialize state.
 	//
 	CFIXRUN_STATE State;
-	PCDIAG_HANDLER LogHandler = NULL;
-	PCDIAG_HANDLER ProgressHandler = NULL;
 	HRESULT Hr;
 	DWORD ExitCode = CFIXRUN_EXIT_FAILURE;
 
 	ZeroMemory( &State, sizeof( CFIXRUN_STATE ) );
 
 	State.Options = Options;
-	State.Formatter = NULL;
 
 	ASSERT( Options->PrintConsole );
 
@@ -257,89 +273,6 @@ DWORD CfixrunMain(
 		goto Cleanup;
 	}
 
-	//
-	// Formatter.
-	//
-	Hr = CfixrunpCreateFormatter(
-		State.Resolver,
-		State.Options->OmitSourceInfoInStackTrace ?
-			0 : CFIXRUNP_FORMATTER_SHOW_STACKTRACE_SOURCE_INFORMATION,
-		&State.Formatter );
-	if ( FAILED( Hr ) )
-	{
-		goto Cleanup;
-	}
-	
-	//
-	// Log Session.
-	//
-	Hr = CdiagCreateSession( 
-		State.Formatter,
-		State.Resolver,
-		&State.LogSession );
-	if ( FAILED( Hr ) )
-	{
-		goto Cleanup;
-	}
-
-	Hr = CfixrunsCreateOutputHandler(
-		State.LogSession,
-		State.Options->LogOutputTarget,
-		State.Options->LogOutputTargetName,
-		&LogHandler );
-	if ( FAILED( Hr ) )
-	{
-		goto Cleanup;
-	}
-
-	if ( LogHandler )
-	{
-		Hr = CdiagSetInformationSession(
-			State.LogSession,
-			CdiagSessionDefaultHandler,
-			0,
-			LogHandler );
-		if ( FAILED( Hr ) )
-		{
-			goto Cleanup;
-		}
-	}
-
-	//
-	// Progress Session.
-	//
-	Hr = CdiagCreateSession( 
-		State.Formatter,
-		State.Resolver,
-		&State.ProgressSession );
-	if ( FAILED( Hr ) )
-	{
-		goto Cleanup;
-	}
-
-	Hr = CfixrunsCreateOutputHandler(
-		State.ProgressSession,
-		State.Options->ProgressOutputTarget,
-		State.Options->ProgressOutputTargetName,
-		&ProgressHandler );
-	if ( FAILED( Hr ) )
-	{
-		goto Cleanup;
-	}
-
-	if ( ProgressHandler )
-	{
-		Hr = CdiagSetInformationSession(
-			State.ProgressSession,
-			CdiagSessionDefaultHandler,
-			0,
-			ProgressHandler );
-		if ( FAILED( Hr ) )
-		{
-			goto Cleanup;
-		}
-	}
-
 	if ( Options->PauseAtBeginning )
 	{
 		Options->PrintConsole( L"Press any key to start testrun...\n" );
@@ -372,34 +305,9 @@ DWORD CfixrunMain(
 	}
 
 Cleanup:
-	if ( ProgressHandler )
-	{
-		ProgressHandler->Dereference( ProgressHandler );
-	}
-
-	if ( LogHandler )
-	{
-		LogHandler->Dereference( LogHandler );
-	}
-
-	if ( State.LogSession )
-	{
-		VERIFY( SUCCEEDED( CdiagDereferenceSession( State.LogSession ) ) );
-	}
-
-	if ( State.ProgressSession )
-	{
-		VERIFY( SUCCEEDED( CdiagDereferenceSession( State.ProgressSession ) ) );
-	}
-
 	if ( State.Resolver )
 	{
 		State.Resolver->Dereference( State.Resolver );
-	}
-
-	if ( State.Formatter )
-	{
-		State.Formatter->Dereference( State.Formatter );
 	}
 
 	if ( Options->PauseAtEnd )

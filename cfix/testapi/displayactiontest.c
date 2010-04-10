@@ -31,19 +31,9 @@ void TestDisplayAction()
 	WCHAR Path[ MAX_PATH ];
 
 	CFIXRUN_OPTIONS Options;
-	CFIXRUN_OUTPUT_TARGET DefOutputProgress;
 
 	ZeroMemory( &Options, sizeof( CFIXRUN_OPTIONS ) );
 	Options.PrintConsole = wprintf;
-
-	if ( IsDebuggerPresent() )
-	{
-		DefOutputProgress = CfixrunTargetDebug;
-	}
-	else
-	{
-		DefOutputProgress = CfixrunTargetConsole;
-	}
 
 	TEST( GetModuleFileName( ModuleHandle, Path, _countof( Path ) ) );
 	TEST( PathRemoveFileSpec( Path ) );

@@ -62,6 +62,7 @@ version:
 	tools\rcstamp cfix\Cfix\cfix.rc $(VERSION)
 	tools\rcstamp cfix\cfixcmd\runtest.rc $(VERSION)
 	tools\rcstamp cfix\cfixemb\cfixemb.rc $(VERSION)
+	tools\rcstamp cfix\cfixemb\cfixcons.rc $(VERSION)
 	tools\rcstamp cdiag\cdiag\cdiag.rc $(VERSION)
 	tools\rcstamp cfixctl\cfixctl\cfixctl.rc $(VERSION)
 	tools\rcstamp cfixkern\Cfixkl\cfixkl.rc $(VERSION)

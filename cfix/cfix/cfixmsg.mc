@@ -228,10 +228,35 @@ SymbolicName	= CFIX_E_INVALID_FIXTURE_FLAG
 Language		= English
 Invalid flag specified for fixture.
 .
+
 MessageId		= 0x8019
 Severity		= Warning
 Facility		= Interface
 SymbolicName	= CFIX_E_UNSUPPORTED_FIXTURE_REVISION
 Language		= English
 Fixture revision not supported.
+.
+
+MessageId		= 0x801a
+Severity		= Warning
+Facility		= Interface
+SymbolicName	= CFIX_E_UNSUPPORTED_EVENT_SINK_VERSION
+Language		= English
+Event sink revision not supported.
+.
+
+MessageId		= 0x801b
+Severity		= Warning
+Facility		= Interface
+SymbolicName	= CFIX_E_MISSING_EVENT_SINK_EXPORT
+Language		= English
+Event sink DLL does not export a sink creation routine. Check that you are using the correct DLL and that the exports are unmangled.
+.
+
+MessageId		= 0x801c
+Severity		= Warning
+Facility		= Interface
+SymbolicName	= CFIX_E_LOADING_EVENTDLL_FAILED
+Language		= English
+Loading Event DLL failed. Make sure that path and CPU architecture are correct.
 .

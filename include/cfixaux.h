@@ -98,6 +98,22 @@ typedef enum
 
 
 /*++
+	Routine Description:
+		Retrieve information about a stackframe.
+--*/
+typedef HRESULT ( CFIXCALLTYPE * CFIX_GET_INFORMATION_STACKFRAME_ROUTINE ) (
+	__in ULONGLONG Frame,
+	__in SIZE_T ModuleNameCch,
+	__out_ecount_z(ModuleNameCch) PWSTR ModuleName,
+	__in SIZE_T FunctionNameCch,
+	__out_ecount_z(FunctionNameCch) PWSTR FunctionName,
+	__out PULONG Displacement,
+	__in SIZE_T SourceFileCch,
+	__out_ecount_z(SourceFileCch) PWSTR SourceFile,
+	__out PULONG SourceLine 
+	);
+
+/*++
 	Structure Description:
 		Contains (minimum) stacktrace information, i.e.
 		the PCs of each stack.
@@ -108,6 +124,11 @@ typedef struct _CFIX_STACKTRACE
 	// Number of frames in Frames array.
 	//
 	ULONG FrameCount;
+
+	//
+	// Function to use to resolve symbolic information.
+	//
+	CFIX_GET_INFORMATION_STACKFRAME_ROUTINE GetInformationStackFrame;
 
 	//
 	// PC-Addresses of frames. Index 0 contains the topmost frame.
