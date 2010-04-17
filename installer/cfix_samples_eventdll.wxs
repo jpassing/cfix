@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Include>
+  <File Id="FileSamplesEventDllLogfileCpp" Name="Logfile.cpp" Source="$(var.CFIX_TREE)\samples\EventDll\Logfile\Logfile.cpp" />
+  <File Id="FileSamplesEventDllLogfileDef" Name="Logfile.def" Source="$(var.CFIX_TREE)\samples\EventDll\Logfile\Logfile.def" />
+  <File Id="FileSamplesEventDllLogfileSln" Name="Logfile.sln" Source="$(var.CFIX_TREE)\samples\EventDll\Logfile\Logfile.sln" />
+  <File Id="FileSamplesEventDllLogfileVcproj" Name="Logfile.vcp" LongName="Logfile.vcproj" Source="$(var.CFIX_TREE)\samples\EventDll\Logfile\Logfile.vcproj" />
+  <File Id="FileSamplesEventDllKtestLogfileSOURCES" Name="SOURCES" Source="$(var.CFIX_TREE)\samples\EventDll\Logfile\SOURCES" />
+</Include>

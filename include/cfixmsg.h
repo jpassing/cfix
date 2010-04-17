@@ -301,3 +301,12 @@
 //
 #define CFIX_E_LOADING_EVENTDLL_FAILED   ((HRESULT)0x8004801CL)
 
+//
+// MessageId: CFIX_E_EVENTDLL_INVALID_OPTIONS
+//
+// MessageText:
+//
+// Options passed to Event DLL are invalid.
+//
+#define CFIX_E_EVENTDLL_INVALID_OPTIONS  ((HRESULT)0x8004801DL)
+

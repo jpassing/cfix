@@ -260,3 +260,11 @@ SymbolicName	= CFIX_E_LOADING_EVENTDLL_FAILED
 Language		= English
 Loading Event DLL failed. Make sure that path and CPU architecture are correct.
 .
+
+MessageId		= 0x801d
+Severity		= Warning
+Facility		= Interface
+SymbolicName	= CFIX_E_EVENTDLL_INVALID_OPTIONS
+Language		= English
+Options passed to Event DLL are invalid.
+.

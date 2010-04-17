@@ -88,11 +88,11 @@ EXTERN_C HRESULT CFIXCALLTYPE CfixutilSearch(
 
 	Parameters:
 		DllPath		- Name/path of DLL.
-		Flags		-  CFIX_EVENT_SINK_FLAG_*.
+		Flags		- CFIX_EVENT_SINK_FLAG_*.
 		Options		- Options to pass to event DLL.
 		Sink		- Result.
 --*/
-HRESULT CfixutilLoadEventSinkFromDll(
+EXTERN_C HRESULT CfixutilLoadEventSinkFromDll(
 	__in PCWSTR DllPath,
 	__in ULONG Flags,
 	__in_opt PCWSTR Options,

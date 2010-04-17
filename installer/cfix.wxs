@@ -360,6 +360,23 @@
                 <?include cfix_samples_usercc.wxs?>
               </Component>
             </Directory>
+            <Directory Id="DirSamplesEventDll" Name="EventDll">
+              <Directory Id="DirSamplesEventDllLogfile" Name="Logfile">
+                <Component Id="CompSamplesEventDllLogfile" DiskId="1" Guid="7aeb80ec-0741-4dab-94c0-7798f4d4753b">
+                  <Registry
+                     Id="CompSamplesEventDllLogfileComponent"
+                     Root="HKCU"
+                     Key="Software\cfix\cfix\1.4\Components"
+                     Name="CompSamplesEventDllLogfileComponent"
+                     Type="integer"
+                     KeyPath="yes"
+                     Value="1" />
+                  <RemoveFolder Id="RemoveDirSamplesEventDllLogfile" On="uninstall"/>
+
+                  <?include cfix_samples_eventdll.wxs?>
+                </Component>
+              </Directory>
+            </Directory>
           </Directory>
          <Directory Id="DirInclude" Name="include">
             <Component Id="CompIncludes" DiskId="1" Guid="c988cb16-f49a-452e-9901-2c660fecd35e">
@@ -456,6 +473,7 @@
         <ComponentRef Id="CompSamplesKernel"/>
         <ComponentRef Id="CompSamplesUser"/>
         <ComponentRef Id="CompSamplesUserCc"/>
+        <ComponentRef Id="CompSamplesEventDllLogfile"/>
       </Feature>
 
       <Feature Id="FeatureWinunit" Title="WinUnit Compatibility" Level="2" AllowAdvertise="no" Description="WinUnit Compatibility">
