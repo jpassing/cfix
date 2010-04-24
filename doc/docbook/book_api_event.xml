@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="Event API">
+	<title>Event API</title>
+	<indexterm><primary>Event API</primary></indexterm>
+	<para>
+		During execution of a test run, cfix generates a stream of events. This stream of events 
+		includes information about failed assertions, log messages, and status information indicating
+		when execution of a test case begins and ends.
+	</para>
+	<para>
+		All this event information is delivered to an <emphasis>event sink</emphasis>. The default
+		event sink used by cfix prints output to the console and is implemented in cfixcons.dll.
+	</para>
+	<para>
+		Using the Event API, developers can implement custom event sinks that replace the default
+		console event sink. A custom event sink could, for example, gather events and write them 
+		to a log file in a specific format.
+	</para>
+	<para>
+		Event sinks are implemented in <emphasis>Event DLLs</emphasis>. This design allows event 
+		sinks to be generic and usable in combination with any kind of test module.
+	</para>
+	<para>
+		Event DLLs have to provide a single exported routine named 
+		<link linkend="CreateEventSink">CreateEventSink</link> -- this routine
+		serves as a factory routine for event sinks. The cfix runtime will call this routine
+		once before starting a test run and will use the returned event sink to deliver all 
+		events to.
+	</para>
+
+	<section id="CustomEventSink">
+		<title>Creating Custom Event Sinks</title>
+	
+		<section id="CreateEventSink">
+			<title>CreateEventSink</title>
+			<indexterm><primary>CreateEventSink</primary></indexterm>
+			
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				Event DLLs have to provide a single export named <emphasis>CreateEventSink</emphasis>.
+				This routine serves as a factory routine for event sinks. The cfix runtime will call this routine
+				once before starting a test run and will use the returned event sink to deliver all events to.
+				</para>
+			</simplesect>
+			
+			<simplesect>
+				<title>Declaration</title>
+				<programlisting>
+CFIXAPI HRESULT CFIXCALLTYPE CreateEventSink(
+	__in ULONG Version,
+	__in ULONG Flags,
+	__in_opt PCWSTR Options,
+	__reserved ULONG Reserved,
+	__out PCFIX_EVENT_SINK *Sink 
+	);
+				</programlisting>
+			</simplesect>
+			
+			<simplesect>
+				<title>Parameters</title>
+				<para>
+				[in] <emphasis>Version</emphasis>: Event API Version the event sink is expected to support. In order
+				to ensure binary compatibility with future framework versions, implementors should compare the value
+				passed in this paramerer with CFIX_EVENT_SINK_VERSION and return CFIX_E_UNSUPPORTED_EVENT_SINK_VERSION 
+				in case of a mismatch.
+				</para>
+				<para>
+				[in] <emphasis>Flags</emphasis>: May contain the flag CFIX_EVENT_SINK_FLAG_SHOW_STACKTRACE_SOURCE_INFORMATION,
+				indicating that stack traces should include source and line information. Implementors are free to
+				ignore this flag.
+				</para>
+				<para>
+				[in] <emphasis>Options</emphasis>: Options string, may be used to allow users to pass additional information
+				(e.g. a file path) to the DLL. The options string is not interpreted by the cfix runtim and may use any format.
+				</para>
+				<para>
+				[in] <emphasis>Reserved</emphasis>: Reserved, always 0.
+				</para>
+				<para>
+				[out] <emphasis>Sink</emphasis>: Resulting Event sink.
+				</para>
+			</simplesect>
+			
+			
+			&TestApiEventDllRequirements16;
+		</section>
+	</section>
+</section>

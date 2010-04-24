@@ -10,7 +10,9 @@
 	<!ENTITY TestApiWuDefaultRequirements13 SYSTEM "book_api_wu_req13.xml">
 	<!ENTITY TestDefDefaultRequirements SYSTEM "book_testdef_req.xml">
 	<!ENTITY TestDefDefaultRequirements12 SYSTEM "book_testdef_req12.xml">
-
+	<!ENTITY TestApiEventDllRequirements16 SYSTEM "book_api_eventdll_req16.xml">
+	
+	<!ENTITY EventApi SYSTEM "book_api_event.xml">
 	<!ENTITY ApiBase SYSTEM "book_api_base.xml">
 	<!ENTITY ApiBaseFixtureDef SYSTEM "book_api_base_fixturedef.xml">
 	<!ENTITY ApiCc SYSTEM "book_api_cc.xml">
@@ -2057,8 +2059,10 @@ f9fc50fe cc              int     3
 		&ApiWu;
 		&ApiWuFixtureDef;
 	</section>
+	
+	&EventApi;
 
-	<section id="APIComaptbility">
+	<section id="APICompatbility">
 		<title>Note on compatibility and API stability</title>
 		<para>
 			All routines, data structures and macros documented as part of this documentation set are stable -- future relases of
