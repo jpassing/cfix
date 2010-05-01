@@ -225,7 +225,8 @@ static VOID CfixconssReportEvent(
 
 	UNREFERENCED_PARAMETER( Thread );
 
-	if ( Event->StackTrace.FrameCount > 0 )
+	if ( Event->StackTrace.FrameCount > 0 &&
+		 Event->StackTrace.GetInformationStackFrame != NULL )
 	{
 		CfixconssFormatStackTrace( 
 			&Event->StackTrace,

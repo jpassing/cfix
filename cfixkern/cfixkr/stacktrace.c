@@ -44,6 +44,8 @@ NTSTATUS CfixkrpCaptureStackTrace(
 		return STATUS_NOT_IMPLEMENTED;
 	}
 
+	StackTrace->GetInformationStackFrame = NULL;
+
 	//
 	// N.B. CFIX_STACKTRACE uses ULONGLONGs, RtlWalkFrameChain
 	// uses PVOIDs, so conversion is necessary on i386.
