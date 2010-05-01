@@ -47,7 +47,7 @@
 	//
 	// Routines are statically linked.
 	//
-	#define CFIXREPORTAPI
+	#define CFIXREPORTAPI EXTERN_C
 #else
 	#ifndef CFIX_NO_LIB
 	#pragma comment( lib, "cfix" )
@@ -409,7 +409,7 @@ HRESULT CfixRegisterThread(
 		See MSDN for remaining parameters.
 --*/
 
-NTSTATUS CFIXCALLTYPE CfixCreateSystemThread(
+EXTERN_C NTSTATUS CFIXCALLTYPE CfixCreateSystemThread(
     __out PHANDLE ThreadHandle,
     __in ULONG DesiredAccess,
     __in_opt POBJECT_ATTRIBUTES ObjectAttributes,
