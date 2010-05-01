@@ -424,6 +424,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\cpp.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\testkmsc\filamentjoin.c"
 					>
 				</File>

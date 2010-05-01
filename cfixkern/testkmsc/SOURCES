@@ -37,5 +37,6 @@ SOURCES=\
 	filamentjoin.c \
 	suite.c \
 	beforeafter.c \
-	tls.c
+	tls.c \
+	cpp.cpp
 	

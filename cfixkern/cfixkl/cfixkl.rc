@@ -53,7 +53,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1, 7, 0, 3759
+ FILEVERSION 1, 7, 0, 3766
  PRODUCTVERSION 1,1,0,1
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -71,7 +71,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Johannes Passing"
             VALUE "FileDescription", "Cfix Kernel Layer DLL"
-            VALUE "FileVersion", "1, 7, 0, 3759\0"
+            VALUE "FileVersion", "1, 7, 0, 3766\0"
             VALUE "InternalName", "Cfixkl"
             VALUE "LegalCopyright", "Copyright (C) 2008 Johannes Passing"
             VALUE "OriginalFilename", "Cfixkl"
@@ -101,6 +101,8 @@ END
 #endif    // not APSTUDIO_INVOKED
 
 #include "cfixklmsg.rc"
+
+
 
 
 
