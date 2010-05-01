@@ -10,7 +10,7 @@
 	<!ENTITY TestApiWuDefaultRequirements13 SYSTEM "book_api_wu_req13.xml">
 	<!ENTITY TestDefDefaultRequirements SYSTEM "book_testdef_req.xml">
 	<!ENTITY TestDefDefaultRequirements12 SYSTEM "book_testdef_req12.xml">
-	<!ENTITY TestApiEventDllRequirements16 SYSTEM "book_api_eventdll_req16.xml">
+	<!ENTITY TestApiEventDllRequirements17 SYSTEM "book_api_eventdll_req17.xml">
 	
 	<!ENTITY EventApi SYSTEM "book_api_event.xml">
 	<!ENTITY ApiBase SYSTEM "book_api_base.xml">
@@ -1963,6 +1963,24 @@ f9fc50fe cc              int     3
 		</para>
 		</simplesect>
 		
+		<simplesect>
+		<title>What's new in cfix 1.7</title>
+		<para>
+			<itemizedlist>
+				<listitem>
+					WinUnit: The implementation of a fixtures may now be spread over multiple .cpp files.
+				</listitem>
+				<listitem>
+					Using the new <link linkend="EventAPI">Event API</link>, output and logging may be fully customized.
+					See <emphasis>EventDll</emphasis> example project to learn more about the usage of the Event API
+					and the implementation of Event DLLs.
+				</listitem>
+				<listitem>
+					The command line options <emphasis>-out</emphasis> and <emphasis>-log</emphasis> have been removed.
+				</listitem>
+			</itemizedlist>	
+		</para>
+		</simplesect>
 	</section>
 	
 	<section id="TestAPI">

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section id="Event API">
+<section id="EventAPI">
 	<title>Event API</title>
 	<indexterm><primary>Event API</primary></indexterm>
 	<para>
@@ -30,6 +30,16 @@
 
 	<section id="CustomEventSink">
 		<title>Creating Custom Event Sinks</title>
+		
+		<simplesect>
+		<para>
+			Creating a custom event sink comprises two steps: First, you have to implement the interface defined
+			by CFIX_EVENT_SINK. Second, you have to wrap your implementation in a separate DLL, the <emphasis>Event DLL </emphasis>
+			and provide a specific export, <link linkend='CreateEventSink'>CreateEventSink</link>. Please refer to the 
+			following subsections for details.
+		</para>
+		</simplesect>
+		
 	
 		<section id="CreateEventSink">
 			<title>CreateEventSink</title>
@@ -84,7 +94,23 @@ CFIXAPI HRESULT CFIXCALLTYPE CreateEventSink(
 			</simplesect>
 			
 			
-			&TestApiEventDllRequirements16;
+			&TestApiEventDllRequirements17;
+		</section>
+		
+		<section id="CFIX_EVENT_SINK">
+			<title>CFIX_EVENT_SINK</title>
+			<indexterm><primary>CFIX_EVENT_SINK</primary></indexterm>
+			
+			
+			<simplesect>
+				<title>Synopsis</title>
+				<para>
+				The CFIX_EVENT_SINK defines the interface of an event sink. The structure is defined
+				in cfixevnt.h -- please refer to this header file for details on the structure.
+				</para>
+			</simplesect>
+			
+			&TestApiEventDllRequirements17;
 		</section>
 	</section>
 </section>
