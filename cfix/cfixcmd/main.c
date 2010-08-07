@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <cfixapi.h>
 #include <cfixrun.h>
+
+#define CDIAGLITE
 #include <cdiag.h>
 #include <shlwapi.h>
 

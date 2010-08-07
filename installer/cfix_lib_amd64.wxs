@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Include>
   <File Id="FileCdiagLibAmd64" Name="cdiag.lib" Source="$(var.CFIX_TREE)\bin\fre\amd64\cdiag.lib"  Vital="yes"/>
+  <File Id="FileCdiagLiteLibAmd64" Name="cdiag-l.lib" LongName="cdiag-lite.lib" Source="$(var.CFIX_TREE)\bin\fre\amd64\cdiag-lite.lib"  Vital="yes"/>
   <File Id="FileCfixLibAmd64" Name="cfix.lib" Source="$(var.CFIX_TREE)\bin\fre\amd64\cfix.lib"  Vital="yes"/>
   <File Id="FileCfixKdrvLibAmd64" Name="cfixkdrv.lib" Source="$(var.CFIX_TREE)\bin\fre\amd64\cfixkdrv.lib"  Vital="yes"/>
 </Include>

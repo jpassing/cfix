@@ -44,7 +44,8 @@ C_DEFINES = $(C_DEFINES) /D_DEBUG
 !endif
 
 TARGETLIBS=$(SDK_LIB_PATH)\shlwapi.lib \
-		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cdiag.lib \
+		   $(SDK_LIB_PATH)\version.lib \
+		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cdiag-lite.lib \
 		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cfixutil.lib \
 		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cfixrun.lib \
 		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cfix.lib \

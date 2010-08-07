@@ -1,6 +1,6 @@
 #
 # Copyright:
-#		2008-2009, Johannes Passing (passing at users.sourceforge.net)
+#		2007-2009 Johannes Passing (passing at users.sourceforge.net)
 #
 # This file is part of cfix.
 #
@@ -19,46 +19,34 @@
 #
 BSCMAKE_FLAGS=$(BSCMAKE_FLAGS) /n
 
-MSC_WARNING_LEVEL=/W4 /WX /Wp64
+MSC_WARNING_LEVEL=/W4 /Wp64
 
-INCLUDES=..\..\include;..\cfixrun;
+INCLUDES=..\..\..\include;..\..\..\Jpht\Include;$(SDK_INC_PATH)\..\mfc42
 
 !if "$(TARGET_DIRECTORY)"=="i386"
 USER_C_FLAGS=/D_UNICODE /DUNICODE /analyze
+LINKER_FLAGS=/nxcompat /dynamicbase /SafeSEH
 !else
 USER_C_FLAGS=/D_UNICODE /DUNICODE
+LINKER_FLAGS=/nxcompat /dynamicbase
 !endif
-
-UMTYPE=console
-UMENTRY=wmain
-USE_LIBCMT=1
 
 !if "$(DDKBUILDENV)"=="chk"
 DEBUG_CRTS=1
-C_DEFINES = $(C_DEFINES) /D_DEBUG
 !endif
 
+USE_LIBCMT=1
+
 TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
-		   $(SDK_LIB_PATH)\shlwapi.lib \
-		   $(SDK_LIB_PATH)\shell32.lib \
-		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cdiag-lite.lib \
-		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cfix.lib \
-		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cfixkl.lib \
-		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cfixutil.lib \
-		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cfixrun.lib
-		   
-TARGETNAME=testapi
-TARGETPATH=..\..\bin\$(DDKBUILDENV)
-TARGETTYPE=DYNLINK
+		   $(SDK_LIB_PATH)\advapi32.lib \
+		   $(SDK_LIB_PATH)\version.lib
+
+TARGETNAME=cdiag-lite
+TARGETPATH=..\..\..\bin\$(DDKBUILDENV)
+TARGETTYPE=LIBRARY
+
 SOURCES=\
-	dllmain.c \
-	filamentjoin.c \
-	peloadtest.c \
-	actiontest.c \
-	cmdlinetest.c \
-	testrun.c \
-	anonthreads.c \
-	optionstest.c \
-	pequerytest.c \
-	testmisc.c \
-	displayactiontest.c
+	..\memalloc.c \
+	..\helper.c \
+	..\msgresolver.c \
+	..\version.c

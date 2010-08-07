@@ -21,6 +21,8 @@
  * along with cfix.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "cfixrun.h"
+
+#define CDIAGLITE
 #include <cdiag.h>
 #include <cfixutil.h>
 

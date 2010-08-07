@@ -24,6 +24,8 @@
 #define CFIXAPI
 
 #include <stdlib.h>
+
+#define CDIAGLITE
 #include <cdiag.h>
 #include <cfixevnt.h>
 #include <crtdbg.h>

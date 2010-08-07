@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Include>
   <File Id="FileCdiagLibI386" Name="cdiag.lib" Source="$(var.CFIX_TREE)\bin\fre\i386\cdiag.lib"  Vital="yes"/>
+  <File Id="FileCdiagLiteLibI386" Name="cdiag-l.lib" LongName="cdiag-lite.lib" Source="$(var.CFIX_TREE)\bin\fre\i386\cdiag-lite.lib"  Vital="yes"/>
   <File Id="FileCfixLibI386" Name="cfix.lib" Source="$(var.CFIX_TREE)\bin\fre\i386\cfix.lib"  Vital="yes"/>
   <File Id="FileCfixKdrvLibI386" Name="cfixkdrv.lib" Source="$(var.CFIX_TREE)\bin\fre\i386\cfixkdrv.lib"  Vital="yes"/>
 </Include>

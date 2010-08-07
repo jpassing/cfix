@@ -34,8 +34,12 @@
 #define CDIAGCALLTYPE __stdcall
 #endif
 
-#if !defined(CDIAGAPI)
-#define CDIAGAPI __declspec(dllimport)
+#if defined(CDIAGLITE)
+	#define CDIAGAPI
+#else
+	#if !defined(CDIAGAPI)
+	#define CDIAGAPI __declspec(dllimport)
+	#endif
 #endif
 
 #ifdef __cplusplus

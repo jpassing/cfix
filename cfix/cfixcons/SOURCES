@@ -42,7 +42,7 @@ USE_LIBCMT=1
 
 TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
 		   $(SDK_LIB_PATH)\shlwapi.lib \
-		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cdiag.lib \
+		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cdiag-lite.lib \
 		   $(TARGETPATH)\$(TARGET_DIRECTORY)\cfix.lib
 
 TARGETNAME=cfixcons
